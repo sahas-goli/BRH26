@@ -4,13 +4,13 @@ Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when
 
 Collaborators with no `web/.env.local` take the task [AGENTS.md](AGENTS.md) assigns to their name and claim only that task. Address people by name. Do not use seat numbers.
 
-Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with Sahas. Do not ask Sahas for those secrets. AL-05, AL-06, and AL-07 are done.
+Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with Sahas. Do not ask Sahas for those secrets. AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, and AL-11 are done.
 
-@Hayden is AL-08 (judging slide outline). @Selina is AL-11 (AL-10 is done). @Audrey is AL-09 (People's Choice share copy, do not post it). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+@Hayden is AL-12 (Devpost track tick sheet; do not submit Devpost; do not buy a domain). @Audrey is AL-13 (theme answer card; do not invent a feature). @Selina is AL-14 (public-site read-aloud click path; do not film). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-05 was the poster. AL-07 was the public-site storyboard. AL-08 was the judging slide outline. AL-09 was the People's Choice share copy (do not post it). AL-10 was the transcript export notes. AL-11 was the team form check (do not submit personal data). Public site: https://brh26-brh-26.vercel.app.
 
 S2-06 stays with Sahas. Leave it.
 
-Updated 2026-10-03 17:41 ET.
+Updated 2026-10-03 18:35 ET.
 
 ## On main
 
@@ -48,8 +48,8 @@ Software tasks have one owner, SWE. Which task to claim is at the top of this fi
 ## Claims (remote locks)
 
 - S2-06 stays with Sahas. Leave it.
-- AL-05 done (poster). AL-07 done (storyboard). AL-06 done (domain shortlist). AL-10 done. Do not assign them.
-- Open, no env, assigned: @Hayden AL-08, @Selina AL-11, @Audrey AL-09.
+- AL-05 done (poster). AL-06 done (domain shortlist). AL-07 done (storyboard). AL-08 done (slides). AL-09 done (People's Choice copy, unsent). AL-10 done (transcript notes). AL-11 done (team form check, not submitted). Do not assign them.
+- Open, no env, assigned: @Hayden AL-12, @Audrey AL-13, @Selina AL-14.
 - AL-01, AL-02, AL-03, AL-04, S3-07 — unclaimed locks, but they stay with Sahas. Do not claim them without `web/.env.local`.
 
 ## Next (humans)
@@ -69,13 +69,16 @@ Collaborators with no `web/.env.local` take the task [AGENTS.md](AGENTS.md) assi
 
 Assigned:
 
-- @Hayden AL-08 judging slide outline → `submission/slides.md`
-- @Audrey AL-09 People's Choice share copy (do not post) → `submission/peoples-choice-share.md`
-- @Selina AL-11 team registration form check (no personal data) → `submission/team-form.md`
+- @Hayden AL-12 Devpost track tick sheet (do not submit, do not buy a domain) → `submission/track-ticks.md`
+- @Audrey AL-13 theme answer card (do not invent a feature) → `submission/theme-answers.md`
+- @Selina AL-14 public-site read-aloud click path (do not film) → `submission/public-click-path.md`
 
 Done. Do not assign them.
 
 - AL-05 poster (`design/poster-direction.md`)
 - AL-06 domain shortlist (`submission/domain-shortlist.md`)
 - AL-07 storyboard (`submission/public-storyboard.md`)
+- AL-08 judging slide outline (`submission/slides.md`)
+- AL-09 People's Choice share copy, unsent (`submission/peoples-choice-share.md`)
 - AL-10 Cursor transcript export notes (`cursor-transcripts/README.md`)
+- AL-11 team form check, not submitted (`submission/team-form.md`)

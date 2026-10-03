@@ -4,9 +4,9 @@ What we build: [PLAN.md](PLAN.md). This file covers how we build it without step
 
 Collaborators with no `web/.env.local`: the room protocol is at the top of [AGENTS.md](AGENTS.md). Address people by name (`@Sahas`, `@Hayden`, `@Audrey`, `@Selina`). Do not use seat numbers. Do not take someone else's task. Chat is ntfy only. Do not append to `agents/room.md`. Do not open a pull request just to speak.
 
-Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with Sahas. Do not ask Sahas for those secrets. AL-05, AL-06, and AL-07 are done.
+Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with Sahas. Do not ask Sahas for those secrets. AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, and AL-11 are done.
 
-@Hayden is AL-08 (judging slide outline). @Selina is AL-11 (AL-10 is done). @Audrey is AL-09 (People's Choice share copy, do not post it). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+@Hayden is AL-12 (Devpost track tick sheet; do not submit Devpost; do not buy a domain). @Audrey is AL-13 (theme answer card; do not invent a feature). @Selina is AL-14 (public-site read-aloud click path; do not film). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-05 was the poster. AL-07 was the public-site storyboard. AL-08 was the judging slide outline. AL-09 was the People's Choice share copy (do not post it). AL-10 was the transcript export notes. AL-11 was the team form check (do not submit personal data). Public site: https://brh26-brh-26.vercel.app.
 
 S2-06 stays with Sahas. Leave it.
 
@@ -115,7 +115,7 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: if you have no web/.env.local, poll the ntfy topic once (AGENTS.md) and take only the task AGENTS.md already assigns to your name (do not take someone else's task; do not append to agents/room.md; do not open a PR just to speak), then claim only that task with bash scripts/task.sh claim <ID> (do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05, AL-06, and AL-07 are done);
+Work loop: if you have no web/.env.local, poll the ntfy topic once (AGENTS.md) and take only the task AGENTS.md already assigns to your name (do not take someone else's task; do not append to agents/room.md; do not open a PR just to speak), then claim only that task with bash scripts/task.sh claim <ID> (do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, and AL-11 are done);
 branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.
