@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:30 ET.
+Updated 2026-10-03 12:32 ET.
 
 ## On main
 
@@ -17,10 +17,11 @@ Updated 2026-10-03 12:30 ET.
 | `a62857f` | `submitPayout` sends that transaction once. A retry returns the existing signature. | S2-05 still open. |
 | `4b3c8e2` | `web/lib/nessie.ts` opens an escrow (checking funded at cap + $50, then the cap moves into escrow), pays holders from escrow, and refunds the rest to checking. A local stand-in proved both balances move on each step. Live Nessie was not called. | S2-06 still open. `NESSIE_KEY` unset. |
 | `37731b0` | When `PAYOUT_MODE=devnet`, claim and confirm stamp one signature onto the payout rows before insert. Bank rails and refunds stay off that transaction. A second confirm returns the stored signature and does not sign again. The test injects the signature; no devnet send ran. | S2-05 still open. `SOLANA_PAYER_SECRET` unset. |
+| `4902fca` | `releaseEscrow` also moves the Solana share from escrow to a treasury account. The local stand-in shows holder, treasury, and escrow all move. | S2-06 still open. Live Nessie not called. |
 
 ## This branch
 
-`releaseEscrow` can also move the Solana share from escrow to a treasury account, so the bank ledger still balances. The local stand-in shows holder, treasury, and escrow all move. Live Nessie was not called. Faucet still 429. S2-06 stays open.
+Nothing in flight. Faucet probed again at 12:32 ET: 429.
 
 ## Plan changes
 
@@ -29,8 +30,8 @@ Updated 2026-10-03 12:30 ET.
 
 ## Blocked
 
-- S2-01 and later web tasks that need the app runner: S3-01 scaffold is not on main. No `package.json`, no `web/lib/db.ts`, no `npm run check`. Claim and confirm return 503 until `pool` exists.
-- S2-02 test B, the 6-transfer half: devnet faucet returned 429. No `SOLANA_PAYER_SECRET`.
+- S2-01 and later web tasks that need the app runner: S3-01 is claimed (`claim/S3-01`) and the scaffold is not on main. No `package.json`, no `web/lib/db.ts`, no `npm run check`. Claim and confirm return 503 until `pool` exists.
+- S2-02 test B, the 6-transfer half: devnet faucet returned 429 again at 12:32 ET. No `SOLANA_PAYER_SECRET`.
 - S2-02 test D: no `NESSIE_KEY`.
 - `swe1/S1-02` has bounty code on its branch and no pull request.
 
@@ -40,4 +41,4 @@ SWE2 holds S2-05 and S2-06. S2-01 and S2-02 are open. S2-03, S2-04, and S2-07 ar
 
 ## Next
 
-S2-05 claim and confirm now call the signer when `PAYOUT_MODE=devnet`. A confirmed devnet signature still needs a funded payer. S2-06 still needs `NESSIE_KEY` before `NESSIE_MODE=live`. S2-01 needs `npm run check`.
+S2-05 still needs a funded payer before a claim can land one confirmed devnet transaction. S2-06 still needs `NESSIE_KEY` before balances move on post, pay, and expiry. S2-01 needs `npm run check` after the scaffold lands. S2-02 needs the faucet and a Nessie key.
