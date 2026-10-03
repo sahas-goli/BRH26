@@ -1,8 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { AttackComparison, GraphPayload, Stats } from "../../lib/types";
+import type { AttackComparison, GraphPayload, PublicBounty, Stats } from "../../lib/types";
 import { Cascade } from "./cascade";
+
+type SweepPoint = { attrition?: number; fanout?: number; success_rate: number; trials: number };
+type Sweep = {
+  note?: string;
+  by_attrition: SweepPoint[];
+  by_fanout: SweepPoint[];
+};
+
+type MockBalances = {
+  mode: "mock" | "unavailable";
+  checkingCents: number;
+  escrowCents: number;
+  status: string;
+};
 
 const DEMO_STATS: Stats = {
   bountyId: "b_demo",
@@ -85,6 +99,59 @@ function SeriesChart({ series }: { series: NonNullable<Stats["series"]> }) {
   );
 }
 
+function SweepChart({
+  points,
+  cursor,
+  label,
+}: {
+  points: { x: number; y: number }[];
+  cursor: number;
+  label: string;
+}) {
+  const width = 320;
+  const height = 90;
+  if (!points.length) return <p className="live-muted">No sweep points.</p>;
+  const maxX = Math.max(...points.map((p) => p.x), 1e-6);
+  const maxY = Math.max(...points.map((p) => p.y), 0.05);
+  const poly = points
+    .map((point, i) => {
+      const x = (i / Math.max(1, points.length - 1)) * (width - 8) + 4;
+      const y = height - 8 - (point.y / maxY) * (height - 16);
+      return `${x},${y}`;
+    })
+    .join(" ");
+  const cursorIdx = Math.min(points.length - 1, Math.max(0, Math.round(cursor * (points.length - 1))));
+  const cx = (cursorIdx / Math.max(1, points.length - 1)) * (width - 8) + 4;
+  const cy = height - 8 - (points[cursorIdx]!.y / maxY) * (height - 16);
+  return (
+    <svg className="live-series" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label}>
+      <polyline fill="none" stroke="#6ec8ff" strokeWidth="2" points={poly} />
+      <line x1="4" x2={width - 4} y1={height - 8} y2={height - 8} stroke="#2a342d" />
+      <circle cx={cx} cy={cy} r="4" fill="#b6f24a" />
+      <text x={8} y={14} fill="#9aab9f" fontSize="10">
+        max x={maxX.toFixed(2)}
+      </text>
+    </svg>
+  );
+}
+
+function money(cents: number): string {
+  return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
+}
+
+function mockBalancesFrom(bounty: PublicBounty | null, status: string | undefined): MockBalances {
+  if (!bounty) return { mode: "unavailable", checkingCents: 0, escrowCents: 0, status: status ?? "—" };
+  const st = bounty.status;
+  if (st === "paid" || st === "refunded") {
+    return { mode: "mock", checkingCents: 5000 + (bounty.capCents - bounty.bountyCents), escrowCents: 0, status: st };
+  }
+  if (st === "found") {
+    return { mode: "mock", checkingCents: 5000, escrowCents: bounty.capCents, status: st };
+  }
+  // open / expired before refund path
+  return { mode: "mock", checkingCents: 5000, escrowCents: bounty.capCents, status: st };
+}
+
 export function LiveBoard({ initialBountyId }: { initialBountyId: string | null }) {
   const [bountyId, setBountyId] = useState(initialBountyId ?? "b_demo");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -94,7 +161,10 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
   const [h, setH] = useState(4);
   const [k, setK] = useState(2);
   const [attack, setAttack] = useState<AttackComparison | null>(null);
+  const [attackError, setAttackError] = useState<string | null>(null);
   const [replayT, setReplayT] = useState(0.65);
+  const [sweep, setSweep] = useState<Sweep | null>(null);
+  const [publicBounty, setPublicBounty] = useState<PublicBounty | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,9 +180,12 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
         const graphRes = await fetch(`/api/graph/${encodeURIComponent(nextStats.bountyId)}`, { cache: "no-store" });
         if (!graphRes.ok) throw new Error(`graph ${graphRes.status}`);
         const nextGraph = (await graphRes.json()) as GraphPayload;
+        const bountyRes = await fetch(`/api/bounties/${encodeURIComponent(nextStats.bountyId)}`, { cache: "no-store" });
+        const nextBounty = bountyRes.ok ? ((await bountyRes.json()) as PublicBounty) : null;
         if (cancelled) return;
         setStats(nextStats);
         setGraph(nextGraph);
+        setPublicBounty(nextBounty);
         setBountyId(nextStats.bountyId);
         setUsingDemo(false);
         setError(null);
@@ -121,6 +194,7 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
         if (cancelled) return;
         setStats(DEMO_STATS);
         setGraph(DEMO_GRAPH);
+        setPublicBounty(null);
         setUsingDemo(true);
         setError(err instanceof Error ? err.message : "offline");
         // Avoid hammering 503s in the console while DATABASE_URL is unset.
@@ -144,8 +218,14 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ h, k, budgetCents: 1600 }),
       });
-      if (!res.ok || cancelled) return;
+      if (cancelled) return;
+      if (!res.ok) {
+        setAttack(null);
+        setAttackError(`attack ${res.status}`);
+        return;
+      }
       setAttack((await res.json()) as AttackComparison);
+      setAttackError(null);
     }
     void run();
     return () => {
@@ -153,16 +233,60 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
     };
   }, [h, k]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSweep() {
+      const paths = ["/api/sim/sweep", "/sim/sweep.json"];
+      for (const path of paths) {
+        try {
+          const res = await fetch(path, { cache: "force-cache" });
+          if (!res.ok) continue;
+          const body = (await res.json()) as Sweep;
+          if (!cancelled && Array.isArray(body.by_attrition) && Array.isArray(body.by_fanout)) {
+            setSweep(body);
+            return;
+          }
+        } catch {
+          /* try next */
+        }
+      }
+    }
+    void loadSweep();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const zone = zoneFor(stats?.b ?? null);
   const angle = needleAngle(stats?.b ?? null);
   const series = stats?.series ?? [];
   const controllerLabels = ["healthy", "nudge", "widen", "raise"] as const;
+  const balances = mockBalancesFrom(publicBounty, stats?.status);
 
+  const attritionPoints = useMemo(
+    () => (sweep?.by_attrition ?? []).map((p) => ({ x: p.attrition ?? 0, y: p.success_rate })),
+    [sweep],
+  );
+  const fanoutPoints = useMemo(
+    () => (sweep?.by_fanout ?? []).map((p) => ({ x: p.fanout ?? 0, y: p.success_rate })),
+    [sweep],
+  );
+  const scrubIdx = Math.min(
+    Math.max(attritionPoints.length - 1, 0),
+    Math.round(replayT * Math.max(attritionPoints.length - 1, 0)),
+  );
+  const scrubPoint = attritionPoints[scrubIdx];
   const replayNote = useMemo(() => {
-    if (replayT < 0.33) return "Early hops: fan-out still forming.";
-    if (replayT < 0.66) return "Cliff region: b dips under 2, controller arms.";
-    return "Late cascade: paid path glows; salts publish on settle.";
-  }, [replayT]);
+    if (!scrubPoint) {
+      if (replayT < 0.33) return "Early hops: fan-out still forming.";
+      if (replayT < 0.66) return "Cliff region: b dips under 2, controller arms.";
+      return "Late cascade: paid path glows; salts publish on settle.";
+    }
+    const rate = (scrubPoint.y * 100).toFixed(1);
+    if (scrubPoint.y < 0.05) return `Attrition ${scrubPoint.x.toFixed(1)} · success ${rate}% — past the b≈2 cliff.`;
+    if (scrubPoint.y < 0.2) return `Attrition ${scrubPoint.x.toFixed(1)} · success ${rate}% — cliff forming.`;
+    return `Attrition ${scrubPoint.x.toFixed(1)} · success ${rate}% — cascades still land.`;
+  }, [replayT, scrubPoint]);
 
   return (
     <div className="live-shell">
@@ -250,23 +374,24 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
           </section>
 
           <section className="live-panel">
-            <h2>Balances / Tiger</h2>
+            <h2>Balances (Nessie)</h2>
             <p className="live-muted">
-              Nessie panel waits on live escrow reads. Tiger benchmarks land with S3-03 (`sweep.json`, cagg vs raw ms,
-              compression ratio, refresh lag).
+              {balances.mode === "mock"
+                ? "Mock escrow view (NESSIE_MODE≠live). Live balances need VERIFY D."
+                : "Balances unavailable until a featured bounty loads."}
             </p>
             <div className="live-stats-row" style={{ marginTop: 10 }}>
               <div>
-                <strong>—</strong>
-                cagg ms
+                <strong>{balances.mode === "mock" ? money(balances.checkingCents) : "—"}</strong>
+                checking
               </div>
               <div>
-                <strong>—</strong>
-                compress×
+                <strong>{balances.mode === "mock" ? money(balances.escrowCents) : "—"}</strong>
+                escrow
               </div>
               <div>
-                <strong>—</strong>
-                lag s
+                <strong>{balances.status}</strong>
+                status
               </div>
             </div>
           </section>
@@ -297,10 +422,16 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
                 </div>
               </div>
             </div>
+            {attackError ? <p className="live-muted">Attack API: {attackError}</p> : null}
+            {attack ? (
+              <p className="live-muted">
+                poster pays {money(attack.ours.posterPays)} either way · h={attack.h} k={attack.k}
+              </p>
+            ) : null}
           </section>
 
           <section className="live-panel">
-            <h2>Replay scrubber</h2>
+            <h2>Replay / sweep</h2>
             <input
               className="live-slider"
               type="range"
@@ -312,7 +443,19 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
               aria-label="Replay progress"
             />
             <p className="live-muted">{replayNote}</p>
-            <p className="live-muted">Hooks to S3-03 1M-event replay + sweep.json when loaded.</p>
+            {attritionPoints.length ? (
+              <>
+                <p className="live-muted">success vs attrition (scrubber cursor)</p>
+                <SweepChart points={attritionPoints} cursor={replayT} label="Success rate versus attrition" />
+                <p className="live-muted" style={{ marginTop: 8 }}>
+                  success vs fan-out
+                </p>
+                <SweepChart points={fanoutPoints} cursor={replayT} label="Success rate versus fan-out" />
+              </>
+            ) : (
+              <p className="live-muted">Loading offline sweep.json…</p>
+            )}
+            {sweep?.note ? <p className="live-muted">{sweep.note}</p> : null}
           </section>
 
           <section className="live-panel">
