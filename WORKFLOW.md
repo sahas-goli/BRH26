@@ -2,11 +2,11 @@
 
 What we build: [PLAN.md](PLAN.md). This file covers how we build it without stepping on each other. Agents: read this file fully, then the PLAN.md sections your task's `spec:` line points to.
 
-Collaborators with no `web/.env.local` take exactly one of AL-05, AL-06, AL-07. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
+Collaborators with no `web/.env.local` take exactly one of AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, AL-11. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
 
 Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets.
 
-AL-05 is the poster. AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-07 is the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+AL-05 is the poster. AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-07 is the public-site storyboard. AL-08 is the judging slide outline. AL-09 is the People's Choice share copy (do not post it). AL-10 is the Cursor transcript export notes. AL-11 is the team registration form check (no personal data in git). Public site: https://brh26-brh-26.vercel.app.
 
 S2-06 is Hayden's Nessie task. Leave it.
 
@@ -115,7 +115,7 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: if you have no web/.env.local, claim exactly one of AL-05, AL-06, AL-07 with bash scripts/task.sh claim <ID> (one person per task; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07);
+Work loop: if you have no web/.env.local, claim exactly one of AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, AL-11 with bash scripts/task.sh claim <ID> (one person per task; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07);
 branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.
@@ -150,8 +150,8 @@ One team chat. Messages start with a tag, so a skim is enough:
 - **05:00 code freeze:** no code changes, except a fix the whole team agrees on for something that breaks the demo.
 - **After 05:00:**
   - write-ups in `submission/<track>.md` (owners in PLAN.md section 13);
-  - deck;
-  - Cursor transcripts (everyone);
+  - deck (AL-08);
+  - Cursor transcripts (AL-10 writes the export notes; everyone still exports their own);
   - backup video (AL-03);
   - Devpost by 08:15 (AL-04);
   - make the repo public after the secret scrub.

@@ -2,15 +2,15 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Collaborators with no `web/.env.local` take exactly one of AL-05, AL-06, AL-07. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
+Collaborators with no `web/.env.local` take exactly one of AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, AL-11. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
 
 Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets.
 
-AL-05 is the poster. AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-07 is the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+AL-05 is the poster. AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-07 is the public-site storyboard. AL-08 is the judging slide outline. AL-09 is the People's Choice share copy (do not post it). AL-10 is the Cursor transcript export notes. AL-11 is the team registration form check (no personal data in git). Public site: https://brh26-brh-26.vercel.app.
 
 S2-06 is Hayden's Nessie task. Leave it.
 
-Updated 2026-10-03 17:20 ET.
+Updated 2026-10-03 17:35 ET.
 
 ## On main
 
@@ -48,7 +48,7 @@ Software tasks have one owner, SWE. Which task to claim is at the top of this fi
 ## Claims (remote locks)
 
 - `claim/S2-06` — Hayden (haydenmfu), since 2026-10-03T20:45Z. Leave it.
-- AL-05, AL-06, AL-07 — unclaimed. One collaborator each.
+- AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, AL-11 — unclaimed. One collaborator each.
 - AL-01, AL-02, AL-03, AL-04, S3-07 — unclaimed locks, but they stay with S. Do not claim them without `web/.env.local`.
 
 ## Next (humans)
@@ -58,14 +58,18 @@ Software tasks have one owner, SWE. Which task to claim is at the top of this fi
 
 ## Open tasks by env
 
-Collaborators with no `web/.env.local` claim exactly one of the three below. One person per task. `bash scripts/task.sh claim <ID>` from Git Bash, then `git switch -c swe/<ID> origin/main`.
+Collaborators with no `web/.env.local` claim exactly one of the tasks below. One person per task. `bash scripts/task.sh claim <ID>` from Git Bash, then `git switch -c swe/<ID> origin/main`.
 
 **Needs env** — `web/.env.local`, API keys, or a logged-in Vercel/Tiger account. Do not send these to collaborators. Do not claim them.
 
 - AL-01, AL-02, AL-03, AL-04, S3-07 stay with S. S2-06 is Hayden's. Leave it.
 
-**No env (collaborators)** — public site and the repo only. Three parallel files, no shared edits. One person per task.
+**No env (collaborators)** — public site and the repo only. Separate files, no shared edits. One person per task.
 
 - AL-05 brand/poster notes → `design/poster-direction.md`
 - AL-06 domain shortlist (search only, do not buy) → `submission/domain-shortlist.md`
 - AL-07 public-URL shot list → `submission/public-storyboard.md`
+- AL-08 judging slide outline → `submission/slides.md`
+- AL-09 People's Choice share copy (do not post) → `submission/peoples-choice-share.md`
+- AL-10 Cursor transcript export notes → `cursor-transcripts/README.md`
+- AL-11 team registration form check (no personal data) → `submission/team-form.md`
