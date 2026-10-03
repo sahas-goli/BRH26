@@ -2,13 +2,13 @@
 
 What we build: [PLAN.md](PLAN.md). This file covers how we build it without stepping on each other. Agents: read this file fully, then the PLAN.md sections your task's `spec:` line points to.
 
-Collaborators with no `web/.env.local`: the room protocol is at the top of [AGENTS.md](AGENTS.md). Three seats, one person each. Take the lowest empty seat, then claim only that seat's task.
+Collaborators with no `web/.env.local`: the room protocol is at the top of [AGENTS.md](AGENTS.md). Address people by name (`@Sahas`, `@Hayden`, `@Audrey`, `@Selina`). Do not use seat numbers. Do not take someone else's task. Chat is ntfy only. Do not append to `agents/room.md`. Do not open a pull request just to speak.
 
-Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets. AL-05, AL-06, and AL-07 are done.
+Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with Sahas. Do not ask Sahas for those secrets. AL-05, AL-06, and AL-07 are done.
 
-@seat1 is AL-08 (judging slide outline). @seat2 is AL-10 (Cursor transcript export notes). @seat3 is AL-09 (People's Choice share copy, do not post it). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-11 is queued. AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+@Hayden is AL-08 (judging slide outline). @Selina is AL-11 (AL-10 is done). @Audrey is AL-09 (People's Choice share copy, do not post it). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
 
-S2-06 is Hayden's Nessie task. Leave it.
+S2-06 stays with Sahas. Leave it.
 
 ## 1. The loop
 
@@ -21,7 +21,7 @@ npm --prefix web run check        # 3. typecheck + tests must pass
 # 4. set "status: done" in tasks/S2-03.md in the same branch
 gh pr create --fill && gh pr merge --rebase --delete-branch
 scripts/task.sh done S2-03        # 5. drop the lock
-# 6. post "MERGED S2-03" in team chat, then go back to 1
+# 6. post "MERGED S2-03" on the ntfy topic, then go back to 1
 ```
 
 ## 2. One-time setup (each person, about 15 min)
@@ -115,7 +115,7 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: if you have no web/.env.local, read the end of agents/room.md and take the lowest empty seat in AGENTS.md, then claim only that seat's task with bash scripts/task.sh claim <ID> (one person per seat; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05, AL-06, and AL-07 are done);
+Work loop: if you have no web/.env.local, poll the ntfy topic once (AGENTS.md) and take only the task AGENTS.md already assigns to your name (do not take someone else's task; do not append to agents/room.md; do not open a PR just to speak), then claim only that task with bash scripts/task.sh claim <ID> (do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05, AL-06, and AL-07 are done);
 branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.
@@ -129,7 +129,11 @@ behind its mock flag and tell me what to verify. Prefer the simplest code that m
 
 ## 10. Talking to each other
 
-The chat is the room at the top of [AGENTS.md](AGENTS.md): append to `agents/room.md`, then one ntfy ping whose title contains the @target. Reply when stuck, done, or joining. Do not spam progress, secrets, env values, or stack traces.
+Chat is the ntfy topic in [AGENTS.md](AGENTS.md). Speak by HTTP POST. The title must include the @target (`@Sahas`, `@Hayden`, `@Audrey`, or `@Selina`). Read with one short poll at session start (`poll=1&since=30m`, 15s timeout). Do not append to `agents/room.md`. Do not open a pull request just to speak. `agents/room.md` is a pointer, not the transcript.
+
+There is no Cursor push subscription for ntfy. The orchestrator session is not woken by ntfy. Collaborator sessions are not woken either. Do not claim otherwise.
+
+Reply on ntfy when stuck, done, or joining. Do not spam progress, secrets, env values, or stack traces.
 
 One team chat. Messages start with a tag, so a skim is enough:
 
