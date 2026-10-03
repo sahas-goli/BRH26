@@ -5,10 +5,10 @@ What we build: [PLAN.md](PLAN.md). This file covers how we build it without step
 ## 1. The loop
 
 ```
-scripts/task.sh list SWE2         # 1. see your lane: open, claimed, done
+scripts/task.sh list SWE          # 1. see the software lane: open, claimed, done
 scripts/task.sh claim S2-03       # 2. atomic lock; if it says TAKEN, pick another
-git switch -c swe2/S2-03 origin/main
-...work, commit small, only in paths you own...
+git switch -c swe/S2-03 origin/main
+...work, commit small, in any SWE path...
 npm --prefix web run check        # 3. typecheck + tests must pass
 # 4. set "status: done" in tasks/S2-03.md in the same branch
 gh pr create --fill && gh pr merge --rebase --delete-branch
@@ -20,8 +20,8 @@ scripts/task.sh done S2-03        # 5. drop the lock
 
 1. `git clone https://github.com/Sahas266/BRH26 && cd BRH26`, then `gh auth login`, and set `git config user.name "<first name>"` (the claim lock shows this name).
 2. Install Node 20+ and npm. On Windows, run `scripts/task.sh` from Git Bash.
-3. Get secrets from the team password note or DM (section 6) and put them in `web/.env.local`, plus `agent/.env.local` for SWE1.
-4. Accept the Vercel team invite (SWE3 owns the project).
+3. Get secrets from the team password note or DM (section 6) and put them in `web/.env.local`, plus `agent/.env.local` for the Photon agent.
+4. Accept the Vercel team invite.
 5. Cursor: keep Settings > Agents > Attribution on, so commits get `Co-authored-by: Cursor`. That trailer is our SpaceX-track evidence (section 8). Claude Code is fine too, but **commit code through Cursor Agent whenever you can**.
 6. Start your agent with the role prompt from section 9.
 
@@ -29,7 +29,7 @@ scripts/task.sh done S2-03        # 5. drop the lock
 
 Your idea, "claim, push, pull before claiming," is the right shape. The weak spot is that two people can both pull, both see a task open, and both commit a claim to the same file. The second push then hits a merge conflict in the task file instead of a clean "no." We fix that with two rules.
 
-- **Lanes first.** Every task in `tasks/` has an `owner:` role (SWE1, SWE2, SWE3, HW, or ALL). You normally work only your own lane, so collisions are rare to begin with. Take tasks from another lane only after asking its owner in chat.
+- **One software lane.** Every software task has `owner: SWE`. Anyone may claim any open SWE task. HW tasks stay with HW. ALL tasks are for anyone. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists the SWE lane.
 - **The lock is a branch, not a file edit.** `scripts/task.sh claim <ID>` pushes a brand-new branch `claim/<ID>` to GitHub. Creating a branch that already exists is rejected by the server, so exactly one claim can win. The loser sees `TAKEN: <ID> is claimed by <name> <time>`. There is no file edit, no merge conflict and no commit noise on main.
 - **Done lives in the task file.** The PR that finishes a task sets `status: done` in `tasks/<ID>.md`, so the board's history is in git. After merging, `scripts/task.sh done <ID>` deletes the lock branch.
 
@@ -49,7 +49,7 @@ Your idea, "claim, push, pull before claiming," is the right shape. The weak spo
 
 ## 4. Git flow
 
-- **Branches** are named `<role>/<task-id>`, e.g. `swe1/S1-02`, always cut from fresh `origin/main`.
+- **Branches** are named `<role>/<task-id>`, e.g. `swe/S1-02`, always cut from fresh `origin/main`.
 - **Commits** are small, and each message starts with the task ID: `S1-02: forward endpoint enforces fanout`.
 - **Merge** through a PR with `gh pr merge --rebase --delete-branch`. Use rebase, not squash, so every Cursor trailer survives. Self-merging is allowed once `npm --prefix web run check` and `npm --prefix web run build` both pass locally.
 - **Merge at least every 2 hours.** Long-lived branches are how parallel agents end up in conflict hell; if a task is half done, merge it behind a mock flag.
@@ -59,7 +59,7 @@ Your idea, "claim, push, pull before claiming," is the right shape. The weak spo
 
 ## 5. Ownership and contracts
 
-- The ownership map is PLAN.md section 3. **Agents edit only their role's paths.** If you need a change in someone else's file, post `REQUEST <owner>: <what>` in chat or open a tiny PR and tag them. Never edit it silently.
+- The ownership map is PLAN.md section 3. **SWE may edit any SWE path.** HW stays on HW paths. A change in the other role's files still needs a `REQUEST <owner>: <what>` in chat, or a tiny PR. Never edit it silently.
 - **Shared contracts** are `web/lib/types.ts`, `db/schema.sql`, `.env.example`, `web/package.json` and its lockfile, and PLAN.md section 4. To change one:
   1. Post `CONTRACT: <one-line change>` in chat.
   2. Open a PR containing only the contract change (plus PLAN.md section 4 if relevant).
@@ -71,7 +71,7 @@ Your idea, "claim, push, pull before claiming," is the right shape. The weak spo
   2. Rebase, then `npm --prefix web install <package>`.
   3. Commit only the `package.json` and lockfile changes, and merge right away.
   4. Lockfile conflict: `git checkout origin/main -- web/package-lock.json && npm --prefix web install`, then commit.
-- **SWE3's S3-01 scaffold creates every shared root file**: `layout.tsx`, `tsconfig`, `next.config`, `.gitignore`, and stub route files for every endpoint. After that, each person only fills in their own files, so nobody has to touch shared roots.
+- **S3-01 scaffold creates every shared root file**: `layout.tsx`, `tsconfig`, `next.config`, `.gitignore`, and stub route files for every endpoint. After that, any SWE may fill any software file.
 
 ## 6. Secrets
 
@@ -108,8 +108,8 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: scripts/task.sh list <ROLE>; claim one task whose depends_on are done (or mockable);
-branch <role>/<ID> from origin/main; small commits prefixed with the task ID; run
+Work loop: scripts/task.sh list SWE; claim any open SWE task whose depends_on are done (or mockable);
+branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.
 Never print secrets. Never force-push. Never invent an API marked VERIFY in PLAN.md; implement it
@@ -118,9 +118,7 @@ behind its mock flag and tell me what to verify. Prefer the simplest code that m
 
 | Role | Paste into `<PATHS ...>` |
 |---|---|
-| SWE1 | `web/app/page.tsx`, `web/app/{post,h,claim}/**`, `web/app/api/{bounties,h,forward,og}/**` (not `bounties/[id]/confirm`), `web/lib/{bounty,imagine,hintcard}.ts`, `agent/**` |
-| SWE2 | `web/lib/{split,split.test,solana,nessie,payout,controller}.ts`, `web/app/api/{claim,attack,controller}/**`, `web/app/api/bounties/[id]/confirm/**`, `web/scripts/**` |
-| SWE3 | `db/**`, `sim/**`, `web/lib/db.ts`, `web/app/{live,talk}/**`, `web/app/api/{stats,graph,grok}/**`, `web/app/layout.tsx`, `web/next.config.*`, `web/tsconfig.json` |
+| SWE | Every path marked SWE in PLAN.md section 3. Do not edit HW paths. |
 | HW | `hardware/**`, `web/lib/hotp.ts`, `web/lib/hotp.test.ts` |
 
 ## 10. Talking to each other
