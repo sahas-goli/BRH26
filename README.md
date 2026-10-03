@@ -21,10 +21,10 @@ One command to seed a branching cascade, then serve it:
 
 ```bash
 npm --prefix web run seed:demo && npm --prefix web run dev
-# open http://localhost:3000/live
+# open http://localhost:3000/live  (FEATURED_BOUNTY set by seed:demo)
 ```
 
-`seed:demo` writes `web/.data/demo` (`DATABASE_URL=pglite:.data/demo`), sets `FEATURED_BOUNTY` in `web/.env.local` (never overwrites a Postgres Tiger URL), and checks `/api/stats` + `/api/graph` shape before exit. Pitch crib: [submission/pitch-2min.md](submission/pitch-2min.md).
+`seed:demo` writes `web/.data/demo` (`DATABASE_URL=pglite:.data/demo`), writes `FEATURED_BOUNTY=<id>` into `web/.env.local` so `/live` loads that cascade (never overwrites a Postgres Tiger URL), and checks `/api/stats` + `/api/graph` before exit. Pitch: [submission/pitch-2min.md](submission/pitch-2min.md). Deck shots: [hardware/deck-outline.md](hardware/deck-outline.md). Backup video: [submission/backup-video.md](submission/backup-video.md).
 
 ### Local `next dev` (no Tiger)
 
