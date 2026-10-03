@@ -17,7 +17,7 @@ function buildPool(connectionString: string): Pool {
     connectionString,
     ssl: connectionString.includes("localhost") || connectionString.includes("127.0.0.1")
       ? undefined
-      : { rejectUnauthorized: true },
+      : { rejectUnauthorized: false }, // Tiger Cloud (PLAN.md 7.1)
     max: 5,
   });
 }

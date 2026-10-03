@@ -1,0 +1,47 @@
+{
+  "note": "Success rate vs attrition and fan-out on the Kleinberg lattice. Cliff near branching factor 2.",
+  "by_attrition": [
+    {
+      "attrition": 0.2,
+      "success_rate": 0.0875,
+      "trials": 80
+    },
+    {
+      "attrition": 0.3,
+      "success_rate": 0.025,
+      "trials": 80
+    },
+    {
+      "attrition": 0.4,
+      "success_rate": 0.0,
+      "trials": 80
+    },
+    {
+      "attrition": 0.5,
+      "success_rate": 0.0,
+      "trials": 80
+    },
+    {
+      "attrition": 0.6,
+      "success_rate": 0.0,
+      "trials": 80
+    }
+  ],
+  "by_fanout": [
+    {
+      "fanout": 1,
+      "success_rate": 0.0,
+      "trials": 80
+    },
+    {
+      "fanout": 2,
+      "success_rate": 0.0125,
+      "trials": 80
+    },
+    {
+      "fanout": 3,
+      "success_rate": 0.0875,
+      "trials": 80
+    }
+  ]
+}
