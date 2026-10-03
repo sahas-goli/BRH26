@@ -236,15 +236,25 @@ async function smoke(client) {
   report.applied.push(`smoke.insert_1000_${Date.now() - started}ms`);
 }
 
+function withoutSslMode(connectionString) {
+  const query = connectionString.indexOf("?");
+  if (query < 0) return connectionString;
+  const params = new URLSearchParams(connectionString.slice(query + 1));
+  params.delete("sslmode");
+  const rest = params.toString();
+  return rest ? `${connectionString.slice(0, query)}?${rest}` : connectionString.slice(0, query);
+}
+
 async function main() {
   if (dryRun) {
     console.log(JSON.stringify(dryRunPlan(), null, 2));
     return;
   }
   const url = requireUrl();
+  const ssl = pgSslOption(url);
   const client = new pg.Client({
-    connectionString: url,
-    ssl: pgSslOption(url),
+    connectionString: ssl ? withoutSslMode(url) : url,
+    ssl,
   });
   await client.connect();
   try {

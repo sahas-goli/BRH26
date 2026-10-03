@@ -421,7 +421,8 @@ The controller fixes b before it spends money, which follows from Kleinberg and 
 
 ### 7.1 Tiger Data and the replay simulator (SWE3)
 
-- Create a Tiger Cloud service ($1,000 credits for 30 days on signup), apply `schema.sql` and then `caggs.sql`, and share `DATABASE_URL` out of band. Use `pg` with `ssl: { rejectUnauthorized: false }` and keep the pool at 5 or fewer on Vercel.
+- Create a Tiger Cloud service ($1,000 credits for 30 days on signup), apply `schema.sql` and then `caggs.sql`, and share `DATABASE_URL` out of band. Use `pg` with `ssl: { rejectUnauthorized: false }` and keep the pool at 5 or fewer on Vercel. Node's `pg` treats `sslmode=require` as full certificate verification, so the client drops `sslmode` from the URL and sets `rejectUnauthorized: false`.
+- **Applied 2026-10-03** on service `hldtuqlvht` (BRH26, us-east-1, ready): `events` hypertable, `bounty_minute` with `percentile_agg`, `bounty_hour` with `rollup`. A 1,000-row insert took 22 ms. The columnstore policy was already present. The 100k-row cagg benchmark is still open.
 - **`sim/replay.py`** (numpy, on the DGX):
   - builds a 1000 x 1000 Kleinberg lattice (local links plus one long-range link per node with P proportional to d^-2);
   - runs about 2,000 cascades toward random targets, with fan-out ≤ 3 picking the neighbors closest to the target, per-hop attrition p ~ U(0.2, 0.6), and lognormal hop latency (median 20 min);
