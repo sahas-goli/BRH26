@@ -23,7 +23,9 @@ case "$cmd" in
     printf '%-8s %-5s %-8s %-28s %s\n' ID OWNER STATUS CLAIMED_BY TITLE
     for id in $(git ls-tree --name-only origin/main tasks/ | sed -n 's#^tasks/\(.*\)\.md$#\1#p'); do
       owner=$(field "$id" owner); status=$(field "$id" status)
-      [ "$cmd" = list ] && [ -n "$arg" ] && [ "$owner" != "$arg" ] && continue
+      lane=$arg
+      case "$lane" in SWE1|SWE2|SWE3) lane=SWE ;; esac
+      [ "$cmd" = list ] && [ -n "$lane" ] && [ "$owner" != "$lane" ] && continue
       who=$(claimant "$id")
       [ "$status" != done ] && [ -n "$who" ] && status=claimed
       [ "$cmd" = mine ] && [[ "$who" != "$me "* ]] && continue
@@ -37,7 +39,7 @@ case "$cmd" in
     # A unique commit (timestamped message) on top of main; its tree equals main's, so it changes nothing.
     sha=$(git commit-tree "origin/main^{tree}" -p origin/main -m "claim $arg by $me $(date -u +%Y-%m-%dT%H:%MZ)")
     if git push -q origin "$sha:refs/heads/claim/$arg" 2>/dev/null; then
-      echo "CLAIMED $arg. Branch for the work: git switch -c <role>/$arg origin/main"
+      echo "CLAIMED $arg. Branch for the work: git switch -c swe/$arg origin/main"
     else
       sync; echo "TAKEN: $arg is claimed by $(claimant "$arg")"; exit 1
     fi ;;

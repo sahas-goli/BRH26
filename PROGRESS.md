@@ -13,6 +13,10 @@ Updated 2026-10-03 14:00 ET.
 | `6dc6003` | Full-screen `/live`: d3 cascade, b gauge, attack slider, series chart, explorer link, demo fallback. | S3-05 done. |
 | `e9d059b` | `sim/replay.py` Kleinberg generator, `sim/load.sh`, `submission/tiger.md`. Local run wrote 1,000,000 events + 334k holders. | S3-03 open until loaded into Tiger and benchmarks filled. |
 
+## Plan changes
+
+Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays HW. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists that lane.
+
 ## This branch
 
 Progress note only.
