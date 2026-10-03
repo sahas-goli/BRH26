@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 13:07 ET.
+Updated 2026-10-03 13:25 ET.
 
 ## On main
 
@@ -22,28 +22,30 @@ Updated 2026-10-03 13:07 ET.
 | `4151c75` | A paid claim or confirm includes `explorerUrl` for the payout signature. | S2-05 still open. No confirmed devnet signature. |
 | `fd879cc` | Web scaffold is on main. `npm run check` passed (23 tests, including the split brute force) and `npm run build` passed. | S2-01 done. S3-01 still needs a Vercel preview. |
 | `64070f8` | When `PAYOUT_MODE=devnet`, a custodial hop with no address gets a server keypair before the payout transaction. A wallet hop with no address fails closed. | S2-05 still open. Faucet 429. No `SOLANA_PAYER_SECRET`. |
-| `52cb84f` | `createEscrow` funds escrow once per bounty id. A second call returns the same accounts. | S2-06 still open. `NESSIE_KEY` unset. |
+| `52cb84f` | `createEscrow` funds escrow once per bounty id. A second call returns the same accounts. | S2-06 still open. Live balances do not move. |
+| `86d8523` | In devnet mode the payout rows are committed before the signature is requested. The bounty stays `found` until that signature is stored. A retry that already has a signature does not send again. | S2-05 still open. No claim transaction yet. |
 
 ## This branch
 
-In devnet mode the payout rows are committed before the signature is requested. The bounty stays `found` until that signature is stored. A retry that already has a signature does not send again. S2-05 stays open: no funded payer, so no confirmed devnet transaction.
+Nothing in flight.
 
 ## Plan changes
 
 - 2026-10-03: rent exemption is 650,240 lamports, not the earlier 890,880. Recorded in PLAN.md 6.1. Relay floor is 10 cents, so B ≥ 160 cents. The $10 cap still clears it.
-- 2026-10-03: Nessie writes not run. `NESSIE_KEY` unset. PLAN.md 7.3 still says VERIFY D.
+- 2026-10-03: test B passed. Treasury `DgGpjfFcuZkvQDpMDyPC7fnbJovzQjpXfycRpLMXuA1a` held 5 SOL. Five 6-transfer memos confirmed. Median 611 ms. PLAN.md 6.1.
+- 2026-10-03: test D failed. Nessie creates the customer and accounts, then a completed transfer returns 201 and does not change either balance within 2 minutes. The live body has no payee. `NESSIE_MODE` stays mock. PLAN.md 7.3.
 
 ## Blocked
 
 - Claim and confirm return 503 until `DATABASE_URL` is set. `pool` is exported from `web/lib/db.ts`.
-- S2-02 test B, the 6-transfer half: devnet faucet returned 429 again at 12:50 ET. No `SOLANA_PAYER_SECRET`. No backup RPC is set.
-- S2-02 test D: no `NESSIE_KEY`.
+- S2-05 still needs a claim against that database, then a link from `/live` (SWE3). The payer is funded. No backup RPC is set.
+- S2-06 cannot go live. Nessie balances do not move after a 201 transfer.
 - `swe1/S1-02` has bounty code on its branch and no pull request.
 
 ## Claims
 
-SWE2 holds S2-05 and S2-06. S2-01, S2-03, S2-04, and S2-07 are done. S2-02 is open.
+SWE2 holds S2-05 and S2-06. S2-01, S2-02, S2-03, S2-04, and S2-07 are done.
 
 ## Next
 
-S2-05 still needs a funded payer before a claim can land one confirmed devnet transaction. S2-06 still needs `NESSIE_KEY` before balances move on post, pay, and expiry. S2-02 needs the faucet and a Nessie key. S3-01 still needs a Vercel preview.
+S2-05 needs `DATABASE_URL` and the `/live` page before a claim can show one confirmed devnet transaction. S2-06 stays on the mock because the sandbox does not move balances. S3-01 still needs a Vercel preview.

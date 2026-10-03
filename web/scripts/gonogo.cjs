@@ -9,11 +9,35 @@ const {
   sendAndConfirmTransaction,
 } = require("@solana/web3.js");
 
+const fs = require("fs");
+const path = require("path");
+
 const MEMO = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+function loadEnvLocal() {
+  const file = path.join(__dirname, "..", ".env.local");
+  if (!fs.existsSync(file)) return;
+  for (const line of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
+    const match = line.match(/^\s*([^#=\s]+)\s*=\s*(.*)\s*$/);
+    if (!match || process.env[match[1]]) continue;
+    process.env[match[1]] = match[2];
+  }
+}
+
+loadEnvLocal();
+
 const rpc = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
 
 function redact(value) {
   return String(value).replace(/key=[^&\s]+/gi, "key=REDACTED");
+}
+
+function fundedPayer() {
+  const secret = process.env.SOLANA_PAYER_SECRET;
+  if (!secret) return null;
+  const bs58 = require("bs58");
+  const decode = typeof bs58.decode === "function" ? bs58.decode : bs58.default.decode;
+  return Keypair.fromSecretKey(decode(secret));
 }
 
 async function rentAndTransfers() {
@@ -21,11 +45,22 @@ async function rentAndTransfers() {
   const rent = await connection.getMinimumBalanceForRentExemption(0);
   console.log("rent_lamports", rent);
 
-  const payer = Keypair.generate();
-  const airdrop = await connection.requestAirdrop(payer.publicKey, 1_000_000_000);
-  await connection.confirmTransaction(airdrop, "confirmed");
-  const balance = await connection.getBalance(payer.publicKey);
-  console.log("payer_lamports", balance);
+  const payer = fundedPayer() || Keypair.generate();
+  const usingTreasury = Boolean(process.env.SOLANA_PAYER_SECRET);
+  let balance = await connection.getBalance(payer.publicKey);
+  console.log("payer", payer.publicKey.toBase58(), "lamports", balance, "treasury", usingTreasury);
+  const need = 6 * rent * 5 + 50_000;
+  if (balance < need) {
+    if (usingTreasury) {
+      console.log("B SKIP balance below transfer cost", need);
+      return false;
+    }
+    const airdrop = await connection.requestAirdrop(payer.publicKey, 1_000_000_000);
+    await connection.confirmTransaction(airdrop, "confirmed");
+    balance = await connection.getBalance(payer.publicKey);
+    console.log("payer_lamports", balance);
+  }
+  console.log("treasury_ge_5sol", balance >= 5_000_000_000);
 
   const times = [];
   for (let run = 0; run < 5; run++) {
@@ -87,8 +122,12 @@ async function nessie() {
   });
   const checkingId = checking.objectCreated?._id;
   const escrowId = escrow.objectCreated?._id;
+  // Live TransferCreate requires these four fields and rejects medium and payee_id.
   await call("POST", `/accounts/${checkingId}/transfers`, {
-    medium: "balance", payee_id: escrowId, amount: 10, description: "gonogo",
+    transaction_date: new Date().toISOString().slice(0, 10),
+    status: "completed",
+    amount: 10,
+    description: "gonogo",
   });
   const deadline = Date.now() + 120_000;
   let moved = false;
