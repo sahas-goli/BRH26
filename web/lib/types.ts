@@ -42,6 +42,8 @@ export interface Stats {            // GET /api/stats
   bountyId: string; b: number | null; matureHolders: number; frontier: number;
   holders: number; maxDepth: number; p75LatencyS: number | null;
   controllerStep: 0 | 1 | 2 | 3; status: BountyStatus; asOf: string;
+  /** Last ~60 one-minute buckets from bounty_minute (additive; /live chart). */
+  series?: { bucket: string; received: number; forwarded: number; maxDepth: number }[];
 }
 export interface GraphPayload {
   nodes: { id: string; depth: number; label: string | null; isTarget: boolean; paidCents?: number }[];

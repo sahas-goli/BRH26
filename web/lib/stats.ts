@@ -75,6 +75,7 @@ export function assembleStats(input: {
   b: number | null;
   p75LatencyS: number | null;
   asOf?: string;
+  series?: Stats["series"];
 }): Stats {
   const step = Math.min(3, Math.max(0, input.controllerStep)) as 0 | 1 | 2 | 3;
   return {
@@ -88,6 +89,7 @@ export function assembleStats(input: {
     controllerStep: step,
     status: input.status,
     asOf: input.asOf ?? new Date().toISOString(),
+    ...(input.series ? { series: input.series } : {}),
   };
 }
 
@@ -110,6 +112,7 @@ export async function loadStats(db: DbQuery, bountyId: string): Promise<Stats | 
     [bountyId],
   );
 
+  const series = await loadSeries(db, bountyId);
   return assembleStats({
     bountyId,
     status: bounty.rows[0].status,
@@ -120,7 +123,69 @@ export async function loadStats(db: DbQuery, bountyId: string): Promise<Stats | 
     frontier,
     b: branching.b,
     p75LatencyS,
+    series,
   });
+}
+
+async function loadSeries(
+  db: DbQuery,
+  bountyId: string,
+): Promise<{ bucket: string; received: number; forwarded: number; maxDepth: number }[]> {
+  try {
+    const { rows } = await db.query<{
+      bucket: string | Date;
+      received: string | number;
+      forwarded: string | number;
+      max_depth: string | number | null;
+    }>(
+      `SELECT bucket, received, forwarded, max_depth
+       FROM bounty_minute
+       WHERE bounty_id = $1
+       ORDER BY bucket DESC
+       LIMIT 60`,
+      [bountyId],
+    );
+    return rows
+      .slice()
+      .reverse()
+      .map((row) => ({
+        bucket: new Date(row.bucket).toISOString(),
+        received: Number(row.received ?? 0),
+        forwarded: Number(row.forwarded ?? 0),
+        maxDepth: Number(row.max_depth ?? 0),
+      }));
+  } catch {
+    try {
+      const { rows } = await db.query<{
+        bucket: string | Date;
+        received: string | number;
+        forwarded: string | number;
+        max_depth: string | number | null;
+      }>(
+        `SELECT time_bucket('1 minute', time) AS bucket,
+                count(*) FILTER (WHERE kind = 'received') AS received,
+                count(*) FILTER (WHERE kind = 'forwarded') AS forwarded,
+                max(depth) AS max_depth
+         FROM events
+         WHERE bounty_id = $1
+         GROUP BY 1
+         ORDER BY 1 DESC
+         LIMIT 60`,
+        [bountyId],
+      );
+      return rows
+        .slice()
+        .reverse()
+        .map((row) => ({
+          bucket: new Date(row.bucket).toISOString(),
+          received: Number(row.received ?? 0),
+          forwarded: Number(row.forwarded ?? 0),
+          maxDepth: Number(row.max_depth ?? 0),
+        }));
+    } catch {
+      return [];
+    }
+  }
 }
 
 export function assembleGraph(input: {
