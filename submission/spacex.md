@@ -2,20 +2,28 @@
 
 ## Short description
 
-Built in Cursor with attribution trailers; Grok Imagine wanted-card OG images; Grok Voice `/talk/[token]` with ephemeral tokens and tools `get_bounty` / `forward_to` / `claim`.
+The product was built in Cursor with Co-authored-by attribution. Grok Imagine generates name-free wanted-poster OG images for every hop link. Grok Voice powers `/talk/[token]`: server-minted ephemeral tokens, browser WebSocket, tools `get_bounty` / `forward_to` / `claim`.
 
-## Why SpaceX / Cursor + Grok specifically
+## Why Cursor + Grok specifically
 
-1. Ephemeral voice tokens keep `XAI_API_KEY` off the browser.
-2. Imagine link previews make every forwarded hop look like a wanted poster.
-3. Whole-team Cursor evidence (Co-authored-by, transcripts) matches the track rubric.
-4. Multilingual voice UX for holders who would rather speak than type.
+1. **Ephemeral voice secrets.** `POST /api/grok/token` mints via `https://api.x.ai/v1/realtime/client_secrets`; the browser uses `xai-client-secret.*` — raw `XAI_API_KEY` never ships to the client (`web/lib/grok.ts`).
+2. **Imagine as the link preview.** `wantedPrompt` is attributes-only; PNG stored on the bounty and served at `/api/og/[id]` (`web/lib/imagine.ts`).
+3. **Track evidence.** WORKFLOW requires Cursor Agent commits with attribution; transcripts export to `cursor-transcripts/` for Devpost.
+4. **Multilingual holders.** Voice session instructions tell Grok to help in the user’s language (20+).
 
 ## Where in the code
 
-- `web/lib/imagine.ts`, `web/lib/grok.ts`, `/talk/[token]`, `POST /api/grok/token`
-- Cursor transcripts export path (WORKFLOW §8)
+| Piece | Path |
+|---|---|
+| Imagine | `web/lib/imagine.ts`, `POST` create-bounty hook, `/api/og/[id]` |
+| Voice mint + tools | `web/lib/grok.ts`, `web/app/api/grok/token/`, `web/app/talk/[token]/` |
+| VERIFY G notes | `PLAN.md` §7.5 |
+| Flags | `GROK_ENABLED`, `XAI_API_KEY` |
 
-## Demo look-at
+**VERIFY G (partial):** Endpoints unit-tested; live mint blocked without credits this session. Fallback: `GROK_ENABLED=false` (template OG / drop voice).
 
-Wanted card in a share preview; optional voice forward in a second language when `GROK_ENABLED=true`.
+## What judges see
+
+- Share an `/h/…` link → wanted-card preview.
+- Optional: “Talk instead” → speak a forward in another language when Grok is enabled.
+- Mention Cursor-built codebase / trailers in Q&A.

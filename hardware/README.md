@@ -5,8 +5,8 @@
 | [INVENTORY.md](INVENTORY.md) | HW-01 parts + go/no-go F |
 | [game.md](game.md) | HW-03 organizer approval + volunteer targets |
 | [bridge.py](bridge.py) | HW-05 poll `/api/stats` → serial `B x.xx` |
-| `badge/` | (forthcoming) Uno HOTP firmware |
-| `secrets.h` | **gitignored** per-badge HOTP secrets |
+| [badge/](badge/) | Uno HOTP sketch (TM1637 + button + EEPROM) |
+| [secrets.h.example](secrets.h.example) | template; real `secrets.h` is gitignored |
 
 ## Bridge smoke (no Arduino)
 

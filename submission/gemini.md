@@ -2,18 +2,23 @@
 
 ## Short description
 
-`/post` free text is compiled into an attributes-only `HintCard` via Gemini structured output, with server-side sanitization that drops names and overlong strings.
+The `/post` free-text path calls Gemini with a JSON schema matching `HintCard` + hidden cues. The server re-validates: unknown keys dropped, strings capped, names/streets rejected — so the public card is attributes-only by construction.
 
 ## Why Gemini specifically
 
-1. Structured JSON output matches our `HintCard` schema without brittle parsing.
-2. Instruction-following to strip PII before storage.
-3. Optional flag (`GEMINI_ENABLED`)—manual form fields work without the key.
+1. **Structured output** maps onto our contract (`city`, `organizationType`, `field`, `skill`, `language`, `experience`) without brittle regex.
+2. **PII instruction + server sanitize** — model drops names; `sanitizeCompiledHint` enforces it again (`web/lib/hintcard.ts`).
+3. **Optional.** `GEMINI_ENABLED=false` (default): posters edit hint fields manually; the rest of the MVP still runs.
 
 ## Where in the code
 
-- `web/lib/hintcard.ts`, `/post` page, create-bounty path in `web/lib/bounty.ts`
+| Piece | Path |
+|---|---|
+| Compiler + sanitize | `web/lib/hintcard.ts`, `web/lib/hintcard.test.ts` |
+| Wired from bounty create | `web/lib/bounty.ts` (`compileHint` when `GEMINI_ENABLED=true`) |
+| UI | `web/app/post/` |
+| Env | `GEMINI_API_KEY`, `GEMINI_MODEL` (see `.env.example`) |
 
-## Demo look-at
+## What judges see
 
-Paste a messy ask on `/post`; show the compiled card with no personal names. If key missing, edit fields manually.
+Paste a messy ask (“someone on a launch ops team near Starbase who soldered QFNs”) → card shows city/field/skill only, no personal name. If the key is missing, fill the form fields and continue.

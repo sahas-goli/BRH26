@@ -1,20 +1,36 @@
-# Tiger Data write-up notes
+# Tiger Data track
 
-## Replay
+## Short description
 
-- Generator: `sim/replay.py` (Kleinberg 1000×1000 lattice, greedy fan-out ≤ 3, attrition U(0.2,0.6)).
-- Offline smoke (no Tiger): `bash sim/smoke_replay.sh` (`replay.py --quick` + CSV header checks).
-- Outputs: `sim/out/replay.csv` (~1M `events` rows, `source=replay`), plus bounties/holders CSVs and `sim/out/sweep.json`.
-- Load: `node db/apply.mjs`, then `bash sim/load.sh`.
+Live and replay events share one Timescale hypertable. Continuous aggregates (`bounty_minute`, `bounty_hour`) drive the controller’s p75 latency and the `/live` cascade. A Kleinberg-lattice simulator can load ~1M `source=replay` rows for the Tiger write-up benchmarks.
 
-## Benchmarks (fill after load)
+## Why Tiger Data specifically
+
+1. **Hypertable + caggs** match an append-only event stream with real-time dashboards — not a generic Postgres bolt-on.
+2. **`percentile_agg` / rollup** (toolkit) feed controller maturity (p75 hop latency) when available; `db/apply.mjs` falls back if toolkit/columnstore APIs differ.
+3. **Replay at scale.** `sim/replay.py` generates ~1M events for compression / cagg-vs-raw numbers on the submission form.
+4. **Same schema for live game + synthetic** (`source` column), so `/live` can show overnight hops beside the replay.
+
+## Where in the code
+
+| Piece | Path |
+|---|---|
+| Schema / caggs | `db/schema.sql`, `db/caggs.sql` |
+| Apply + VERIFY E fallbacks | `db/apply.mjs`, `node db/apply.mjs --dry-run` |
+| Stats / graph | `web/lib/stats.ts`, `GET /api/stats`, `GET /api/graph/[id]` |
+| Simulator | `sim/replay.py`, `sim/load.sh`, `sim/smoke_replay.sh` |
+| UI | `web/app/live/` |
+
+## Benchmarks (fill after Tiger apply)
 
 | Metric | Value | Notes |
 |---|---|---|
-| `bounty_minute` vs raw `time_bucket` (ms) | _pending DATABASE_URL_ | `EXPLAIN ANALYZE` on the same bounty |
-| Compression ratio | _pending_ | `hypertable_columnstore_stats('events')` or compression stats |
-| Refresh lag (`now() - max(bucket)`) | _pending_ | After `refresh_continuous_aggregate` |
+| `bounty_minute` vs raw `time_bucket` (ms) | _pending DATABASE_URL_ | `EXPLAIN ANALYZE` on one bounty |
+| Compression ratio | _pending_ | columnstore / compression stats |
+| Refresh lag (`now() - max(bucket)`) | _pending_ | after `refresh_continuous_aggregate` |
 
-## Sweep
+Offline without Tiger: `bash sim/smoke_replay.sh` validates CSV headers; local MVP uses PGlite (`db/schema.local.sql`) and does not replace this track.
 
-See `sim/out/sweep.json` for success rate vs attrition and vs fan-out (b ≈ 2 cliff).
+## What judges see
+
+`/live` with `FEATURED_BOUNTY` pointing at a live or `r_####` replay id; quote the three benchmark numbers once filled. Sweep cliff: `sim/out/sweep.json`.

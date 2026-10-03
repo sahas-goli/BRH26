@@ -2,18 +2,26 @@
 
 ## Short description
 
-Each forward commits a salted edge memo on Solana; a successful claim pays the whole chain in one atomic multi-transfer + memo transaction on devnet.
+Every forward can commit a salted edge memo on Solana. A successful claim pays the entire winning chain in **one** confirmed transaction: up to 8 `SystemProgram.transfer`s plus one Memo (`sixhops:pay:<bountyId>:<hash>`). Devnet for the demo; `PAYOUT_MODE=mock` overnight.
 
 ## Why Solana specifically
 
-1. One tx, N payees, no custom program—fits sub-2s demo latency.
-2. Memo program gives timestamped edge commitments that cannot be backdated.
-3. Devnet + mock mode keeps overnight games safe; mainnet is an RPC flip.
+1. **Atomic multi-payee payout** without a custom on-chain program — fits a ~2 s stage moment.
+2. **Edge commitments.** `sixhops:edge:…` memos hash parent/child salts so losing branches stay private but edges are timestamped.
+3. **Cheap + fast** for hackathon demo money; mock mode keeps venue games safe until RPC is healthy.
+4. **Explorer is the proof.** Judges open one URL and see N transfers + memo.
 
 ## Where in the code
 
-- `web/lib/solana.ts`, payout path in `web/lib/payout.ts`, `PAYOUT_MODE=devnet|mock`
+| Piece | Path |
+|---|---|
+| Memos / tx builders | `web/lib/solana.ts` (`edgeMemo`, `payMemo`, `buildPayoutTransaction`) |
+| Claim / confirm settle | `web/lib/payout.ts` (`PAYOUT_MODE=devnet` path) |
+| Go/no-go B harness | `web/scripts/gonogo.cjs` |
+| Env | `SOLANA_RPC_URL`, `SOLANA_PAYER_SECRET`, `PAYOUT_MODE` |
 
-## Demo look-at
+**Measured (PLAN §7.2):** Devnet claim/confirm produced multi-instruction txs with pay memos (signatures recorded in PLAN).
 
-Explorer link after claim/confirm: N transfers + `sixhops:pay:…` memo.
+## What judges see
+
+After badge claim or poster confirm: Explorer link (`explorer.solana.com/tx/…?cluster=devnet`) with N transfers + memo. Attack slider on `/live` explains why the split is Solana-settled the way it is.
