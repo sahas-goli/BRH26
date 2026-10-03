@@ -1,12 +1,12 @@
-import { tickBounty, type ControllerBounty, type ControllerHolder, type TickAction } from "../../../lib/controller";
-import { refundIfLive } from "../../../lib/nessie";
+import { tickBounty, type ControllerBounty, type ControllerHolder, type TickAction } from "../../../../lib/controller";
+import { refundIfLive } from "../../../../lib/nessie";
 
 export async function POST(request: Request): Promise<Response> {
   if (!process.env.INTERNAL_SECRET || request.headers.get("x-six-hops-secret") !== process.env.INTERNAL_SECRET) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   try {
-    const db = await import("../../../lib/db");
+    const db = await import("../../../../lib/db");
     if (!db.pool) throw new Error("no pool");
     const actions = await tickOpen(db.pool);
     return Response.json({ actions });
