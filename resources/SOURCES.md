@@ -19,7 +19,7 @@ Opening ceremony audio, via an Otter auto-transcript plus a text dump of the fir
 ## Found along the way
 | Link | Feeds | Repull |
 |---|---|---|
-| https://bigredhacks2026.devpost.com/ (+ /rules, /resources, /project-gallery) | [03](03-devpost-and-website.md), track prizes | WebFetch (curl gets 403) |
+| https://bigredhacks2026.devpost.com/ (+ /rules, /resources, /project-gallery) | [03](03-devpost-and-website.md), track text | WebFetch (curl gets 403) |
 | https://somethingreat.notion.site/Hackathon-Guidelines-for-Photon-3dce443f36bb803696daf4135f063cd1 | [photon track](tracks/photon-imessage-agents.md) | POST `https://somethingreat.notion.site/api/v3/loadCachedPageChunkV2` with page id `3dce443f-36bb-8036-96da-f4135f063cd1`, `limit` 200, parse `recordMap.block` titles |
 | https://mlh.link/{elevenlabs,gemini,solana,tigerdata,presage,GoDaddyRegistry} | `tracks/mlh-*.md` | `curl -sL` the short link: it is a meta-refresh page; read `content="0; url=..."` for the partner page (`mlh.com/partners/<name>`; GoDaddy goes to tech.study). Partner pages hold more `mlh.link/<slug>` links (quickstart, docs, faucet, SDK) that resolve the same way. Resolved targets are listed inside each track file |
 | https://brh-registration-portal.netlify.app/ | [03](03-devpost-and-website.md) | React SPA: `curl` index, grep `assets/index-*.js` for UI strings. Supabase-backed; do not probe its API |

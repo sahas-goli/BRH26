@@ -5,7 +5,7 @@ Sources: organizer doc (full rental list), MLH page https://www.mlh.com/resource
 ## How it works
 - Pick up at the **MLH hardware lab / MLH table by the check-in tables**; check items out with an organizer. Set up right after the Friday opening ceremony.
 - Rent for the weekend. **Return all returnable items by the end of the final judging round** (Sun, ~12:30 PM).
-- Related: [tracks/hardware.md](tracks/hardware.md) (Hardware prize track), Sat 2:00 PM CAD workshop by Assistive Tech, Sat 3:00 PM ASML hardware+ML workshop (see [01](01-general-info-doc.md)).
+- Related: [tracks/hardware.md](tracks/hardware.md) (Hardware track judging).
 
 ## MLH rental list (organizer doc)
 | Item | MLH page description / guide |
@@ -23,12 +23,10 @@ Sources: organizer doc (full rental list), MLH page https://www.mlh.com/resource
 | Assorted cables | |
 | Assorted Grove components | *General:* Seeed Grove modular sensors/actuators on a standard 4-pin connector; plug into Grove base shields |
 
-Not rentable but linked by MLH: Arduino IDE (software).
-
 Stock counts and exact models are not published; ask at the table. Ordering/limits per team unknown.
 
 ## 3D printer (user-provided)
-A "nice" 3D printer is available to the team. Unknown, ask organizers: model, build volume, filament types/colors, queue and sign-up process, who operates it, max print time. Past Hardware-track winner Customized Kendama (2025) was designed in FreeCAD and 3D printed ([past-winners.md](past-winners.md)); the Sat 2 PM CAD workshop is the natural place to learn the CAD side.
+A "nice" 3D printer is available to the team. Unknown, ask organizers: model, build volume, filament types/colors, queue and sign-up process, who operates it, max print time. Past Hardware-track winner Customized Kendama (2025) was designed in FreeCAD and 3D printed ([past-winners.md](past-winners.md)); design in CAD (FreeCAD, Fusion, Onshape) before printing.
 
 ## Open questions
 - Which Raspberry Pi models, how many of each item, check-out limits.

@@ -14,7 +14,5 @@ Source: https://www.mlh.com/resources/software ("FREE access to their APIs this 
 - **GoDaddy Registry:** free domain of your choice **for 1 year**; guide https://hackp.ac/GoDaddy-medium , signup https://hackp.ac/GoDaddyRegistry . Claim steps and the bounty: [tracks/mlh-godaddy-registry.md](tracks/mlh-godaddy-registry.md)
 - Other free credits are listed in each MLH track file (ElevenLabs, Tiger Data, Presage, Solana).
 
-## Other MLH pages (nav links)
-- Prizes: https://www.mlh.com/events/bigred-hacks-2026/prizes (claim codes need MLH login)
-- Learn: https://www.mlh.com/resources/learn (not captured)
-- Address form (for shipping physical prizes): https://hackp.ac/address
+## More
+- MLH prizes page (claim codes need MLH login): https://www.mlh.com/events/bigred-hacks-2026/prizes
