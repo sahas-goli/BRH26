@@ -73,3 +73,7 @@ Strongest on-brand, non-`.study` options the portal marked available:
 - `milgram.us`, `milgram.tech`
 - `smallworld.us` (and no strong `.us`/`.club` hit)
 - Any `*.bounty` — TLD not offered on tech.study
+
+## bounty.find (2026-10-03)
+
+Literal query `bounty.find` on tech.study: **inValidTld** — the page said “bounty.find is not available through this search” (extension is not a GoDaddy Registry TLD here). `.find` did not appear as an offered TLD on bare-word searches for `bounty`, `bountyfind`, or `findbounty`. Closest names the portal marked available: `bountyfind.us`, `findbounty.us`. Did not register or purchase.
