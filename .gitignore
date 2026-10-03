@@ -1,6 +1,9 @@
 node_modules/
 .next/
 out/
+!sim/out/
+sim/out/*.csv
+sim/out/*.log
 dist/
 coverage/
 *.tsbuildinfo
