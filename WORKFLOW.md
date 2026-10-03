@@ -129,6 +129,8 @@ behind its mock flag and tell me what to verify. Prefer the simplest code that m
 
 ## 10. Talking to each other
 
+When you are stuck, blocked on S, or finished a claimed task, POST one notification as in [AGENTS.md](AGENTS.md) under "Notify S". Do not send progress spam, secrets, env values, or stack traces.
+
 One team chat. Messages start with a tag, so a skim is enough:
 
 | Tag | Meaning |
