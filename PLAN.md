@@ -1,6 +1,6 @@
 # Six Hops (milgram.study): build plan
 
-Source of truth for what we build. Process (how four people and four agents share the repo) is in [WORKFLOW.md](WORKFLOW.md). Concept and research: [proposals/round-3.md](proposals/round-3.md#1-six-hops-milgramstudy). Sponsor API facts and gotchas: the "Verified 2026-10-03" section of each file in [resources/tracks/](resources/tracks/README.md).
+Source of truth for what we build. Process (how four people and four agents share the repo) is in [WORKFLOW.md](WORKFLOW.md). What has landed, and what is blocked, is in [PROGRESS.md](PROGRESS.md). Update this file when a measurement or a cut changes the design. Task status goes in PROGRESS.md, not here. Concept and research: [proposals/round-3.md](proposals/round-3.md#1-six-hops-milgramstudy). Sponsor API facts and gotchas: the "Verified 2026-10-03" section of each file in [resources/tracks/](resources/tracks/README.md).
 
 Anything marked **VERIFY** is an API detail we have not run yet. Its go/no-go test (section 10) checks it before anyone builds on it.
 
