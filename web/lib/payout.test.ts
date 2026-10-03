@@ -111,6 +111,9 @@ test("devnet confirm uses one solana signature and a retry does not send again",
       signPayout: async ({ rows }) => {
         calls += 1;
         assert.equal(rows.length, 3);
+        assert.equal(db.state.payouts.length, 5);
+        assert.equal(db.state.payouts.every((row) => row.tx_sig === ""), true);
+        assert.equal(db.state.bounties[0].status, "found");
         assert.equal(rows[0].solAddress && rows[0].solAddress !== "wallet-addr", true);
         assert.equal(rows[1].solAddress, "wallet-addr");
         assert.equal(rows[2].solAddress && rows[2].solAddress !== "wallet-addr", true);
@@ -210,6 +213,10 @@ function memoryDb() {
       if (holder && holder.sol_address == null) {
         holder.sol_address = values[0];
         holder.custodial_secret = values[1];
+      }
+    } else if (sql.startsWith("UPDATE payouts SET tx_sig")) {
+      for (const payout of state.payouts) {
+        if (payout.bounty_id === values[1]) payout.tx_sig = values[0];
       }
     } else if (sql.startsWith("INSERT INTO events")) {
       state.events.push({

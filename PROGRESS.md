@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:58 ET.
+Updated 2026-10-03 13:07 ET.
 
 ## On main
 
@@ -22,10 +22,11 @@ Updated 2026-10-03 12:58 ET.
 | `4151c75` | A paid claim or confirm includes `explorerUrl` for the payout signature. | S2-05 still open. No confirmed devnet signature. |
 | `fd879cc` | Web scaffold is on main. `npm run check` passed (23 tests, including the split brute force) and `npm run build` passed. | S2-01 done. S3-01 still needs a Vercel preview. |
 | `64070f8` | When `PAYOUT_MODE=devnet`, a custodial hop with no address gets a server keypair before the payout transaction. A wallet hop with no address fails closed. | S2-05 still open. Faucet 429. No `SOLANA_PAYER_SECRET`. |
+| `52cb84f` | `createEscrow` funds escrow once per bounty id. A second call returns the same accounts. | S2-06 still open. `NESSIE_KEY` unset. |
 
 ## This branch
 
-`createEscrow` funds the poster checking account and moves the cap into escrow. A second call for the same bounty id returns the same accounts. Live Nessie was not called. `NESSIE_KEY` is still unset, so S2-06 stays open.
+In devnet mode the payout rows are committed before the signature is requested. The bounty stays `found` until that signature is stored. A retry that already has a signature does not send again. S2-05 stays open: no funded payer, so no confirmed devnet transaction.
 
 ## Plan changes
 
