@@ -64,7 +64,17 @@ export function configureBounty(options: BountyOptions): void {
 
 function options(): BountyOptions {
   if (!configured) throw new BountyError("database_unavailable", 503);
-  return configured;
+  // Lazy defaults so scaffold can call configureBounty({ database }) only.
+  const base = configured;
+  return {
+    ...base,
+    compileHint: base.compileHint ?? (enabled("GEMINI_ENABLED")
+      ? (text) => import("./hintcard").then((m) => m.compileHintCard(text))
+      : undefined),
+    generateWantedCard: base.generateWantedCard ?? (enabled("GROK_ENABLED")
+      ? (input) => import("./imagine").then((m) => m.storeWantedCard(base.database, input))
+      : undefined),
+  };
 }
 
 function enabled(key: string): boolean { return process.env[key] === "true"; }
@@ -188,9 +198,19 @@ export async function createBounty(input: unknown): Promise<{
   let hidden: HiddenHint[];
   if (body.text !== undefined && enabled("GEMINI_ENABLED")) {
     liveRequired(true, o.compileHint, "hint_compiler_unavailable");
-    const compiled = await o.compileHint!(string(body.text, 4000));
-    hint = hintCard(compiled.hint);
-    hidden = hiddenHints(compiled.hidden);
+    let compiled: { hint: HintCard; hidden?: HiddenHint[] };
+    try {
+      compiled = await o.compileHint!(string(body.text, 4000));
+    } catch {
+      throw new BountyError("hint_compiler_unavailable", 503);
+    }
+    try {
+      hint = hintCard(compiled.hint);
+      hidden = hiddenHints(compiled.hidden);
+    } catch (error) {
+      if (error instanceof BountyError) throw error;
+      throw new BountyError("hint_compiler_unavailable", 503);
+    }
   } else {
     hint = hintCard(body.hint);
     hidden = hiddenHints(body.hidden);
@@ -228,6 +248,39 @@ export async function getPublicBounty(bountyId: string): Promise<PublicBounty> {
   );
   if (!rows[0]) throw new BountyError("not_found", 404);
   return publicBounty(rows[0], o);
+}
+
+/** Bytes + hint for GET /api/og. Does not touch holder open state. */
+export async function getBountyOgSource(bountyId: string): Promise<{ hint: HintCard; png: Buffer | null }> {
+  if (!/^b_[A-Za-z0-9]{8}$/.test(bountyId)) throw new BountyError("not_found", 404);
+  const o = options();
+  const { rows } = await o.database.query<BountyRow & { og_png: Buffer | Uint8Array | null }>(
+    "SELECT id,hint,bounty_cents,cap_cents,status,expires_at,og_png FROM bounties WHERE id=$1",
+    [bountyId],
+  );
+  if (!rows[0]) throw new BountyError("not_found", 404);
+  const raw = rows[0].og_png;
+  const png = raw == null ? null : Buffer.isBuffer(raw) ? raw : Buffer.from(raw);
+  return { hint: hintCard(rows[0].hint), png: png && png.length > 0 ? png : null };
+}
+
+/** Share-card metadata for crawlers; must not set opened_at. */
+export async function getHolderShareMeta(holderToken: string): Promise<{
+  ogImageUrl: string; title: string; description: string;
+}> {
+  validToken(holderToken);
+  const o = options();
+  const { rows: holders } = await o.database.query<{ bounty_id: string }>(
+    "SELECT bounty_id FROM holders WHERE token=$1", [holderToken],
+  );
+  if (!holders[0]) throw new BountyError("not_found", 404);
+  const bounty = await getPublicBounty(holders[0].bounty_id);
+  const bits = Object.values(bounty.hint).filter(Boolean).slice(0, 3).join(" · ");
+  return {
+    ogImageUrl: bounty.ogImageUrl,
+    title: "Wanted · Six Hops",
+    description: bits || "Help forward this search to someone closer.",
+  };
 }
 
 export async function getHolderView(holderToken: string): Promise<HolderView> {
