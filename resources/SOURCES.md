@@ -11,10 +11,8 @@ Captured 2026-10-02. **User-given** links come first; keep them verbatim.
 | https://www.mlh.com/events/bigred-hacks-2026/prizes | `tracks/mlh-*.md` | WebFetch |
 | https://www.bigredhacks.com/ | [03](03-devpost-and-website.md) sponsors, site FAQ | React SPA (also names the registration portal): `curl` index, then grep the `assets/index-*.js` bundle (arrays `C9` tracks, `kc` FAQ, `qc` schedule, `ax` sponsors; names change per build) |
 
-## Local files (user-provided, verbal info)
-| File | Feeds | Notes |
-|---|---|---|
-| `Hackathon Opening Ceremony_otter_ai.zip` (Otter transcript + mp3) and `opening ceremony dump.txt` (first half of the same talk) | "Spoken" sections in [02](02-theme-navigation.md), [01](01-general-info-doc.md), `tracks/` | Auto-transcript: names and numbers garbled in places ("Rock Imagine" = Grok Imagine, "11 Labs" = ElevenLabs, "ESD/ESPN 120" = PSB 120). Unzip to read the transcript. |
+## Verbal (merged, raw files deleted)
+Opening ceremony audio, via an Otter auto-transcript plus a text dump of the first half, supplied by the user. Merged into the "Spoken" sections of [02](02-theme-navigation.md), [01](01-general-info-doc.md) and `tracks/`. Auto-transcript: names and numbers garbled in places ("Rock Imagine" = Grok Imagine, "11 Labs" = ElevenLabs, "ESD/ESPN 120" = PSB 120). Raw files remain in git history (commit fe14373) if needed.
 
 ## Found along the way
 | Link | Feeds | Repull |
