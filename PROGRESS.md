@@ -2,7 +2,15 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 17:05 ET.
+Collaborators with no `web/.env.local` take exactly one of AL-05, AL-06, AL-07. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
+
+Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets.
+
+AL-05 is the poster. AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-07 is the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+
+S2-06 is Hayden's Nessie task. Leave it.
+
+Updated 2026-10-03 17:20 ET.
 
 ## On main
 
@@ -15,7 +23,7 @@ Updated 2026-10-03 17:05 ET.
 
 ## Plan changes
 
-Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stays. The hardware lane, `hardware/`, HOTP, and the venue badge game were removed. Claim is an introduction; poster confirm pays. `bounties.target_badge_id` remains an unused column.
+Software tasks have one owner, SWE. Which task to claim is at the top of this file. The hardware lane, `hardware/`, HOTP, and the venue badge game were removed. Claim is an introduction; poster confirm pays. `bounties.target_badge_id` remains an unused column.
 
 ## Local MVP evidence (no Tiger)
 
@@ -27,7 +35,7 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stay
 ## Blocked / needs humans
 
 - **Live preview MVP:** put the same `DATABASE_URL` in Vercel, plus `INTERNAL_SECRET` and `PUBLIC_BASE_URL`. `FEATURED_BOUNTY=r_0000` makes `/live` open on the replay cascade.
-- **S2-06:** claimed by Sahas Goli (`claim/S2-06` since 16:20Z). Nessie live still failing VERIFY D — keep mock.
+- **S2-06:** claimed by Hayden (`claim/S2-06`, haydenmfu, since 2026-10-03T20:45Z). Nessie live still failing VERIFY D — keep mock. Leave it.
 - **S3-07:** GoDaddy / MLH domain claim for `milgram.study`.
 - **AL-01:** Photon, xAI, and Gemini keys are still missing. Solana, Nessie, and Tiger are set in local `web/.env.local`.
 - **AL-02:** local smoke green; prod double-run still blocked on secrets.
@@ -39,7 +47,9 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stay
 
 ## Claims (remote locks)
 
-- `claim/S2-06` — Sahas Goli
+- `claim/S2-06` — Hayden (haydenmfu), since 2026-10-03T20:45Z. Leave it.
+- AL-05, AL-06, AL-07 — unclaimed. One collaborator each.
+- AL-01, AL-02, AL-03, AL-04, S3-07 — unclaimed locks, but they stay with S. Do not claim them without `web/.env.local`.
 
 ## Next (humans)
 
@@ -48,13 +58,13 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stay
 
 ## Open tasks by env
 
-Claim with `bash scripts/task.sh claim <ID>` from Git Bash, then `git switch -c swe/<ID> origin/main`. Hold at most 2 claims.
+Collaborators with no `web/.env.local` claim exactly one of the three below. One person per task. `bash scripts/task.sh claim <ID>` from Git Bash, then `git switch -c swe/<ID> origin/main`.
 
-**Needs env (S)** — `web/.env.local`, API keys, or a logged-in Vercel/Tiger account. Do not send these to collaborators.
+**Needs env** — `web/.env.local`, API keys, or a logged-in Vercel/Tiger account. Do not send these to collaborators. Do not claim them.
 
-- AL-01, AL-02, AL-03, AL-04, S2-06, S3-07
+- AL-01, AL-02, AL-03, AL-04, S3-07 stay with S. S2-06 is Hayden's. Leave it.
 
-**No env (collaborators)** — public site and the repo only. Three parallel files, no shared edits.
+**No env (collaborators)** — public site and the repo only. Three parallel files, no shared edits. One person per task.
 
 - AL-05 brand/poster notes → `design/poster-direction.md`
 - AL-06 domain shortlist (search only, do not buy) → `submission/domain-shortlist.md`

@@ -2,6 +2,14 @@
 
 What we build: [PLAN.md](PLAN.md). This file covers how we build it without stepping on each other. Agents: read this file fully, then the PLAN.md sections your task's `spec:` line points to.
 
+Collaborators with no `web/.env.local` take exactly one of AL-05, AL-06, AL-07. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
+
+Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets.
+
+AL-05 is the poster. AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-07 is the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+
+S2-06 is Hayden's Nessie task. Leave it.
+
 ## 1. The loop
 
 ```
@@ -29,7 +37,7 @@ scripts/task.sh done S2-03        # 5. drop the lock
 
 Your idea, "claim, push, pull before claiming," is the right shape. The weak spot is that two people can both pull, both see a task open, and both commit a claim to the same file. The second push then hits a merge conflict in the task file instead of a clean "no." We fix that with two rules.
 
-- **One software lane.** Every software task has `owner: SWE`. Anyone may claim any open SWE task. ALL tasks are for anyone. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists the SWE lane.
+- **One software lane.** Every software task has `owner: SWE`. Which open task you may claim is at the top of this file. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists the SWE lane.
 - **The lock is a branch, not a file edit.** `scripts/task.sh claim <ID>` pushes a brand-new branch `claim/<ID>` to GitHub. Creating a branch that already exists is rejected by the server, so exactly one claim can win. The loser sees `TAKEN: <ID> is claimed by <name> <time>`. There is no file edit, no merge conflict and no commit noise on main.
 - **Done lives in the task file.** The PR that finishes a task sets `status: done` in `tasks/<ID>.md`, so the board's history is in git. After merging, `scripts/task.sh done <ID>` deletes the lock branch.
 
@@ -107,7 +115,7 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: scripts/task.sh list SWE; claim any open SWE task whose depends_on are done (or mockable);
+Work loop: if you have no web/.env.local, claim exactly one of AL-05, AL-06, AL-07 with bash scripts/task.sh claim <ID> (one person per task; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07);
 branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.

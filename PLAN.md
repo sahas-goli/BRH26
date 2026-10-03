@@ -66,7 +66,7 @@ flowchart LR
   SIM[sim/ on DGX: 1M-event replay] -->|COPY| DB
 ```
 
-**Repo layout.** Software paths have one owner, SWE. Any software person may edit them and claim any SWE task. ALL tasks are for anyone. Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who claims or edits the work.
+**Repo layout.** Software paths have one owner, SWE. Any software person may edit them. Collaborators with no `web/.env.local` claim exactly one of AL-05, AL-06, or AL-07 (top of WORKFLOW.md). Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who edits the work.
 
 | Path | Owner |
 |---|---|
@@ -500,7 +500,7 @@ Claim `milgram.study` through the MLH GoDaddy Registry offer (https://www.tech.s
 
 ## 8. Tasks
 
-The authoritative list is `tasks/<ID>.md`: one file per task, with owner, dependencies and done-when. Claim and track them with `scripts/task.sh` (WORKFLOW.md section 3). Summary:
+The authoritative list is `tasks/<ID>.md`: one file per task, with owner, dependencies and done-when. Claim and track them with `scripts/task.sh` (WORKFLOW.md section 3). Collaborators with no `web/.env.local` claim exactly one of AL-05, AL-06, or AL-07. Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Summary:
 
 | ID | Owner | Task | Depends | Est h | By |
 |---|---|---|---|---|---|
