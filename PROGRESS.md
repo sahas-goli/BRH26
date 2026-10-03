@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 15:40 ET.
+Updated 2026-10-03 16:00 ET.
 
 ## On main
 
@@ -27,7 +27,7 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 
 ## Blocked / needs humans
 
-- **S3-02 / S3-03:** schema and caggs are on service `hldtuqlvht`. Still need the 100k-row copy, the cagg-versus-raw timing, and `bash sim/load.sh`.
+- **S3-03:** schema, caggs, and VERIFY E are done on `hldtuqlvht` (100k COPY in 1.7 s, cagg 92x faster). Still need `bash sim/load.sh` for the 1M replay and the compression number.
 - **Live preview MVP:** put the same `DATABASE_URL` in Vercel, plus `INTERNAL_SECRET` and `PUBLIC_BASE_URL`.
 - **S2-06:** claimed by Sahas Goli (`claim/S2-06` since 16:20Z). Nessie live still failing VERIFY D — keep mock.
 - **S3-07:** GoDaddy / MLH domain claim for `milgram.study`.

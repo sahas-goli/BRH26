@@ -25,9 +25,9 @@ Live and replay events share one Timescale hypertable. Continuous aggregates (`b
 
 | Metric | Value | Notes |
 |---|---|---|
-| `bounty_minute` vs raw `time_bucket` (ms) | _pending DATABASE_URL_ | `EXPLAIN ANALYZE` on one bounty |
-| Compression ratio | _pending_ | columnstore / compression stats |
-| Refresh lag (`now() - max(bucket)`) | _pending_ | after `refresh_continuous_aggregate` |
+| `bounty_minute` vs raw scan (ms) | 0.928 vs 85.574 (92x) | `EXPLAIN ANALYZE` on `b_copy100k`, 100,000 copied rows |
+| Compression ratio | _pending_ | chunks are newer than the 1-day columnstore policy, so before/after bytes are empty |
+| Refresh lag (`now() - max(bucket)`) | 62.5 s | after refresh; matches the 1-minute cagg end offset |
 
 Offline without Tiger: `bash sim/smoke_replay.sh` validates CSV headers; local MVP uses PGlite (`db/schema.local.sql`) and does not replace this track.
 
