@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 13:35 ET.
+Updated 2026-10-03 13:50 ET.
 
 ## On main
 
@@ -24,10 +24,12 @@ Updated 2026-10-03 13:35 ET.
 | `64070f8` | When `PAYOUT_MODE=devnet`, a custodial hop with no address gets a server keypair before the payout transaction. A wallet hop with no address fails closed. | S2-05 still open. Faucet 429. No `SOLANA_PAYER_SECRET`. |
 | `52cb84f` | `createEscrow` funds escrow once per bounty id. A second call returns the same accounts. | S2-06 still open. Live balances do not move. |
 | `86d8523` | In devnet mode the payout rows are committed before the signature is requested. The bounty stays `found` until that signature is stored. A retry that already has a signature does not send again. | S2-05 still open. No claim transaction yet. |
+| `a51d8a0` | `db/schema.sql`, `db/caggs.sql`, and `db/apply.mjs` with VERIFY E fallbacks. | S3-02 still open until applied to Tiger. |
+| (this PR) | `GET /api/stats` and `GET /api/graph/[id]`. Gauge JSON uses PLAN 4.2 queries. Graph hides salts until paid and links the payout explorer URL. | S3-04 done. |
 
 ## This branch
 
-Nothing in flight.
+`web/lib/stats.ts` plus the stats and graph routes. Unit tests cover gauge JSON and salt reveal rules. Routes return 503 without `DATABASE_URL`.
 
 ## Plan changes
 
@@ -39,14 +41,15 @@ Nothing in flight.
 ## Blocked
 
 - Claim and confirm return 503 until `DATABASE_URL` is set. `pool` is exported from `web/lib/db.ts`.
+- S3-02: schema is in the repo. Live apply waits on `DATABASE_URL` (`node db/apply.mjs`).
 - S2-05: a local claim and confirm already produced confirmed devnet signature `61a5bLrJdUqZkYqjvptTqJ5KGqj2dGWdhvSjoDrgJG16sTwwNqkdNbTcdbbRphtmxRyFjFbz3kuMqgbPU7NjQiXS` (one transfer plus a `sixhops:pay` memo). The task stays open because `/live` is still the SWE3 stub and `DATABASE_URL` is unset. No backup RPC is set.
 - S2-06 cannot go live. Nessie balances do not move after a 201 transfer.
 - `swe1/S1-02` has bounty code on its branch and no pull request.
 
 ## Claims
 
-SWE2 holds S2-05 and S2-06. S2-01, S2-02, S2-03, S2-04, and S2-07 are done.
+SWE3 holds S3-02 and S3-04. SWE2 holds S2-05 and S2-06. S2-01, S2-02, S2-03, S2-04, and S2-07 are done.
 
 ## Next
 
-S2-05 has a confirmed devnet claim signature. It still needs the `/live` page to link that signature, and `DATABASE_URL` for the shared database. S2-06 stays on the mock because the sandbox does not move balances. S3-01 still needs a Vercel preview.
+S3-05 `/live` can consume stats/graph once seeded. S3-02 needs Tiger `DATABASE_URL`. S3-03 replay after schema is live.
