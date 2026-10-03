@@ -8,6 +8,7 @@
 .page textarea { min-height: 130px; resize: vertical; }
 .page button { min-height: 46px; padding: 10px 18px; border: 1px solid #075e52; border-radius: 8px; background: #075e52; color: white; font: inherit; cursor: pointer; margin: 12px 10px 0 0; }
 .page button:disabled { opacity: .55; cursor: default; }
+.secondary { background: #fff !important; color: #075e52 !important; }
 .page :focus-visible { outline: 3px solid #bd6c16; outline-offset: 3px; }
 .page fieldset { border: 1px solid #c8d7d0; border-radius: 10px; padding: 12px; margin: 18px 0; min-width: 0; }
 .page dt { font-size: .85rem; color: #496158; margin-top: 12px; }

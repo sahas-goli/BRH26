@@ -27,6 +27,8 @@ export interface PublicBounty {     // what anyone with a link sees
 export interface HolderView {       // GET /api/h/[token]
   bounty: PublicBounty; depth: number; forwardsLeft: number; canForward: boolean;
   rail: Rail; parentLabel: string | null; talkUrl: string; claimUrl: string;
+  /** Present for the depth-0 poster when status is `found` (PLAN §5 confirm step). */
+  pendingClaim?: { introMessage: string };
 }
 export interface ForwardRecipient { label: string; handle?: string } // handle = iMessage phone/email, optional
 export interface ForwardResult { recipients: { label: string; link: string; delivered: 'imessage' | 'link-only' }[] }

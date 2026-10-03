@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { getHolderShareMeta } from "../../../lib/bounty";
+import { ensureBountyDatabase } from "../../../lib/ensure-db";
 import HolderPage from "./holder-page";
 
 type Props = { params: Promise<{ token: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
+    await ensureBountyDatabase();
     const { token } = await params;
     const meta = await getHolderShareMeta(token);
     return {

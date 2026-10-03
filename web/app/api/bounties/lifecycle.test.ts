@@ -32,6 +32,11 @@ function fixture(extra: Partial<BountyOptions> = {}) {
         rows = state.holders.filter((row) => row.token === values[0]);
       } else if (sql.startsWith("SELECT") && sql.includes("FROM bounties")) {
         rows = state.bounties.filter((row) => row.id === values[0]);
+      } else if (sql.startsWith("SELECT") && sql.includes("kind='claimed'")) {
+        rows = state.events
+          .filter((row) => row.bounty_id === values[0] && row.kind === "claimed")
+          .slice(-1)
+          .map((row) => ({ detail: (row as { detail?: unknown }).detail ?? null }));
       } else if (sql.startsWith("UPDATE holders SET opened_at")) {
         state.holders.find((row) => row.id === values[1])!.opened_at = values[0];
       } else if (sql.startsWith("UPDATE holders SET forwards")) {

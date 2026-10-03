@@ -71,6 +71,9 @@ export default function PostPage() {
       ) {
         throw new Error("Invalid result");
       }
+      try {
+        sessionStorage.setItem(`sixhops:poster:${result.bountyId}`, result.posterToken);
+      } catch { /* private browsing */ }
       setCreated(result);
     } catch {
       setError("We couldn’t confirm whether the search was created. Check your connection before trying again.");

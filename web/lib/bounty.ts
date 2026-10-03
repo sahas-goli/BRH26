@@ -307,13 +307,30 @@ export async function getHolderView(holderToken: string): Promise<HolderView> {
       await event(tx, at.toISOString(), bounty.id, holder, "opened");
     }
     const forwardsLeft = Math.max(0, FANOUT - holder.forwards);
-    return {
+    const view: HolderView = {
       bounty: publicBounty(bounty, o), depth: holder.depth, forwardsLeft,
       canForward: bounty.status === "open" && new Date(bounty.expires_at).getTime() > at.getTime() && holder.depth < H && forwardsLeft > 0,
       rail: holder.rail,
       // Despite the contract's name, this is THIS holder's sender-supplied label.
       parentLabel: holder.label, talkUrl: `/talk/${holderToken}`, claimUrl: `/claim/${holderToken}`,
     };
+    // Poster-only: intro for /confirm (never expose chain members).
+    if (holder.depth === 0 && bounty.status === "found") {
+      const { rows: claimed } = await tx.query<{ detail: unknown }>(
+        `SELECT detail FROM events WHERE bounty_id=$1 AND kind='claimed' ORDER BY time DESC LIMIT 1`,
+        [bounty.id],
+      );
+      const raw = claimed[0]?.detail;
+      let intro: unknown;
+      try {
+        const detail = typeof raw === "string" ? JSON.parse(raw) as { introMessage?: string } : raw as { introMessage?: string } | null;
+        intro = detail?.introMessage;
+      } catch { /* ignore malformed detail */ }
+      if (typeof intro === "string" && intro.trim()) {
+        view.pendingClaim = { introMessage: intro.trim() };
+      }
+    }
+    return view;
   });
 }
 

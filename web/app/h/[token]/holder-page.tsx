@@ -23,10 +23,13 @@ export default function HolderPage() {
   const [sent, setSent] = useState<ForwardResult["recipients"]>([]);
   const [copyStatus, setCopyStatus] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [posterToken, setPosterToken] = useState("");
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [confirmNote, setConfirmNote] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setConfirmNote("");
     fetch(`/api/h/${encodeURIComponent(token)}`, { cache: "no-store", referrerPolicy: "no-referrer", signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error(response.status === 404 ? "This personal link was not found. Ask the sender for their link again." : "The bounty is unavailable right now. Please try again.");
@@ -35,11 +38,52 @@ export default function HolderPage() {
         if (controller.signal.aborted) return;
         setView(data); setRail(data.rail); setWallet(""); setEditDestination(false);
         setRecipients((rows) => rows.slice(0, Math.max(1, Math.min(3, data.forwardsLeft))));
+        if (data.depth === 0) {
+          try {
+            setPosterToken(sessionStorage.getItem(`sixhops:poster:${data.bounty.id}`) ?? "");
+          } catch { setPosterToken(""); }
+        }
       })
       .catch((e: unknown) => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Unable to load this bounty."); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [token, attempt]);
+
+  async function confirmClaim(accept: boolean) {
+    if (!view || confirmBusy) return;
+    if (!posterToken.trim()) {
+      setError("Paste your private poster token from the create-search page to approve or reject.");
+      return;
+    }
+    setConfirmBusy(true); setError(""); setConfirmNote("");
+    try {
+      const response = await fetch(`/api/bounties/${encodeURIComponent(view.bounty.id)}/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({ posterToken: posterToken.trim(), accept }),
+      });
+      const data = await response.json() as { error?: string; status?: string; explorerUrl?: string };
+      if (!response.ok) {
+        const errors: Record<string, string> = {
+          not_found: "Poster token or bounty not found.",
+          not_claimed: "There is no pending claim to confirm.",
+          invalid_input: "Accept must be true or false.",
+        };
+        throw new Error(errors[data.error ?? ""] ?? "Confirmation failed. Check the poster token and try again.");
+      }
+      setConfirmNote(
+        accept
+          ? (data.explorerUrl ? `Paid. Explorer: ${data.explorerUrl}` : `Claim accepted (${data.status ?? "paid"}).`)
+          : "Claim rejected. The bounty is open again for another target.",
+      );
+      setAttempt((a) => a + 1);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Confirmation failed.");
+    } finally {
+      setConfirmBusy(false);
+    }
+  }
 
   async function forward(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,6 +124,33 @@ export default function HolderPage() {
         {view.parentLabel && <p>Your sender labeled your link “{view.parentLabel}”.</p>}
         <p className={styles.muted}>Deadline: <time dateTime={view.bounty.expiresAt}>{new Date(view.bounty.expiresAt).toLocaleString()}</time>. Demo rewards use test funds.</p>
       </section>
+      {view.depth === 0 && view.bounty.status === "found" && (
+        <section className={styles.card} aria-label="Pending claim confirmation">
+          <h2>Someone claims to be the match</h2>
+          <p>Read their introduction. Accepting pays the chain; rejecting reopens the search. You never see who forwarded.</p>
+          {view.pendingClaim?.introMessage
+            ? <blockquote className={styles.muted} style={{ whiteSpace: "pre-wrap" }}>{view.pendingClaim.introMessage}</blockquote>
+            : <p className={styles.muted}>Introduction is unavailable; you can still accept or reject.</p>}
+          <label htmlFor="poster-token">Private poster token</label>
+          <input
+            id="poster-token"
+            autoComplete="off"
+            spellCheck={false}
+            value={posterToken}
+            onChange={(e) => setPosterToken(e.target.value)}
+            placeholder="From the create-search confirmation screen"
+            disabled={confirmBusy}
+          />
+          <p className={styles.muted}>Saved in this browser after create when possible. Keep it private.</p>
+          <button type="button" disabled={confirmBusy} onClick={() => void confirmClaim(true)}>
+            {confirmBusy ? "Working…" : "Accept and pay"}
+          </button>
+          <button type="button" disabled={confirmBusy} onClick={() => void confirmClaim(false)} className={styles.secondary}>
+            Reject claim
+          </button>
+          {confirmNote && <p role="status">{confirmNote}</p>}
+        </section>
+      )}
       <h2>{view.forwardsLeft} forwards remaining</h2>
       <p>Choose someone closer to these clues. Share each personal link only with its intended recipient.</p>
       {view.canForward ? <form onSubmit={forward}>
