@@ -115,3 +115,11 @@ export async function signDevnetPayout(input: {
   });
   return result.signature;
 }
+
+export function newCustodialAccount(): { address: string; secret: string } {
+  const { Keypair } = web3();
+  const bs58 = require("bs58");
+  const encode = typeof bs58.encode === "function" ? bs58.encode : bs58.default.encode;
+  const account = Keypair.generate();
+  return { address: account.publicKey.toBase58(), secret: encode(account.secretKey) };
+}

@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:48 ET.
+Updated 2026-10-03 12:52 ET.
 
 ## On main
 
@@ -19,10 +19,12 @@ Updated 2026-10-03 12:48 ET.
 | `37731b0` | When `PAYOUT_MODE=devnet`, claim and confirm stamp one signature onto the payout rows before insert. Bank rails and refunds stay off that transaction. A second confirm returns the stored signature and does not sign again. The test injects the signature; no devnet send ran. | S2-05 still open. `SOLANA_PAYER_SECRET` unset. |
 | `4902fca` | `releaseEscrow` also moves the Solana share from escrow to a treasury account. The local stand-in shows holder, treasury, and escrow all move. | S2-06 still open. Live Nessie not called. |
 | `46c5b82` | When `NESSIE_MODE=live`, confirm pays bank-rail holders from escrow, moves the Solana share to treasury, and refunds `cap - bounty`. An overdue tick refunds the full escrow before it marks the bounty refunded. | S2-06 still open. Live Nessie not called. |
+| `4151c75` | A paid claim or confirm includes `explorerUrl` for the payout signature. | S2-05 still open. No confirmed devnet signature. |
+| `fd879cc` | Web scaffold is on main. `npm run check` passed (23 tests, including the split brute force) and `npm run build` passed. | S2-01 done. S3-01 still needs a Vercel preview. |
 
 ## This branch
 
-The web scaffold from `swe3/S3-01` is on this branch: `package.json`, `db.ts` (`pool`), `types.ts`, stub routes, and Vercel config. `npm --prefix web run check` passed (23 tests, including the split brute force). `npm --prefix web run build` passed. Tick imports now resolve to `web/lib`. S2-01 is done. S3-01 stays open: a Vercel preview has not been confirmed. S2-05 still needs a confirmed devnet signature.
+When `PAYOUT_MODE=devnet`, a custodial hop with no address gets a server keypair before the payout transaction is built. The pubkey is what the transfer pays. A wallet hop with no address fails closed. The devnet faucet still returned 429 at 12:50 ET, so no confirmed signature yet. S2-05 stays open.
 
 ## Plan changes
 
@@ -32,7 +34,7 @@ The web scaffold from `swe3/S3-01` is on this branch: `package.json`, `db.ts` (`
 ## Blocked
 
 - Claim and confirm return 503 until `DATABASE_URL` is set. `pool` is exported from `web/lib/db.ts`.
-- S2-02 test B, the 6-transfer half: devnet faucet returned 429 again at 12:32 ET. No `SOLANA_PAYER_SECRET`.
+- S2-02 test B, the 6-transfer half: devnet faucet returned 429 again at 12:50 ET. No `SOLANA_PAYER_SECRET`. No backup RPC is set.
 - S2-02 test D: no `NESSIE_KEY`.
 - `swe1/S1-02` has bounty code on its branch and no pull request.
 
