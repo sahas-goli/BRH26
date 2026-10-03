@@ -2,38 +2,36 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 14:05 ET.
+Updated 2026-10-03 15:10 ET.
 
 ## On main
 
 | Commit | What landed | Task |
 |---|---|---|
-| `a51d8a0` | `db/schema.sql`, `db/caggs.sql`, `db/apply.mjs` with VERIFY E fallbacks. | S3-02 still open until applied to Tiger. |
-| `1744638` | `GET /api/stats` and `GET /api/graph/[id]`. | S3-04 done. |
-| `6dc6003` | Full-screen `/live`: d3 cascade, b gauge, attack slider, series chart, explorer link, demo fallback. | S3-05 done. |
-| `e9d059b` | `sim/replay.py` Kleinberg generator, `sim/load.sh`, `submission/tiger.md`. Local run wrote 1,000,000 events + 334k holders. | S3-03 open until loaded into Tiger and benchmarks filled. |
+| (earlier) | `db/schema.sql`, `db/caggs.sql`, `db/apply.mjs` | S3-02 open until Tiger apply |
+| (earlier) | `sim/replay.py`, `sim/load.sh`, `submission/tiger.md` | S3-03 open until Tiger load + benches |
+| `65853ac` | Grok Voice `/talk` + three tools | S3-06 done (live mint still needs `XAI_API_KEY`) |
+| `b52f7ea` | Grok ephemeral token + VERIFY G notes | S3-06a done (partial) |
 
 ## Plan changes
 
-Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays HW. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists that lane.
+Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays HW.
 
-## This branch
+## Blocked / needs humans
 
-S2-05 closeout. The devnet claim and the `/live` explorer link are already on main.
+- **S3-02 / S3-03:** need Tiger `DATABASE_URL`. Offline: `node db/apply.mjs --dry-run`, `bash sim/smoke_replay.sh`.
+- **Live MVP on preview:** Vercel env with at least `DATABASE_URL`, `INTERNAL_SECRET`, `PUBLIC_BASE_URL`. Mock UI works without Tiger; claim/stats/graph are 503 until DB is set.
+- **S2-06:** claimed by Sahas Goli (`claim/S2-06` since 16:20Z). Nessie live still failing VERIFY D — keep mock.
+- **S3-07:** GoDaddy / MLH domain claim for `milgram.study`.
+- **AL-01:** no `web/.env.local` on this workstation — see checklist in `tasks/AL-01.md`.
 
-## Blocked
+## Claims (remote locks)
 
-- S3-02 / S3-03: need `DATABASE_URL` to run `node db/apply.mjs` and `bash sim/load.sh`. On stock Postgres, `apply.mjs` stops at `create_hypertable` after the plain events table exists.
-- Claim/confirm/stats/graph return 503 without `DATABASE_URL`.
-- S2-06 cannot go live. Nessie balances do not move after a 201 transfer. `NESSIE_MODE` stays mock.
-- S3-06a / S3-06: need `XAI_API_KEY`.
-- S3-07: domain registration.
-- `swe1/S1-02` still has bounty code with no PR.
-
-## Claims
-
-Selina holds S3-02 and S3-03. S2-06 stays claimed. S2-05 is done. S3-04 and S3-05 are done.
+- `claim/S2-06` — Sahas Goli (since 16:20Z; not stale yet under the 3 h rule)
+- S3-02 / S3-03 locks released after harness merge so whoever has `DATABASE_URL` can reclaim
 
 ## Next
 
-Paste Tiger `DATABASE_URL` into the environment, then: `node db/apply.mjs` → `bash sim/load.sh` → fill `submission/tiger.md` → point `FEATURED_BOUNTY` at an `r_####` replay id for `/live`. S2-06 stays on the mock.
+1. Paste Tiger `DATABASE_URL` → `node db/apply.mjs` → `bash sim/load.sh` → fill `submission/tiger.md`.
+2. Set Vercel env → preview post→forward→claim smoke (README).
+3. S2-06 stays mock until Nessie transfers move balances.

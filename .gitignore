@@ -16,3 +16,4 @@ hardware/secrets.h
 Thumbs.db
 *.log
 .vercel
+db/apply-report.json

@@ -3,7 +3,9 @@
  * Apply db/schema.sql and db/caggs.sql to DATABASE_URL.
  * Tries Tiger/PLAN syntax first, then the VERIFY (E) fallbacks from PLAN.md 4.2.
  *
- * Usage: DATABASE_URL=... node db/apply.mjs
+ * Usage:
+ *   DATABASE_URL=... node db/apply.mjs
+ *   node db/apply.mjs --dry-run   # parse/extract only; no DB (CI / go-no-go prep)
  */
 import { createRequire } from "node:module";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -15,6 +17,7 @@ const pg = require("pg");
 
 const root = dirname(fileURLToPath(import.meta.url));
 const report = { applied: [], fallbacks: [], errors: [], relations: [] };
+const dryRun = process.argv.includes("--dry-run");
 
 function requireUrl() {
   const url = process.env.DATABASE_URL;
@@ -23,6 +26,12 @@ function requireUrl() {
     process.exit(1);
   }
   return url;
+}
+
+/** SSL for Tiger matches web/lib/db.ts and PLAN.md 7.1. */
+function pgSslOption(url) {
+  if (url.includes("localhost") || url.includes("127.0.0.1")) return undefined;
+  return { rejectUnauthorized: false };
 }
 
 async function exec(client, sql, label) {
@@ -41,13 +50,39 @@ async function tryExec(client, sql, label) {
 }
 
 function relationsSql() {
-  return readFileSync(join(root, "schema.sql"), "utf8")
+  const sql = readFileSync(join(root, "schema.sql"), "utf8")
     .replace(
       /CREATE TABLE IF NOT EXISTS events \([\s\S]*?\) WITH \(tsdb\.hypertable, tsdb\.segmentby = 'bounty_id', tsdb\.orderby = 'time DESC'\);/,
       "",
     )
     .replace(/-- VERIFY \(E\):.*$/gm, "")
     .trim();
+  if (!/CREATE TABLE IF NOT EXISTS bounties/i.test(sql)) {
+    throw new Error("schema.relations missing bounties");
+  }
+  if (!/CREATE TABLE IF NOT EXISTS holders/i.test(sql)) {
+    throw new Error("schema.relations missing holders");
+  }
+  if (/WITH \(tsdb\.hypertable/i.test(sql)) {
+    throw new Error("schema.relations still contains events hypertable DDL");
+  }
+  return sql;
+}
+
+function dryRunPlan() {
+  const relations = relationsSql();
+  return {
+    mode: "dry-run",
+    relationsChars: relations.length,
+    hasBounties: /bounties/i.test(relations),
+    hasHolders: /holders/i.test(relations),
+    hasPayouts: /payouts/i.test(relations),
+    sslRemote: pgSslOption("postgres://x@example.tsdb.cloud.timescale.com/tsdb"),
+    eventsStrategies: ["schema.events.tsdb", "schema.events.plain+hypertable"],
+    caggStrategies: ["bounty_minute.toolkit|plain", "bounty_hour.rollup|plain", "columnstore|compress"],
+    nextHumanStep:
+      "Create Tiger Cloud service, set DATABASE_URL, run `node db/apply.mjs`, paste apply-report.json fallbacks into PLAN.md 4.2 if any.",
+  };
 }
 
 const eventsTiger = `
@@ -202,12 +237,14 @@ async function smoke(client) {
 }
 
 async function main() {
+  if (dryRun) {
+    console.log(JSON.stringify(dryRunPlan(), null, 2));
+    return;
+  }
   const url = requireUrl();
   const client = new pg.Client({
     connectionString: url,
-    ssl: url.includes("localhost") || url.includes("127.0.0.1")
-      ? undefined
-      : { rejectUnauthorized: true },
+    ssl: pgSslOption(url),
   });
   await client.connect();
   try {

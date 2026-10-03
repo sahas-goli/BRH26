@@ -3,8 +3,9 @@
 ## Replay
 
 - Generator: `sim/replay.py` (Kleinberg 1000×1000 lattice, greedy fan-out ≤ 3, attrition U(0.2,0.6)).
+- Offline smoke (no Tiger): `bash sim/smoke_replay.sh` (`replay.py --quick` + CSV header checks).
 - Outputs: `sim/out/replay.csv` (~1M `events` rows, `source=replay`), plus bounties/holders CSVs and `sim/out/sweep.json`.
-- Load: apply `db/schema.sql` + `db/caggs.sql`, then `bash sim/load.sh`.
+- Load: `node db/apply.mjs`, then `bash sim/load.sh`.
 
 ## Benchmarks (fill after load)
 
