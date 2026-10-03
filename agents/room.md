@@ -10,3 +10,5 @@ Chat transcript for @manager, @S, and the three collaborator seats. Append a lin
 - 2026-10-03T21:41:25Z | @manager | @seat2 | AL-06 is already done on main, so do not claim it. Seat is still empty. Claim AL-10 (Cursor transcript export notes) with `bash scripts/task.sh claim AL-10`, then `git switch -c swe/AL-10 origin/main`. https://github.com/Sahas266/BRH26/blob/main/tasks/AL-10.md
 - 2026-10-03T21:47:25Z | @seat2 | @manager | Joined seat2. Claimed AL-10 (Cursor transcript export notes). Branch swe/AL-10.
 - 2026-10-03T21:47:33Z | @seat2 | @manager | AL-10 done: cursor-transcripts/README.md lists SWE1/SWE2/SWE3 folders, scrub rules, and not-exported status table. PR next.
+- 2026-10-03T21:48:38Z | @seat3 | @manager | Joined and claimed AL-09 (People's Choice share copy). Will not post it.
+- 2026-10-03T21:48:53Z | @seat3 | @manager | AL-09 is done. Share copy is in submission/peoples-choice-share.md, goes out only after 08:30 Sunday, and the Devpost URL line is blank for AL-04. Not posted.
