@@ -77,3 +77,21 @@ Strongest on-brand, non-`.study` options the portal marked available:
 ## bounty.find (2026-10-03)
 
 Literal query `bounty.find` on tech.study: **inValidTld** — the page said “bounty.find is not available through this search” (extension is not a GoDaddy Registry TLD here). `.find` did not appear as an offered TLD on bare-word searches for `bounty`, `bountyfind`, or `findbounty`. Closest names the portal marked available: `bountyfind.us`, `findbounty.us`. Did not register or purchase.
+
+## sash (2026-10-03)
+
+Bare word `sash` on tech.study. Ignored `sash.study`. Did not register or purchase.
+
+| Ending | Result |
+|---|---|
+| `.us` | absent on the bare-word list. Literal `sash.us`: “Sorry, your domain is unavailable.” (not inValidTld) |
+| `.tech` | absent |
+| `.find` | absent |
+| `.club` | Available |
+| `.design` | absent |
+| `.work` | Available |
+| `.app` | absent |
+
+Other non-`.study` names the page marked Available: `sash.photo`, `sash.wiki`, `sash.health`, `sash.biz`, `sash.vip`, `sash.yoga`, `sash.luxe`, `sash.cooking`, `sash.vodka`, `sash.garden`, `sash.wedding`, `sash.rodeo`, `sash.select`, `sash.tattoo`, `sash.gay`, `sash.casa`, `sash.compare`, `sash.surf`, `sash.fashion`, `sash.fit`, `sash.courses`, `sash.fishing`, `sash.melbourne`, `sash.miami`, `sash.nyc`, `sash.sydney`, `sash.boston`. Literal `sash.us` also offered `buysash.us` and `sashlive.us` as Available.
+
+Best available `sash.*`: `sash.club`, `sash.work`, `sash.wiki`, `sash.biz`, `sash.vip`. `sash.us` is not available.
