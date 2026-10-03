@@ -393,7 +393,7 @@ export function splitCents(h: number, B: number): { relay: number; finder: numbe
 
 **Honest limits** (say these out loud if asked): a *relay* who inserts fakes moves money from the finder to themselves. The paper proves that is dominated only in equilibrium, and its Theorem 3.1 shows no rule makes it dominated outright for H ≥ 3. Mitigations: a cap of 8, distinct handles for iMessage payouts, and flagging forwards that land within a second of each other (visible in slot order).
 
-**Minimum budget.** A brand-new Solana account needs at least 890,880 lamports (rent exemption for 0 bytes; VERIFY B with `getMinimumBalanceForRentExemption(0)`). At `DEMO_USD_PER_SOL=150`, that is about 13.4 cents, so a relay share B/16 must be at least 14 cents, meaning B ≥ 224 cents. The minimum cap is $10, so B starts at $6 or more and clears this easily.
+**Minimum budget.** A brand-new Solana account needs 650,240 lamports (rent exemption for 0 bytes; `getMinimumBalanceForRentExemption(0)` on `api.devnet.solana.com`, 2026-10-03). At `DEMO_USD_PER_SOL=150`, that is about 9.8 cents, so a relay share B/16 must be at least 10 cents, meaning B ≥ 160 cents. The minimum cap is $10, so B starts at $6 or more and clears this easily. The 6-transfer half of test B is still open: the devnet faucet returned 429.
 
 **`split.test.ts`** (node:test, run by `npm run check`) brute-forces every h in 1..8, k in 0..(8 - h), and B in {1000, 1001, 1337, 99999}, asserting:
 - shares sum to B exactly;
@@ -452,7 +452,7 @@ Base URL is `https://api.nessieisreal.com`; use HTTPS only, because plain HTTP r
 - `POST /customers/{id}/accounts` with `{type:"Checking", nickname, rewards:0, balance}` creates the poster checking (balance = cap + $50), the bounty escrow (balance 0), and holder accounts.
 - `POST /accounts/{id}/transfers` with `{medium:"balance", payee_id, amount, description}` moves money: checking to escrow on post; escrow to holders and treasury on pay; escrow to checking on refund.
 - `GET /accounts/{id}` reads balances for the `/live` money panel.
-- **VERIFY D:** writes to the shared sandbox are untested, and transfers may settle as "pending". The go/no-go checks that both balances change. If writes fail, set `NESSIE_MODE=mock` and drop Nessie from the track list rather than fake it.
+- **VERIFY D:** writes to the shared sandbox are untested, and transfers may settle as "pending". The go/no-go checks that both balances change. If writes fail, set `NESSIE_MODE=mock` and drop Nessie from the track list rather than fake it. 2026-10-03: not run, `NESSIE_KEY` unset.
 
 ### 7.4 Photon iMessage agent (SWE1)
 
