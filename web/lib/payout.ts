@@ -288,6 +288,29 @@ function paidBody(payoutSig?: string): { status: "paid"; payoutSig?: string; exp
   return { status: "paid", payoutSig, explorerUrl: explorerUrl(payoutSig) };
 }
 
+type PayContext = {
+  bountyId: string;
+  bounty: Record<string, unknown>;
+  poster: Record<string, unknown>;
+  rows: PayoutRow[];
+};
+
+async function finishDevnet(
+  db: PayoutDatabase,
+  pay: PayContext,
+  opts: { signPayout?: SignPayout; moveBank?: MoveBank },
+): Promise<{ status: "paid"; payoutSig?: string; explorerUrl?: string }> {
+  const stamped = await stamp(pay.bountyId, pay.rows, opts.signPayout);
+  await moveLiveBank(pay.bounty, stamped, opts.moveBank);
+  const signature = stamped[0]?.txSig ?? "";
+  await db.transaction(async (tx) => {
+    await tx.query("UPDATE payouts SET tx_sig=$1 WHERE bounty_id=$2", [signature, pay.bountyId]);
+    await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", pay.bountyId]);
+    await logEvent(tx, new Date().toISOString(), pay.bountyId, pay.poster, "paid", {});
+  });
+  return paidBody(signature);
+}
+
 export async function claimBounty(
   db: PayoutDatabase,
   input: unknown,
@@ -296,7 +319,7 @@ export async function claimBounty(
   const parsed = body(input);
   const token = requiredString(parsed.token);
   const introMessage = requiredString(parsed.introMessage);
-  return db.transaction(async (tx) => {
+  const outcome = await db.transaction(async (tx) => {
     const lookup = await tx.query<Record<string, unknown>>("SELECT bounty_id FROM holders WHERE token=$1", [token]);
     const bountyId = lookup.rows[0]?.bounty_id;
     if (!bountyId) throw new PayoutError("not_found", 404);
@@ -335,14 +358,27 @@ export async function claimBounty(
     await logEvent(tx, at.toISOString(), String(bountyId), holder, "claimed", { introMessage });
     if (step.ledger.status === "found") {
       await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["found", bountyId]);
-      return { status: "found" };
+      return { result: { status: "found" as const } };
+    }
+    if (process.env.PAYOUT_MODE === "devnet") {
+      await writePayouts(tx, String(bountyId), step.ledger.payouts.map((row) => ({ ...row, txSig: "" })));
+      return {
+        pay: {
+          bountyId: String(bountyId),
+          bounty,
+          poster,
+          rows: step.ledger.payouts,
+        },
+      };
     }
     const stamped = await stamp(String(bountyId), step.ledger.payouts, opts.signPayout);
     await moveLiveBank(bounty, stamped, opts.moveBank);
     await writePayouts(tx, String(bountyId), stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
-    return paidBody(stamped[0]?.txSig ?? step.payoutSig);
+    return { result: paidBody(stamped[0]?.txSig ?? step.payoutSig) };
   });
+  if ("pay" in outcome && outcome.pay) return finishDevnet(db, outcome.pay, opts);
+  return outcome.result!;
 }
 
 export async function confirmBounty(
@@ -355,7 +391,7 @@ export async function confirmBounty(
   const posterToken = requiredString(parsed.posterToken);
   const accept = parsed.accept;
   if (typeof accept !== "boolean") throw new PayoutError("invalid_input", 400);
-  return db.transaction(async (tx) => {
+  const outcome = await db.transaction(async (tx) => {
     const locked = await tx.query<Record<string, unknown>>(
       "SELECT id,status,bounty_cents,cap_cents,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE id=$1 AND poster_token=$2 FOR UPDATE",
       [bountyId, posterToken],
@@ -364,7 +400,8 @@ export async function confirmBounty(
     if (!bounty) throw new PayoutError("not_found", 404);
     if (bounty.status === "paid") {
       const sigs = await tx.query<Record<string, unknown>>("SELECT tx_sig FROM payouts WHERE bounty_id=$1 LIMIT 1", [bountyId]);
-      return paidBody(sigs.rows[0] ? String(sigs.rows[0].tx_sig) : undefined);
+      const existing = sigs.rows[0]?.tx_sig ? String(sigs.rows[0].tx_sig) : "";
+      if (existing) return { result: paidBody(existing) };
     }
     const posters = await tx.query<Record<string, unknown>>(
       "SELECT id,parent_id,depth,rail FROM holders WHERE bounty_id=$1 AND depth=0",
@@ -385,13 +422,19 @@ export async function confirmBounty(
     if (!accept) {
       await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["open", bountyId]);
       await logEvent(tx, at, bountyId, poster, "confirmed", { rejected: true });
-      return { status: "open" };
+      return { result: { status: "open" } };
+    }
+    if (process.env.PAYOUT_MODE === "devnet") {
+      await writePayouts(tx, bountyId, step.ledger.payouts.map((row) => ({ ...row, txSig: "" })));
+      return { pay: { bountyId, bounty, poster, rows: step.ledger.payouts } };
     }
     const stamped = await stamp(bountyId, step.ledger.payouts, opts.signPayout);
     await moveLiveBank(bounty, stamped, opts.moveBank);
     await writePayouts(tx, bountyId, stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
     await logEvent(tx, at, bountyId, poster, "paid", {});
-    return paidBody(stamped[0]?.txSig ?? step.payoutSig);
+    return { result: paidBody(stamped[0]?.txSig ?? step.payoutSig) };
   });
+  if ("pay" in outcome && outcome.pay) return finishDevnet(db, outcome.pay, opts);
+  return outcome.result!;
 }
