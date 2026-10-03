@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer, type Server } from "node:http";
 import { test } from "node:test";
-import { accountCents, openEscrow, refundEscrow, releaseEscrow, type Nessie } from "./nessie";
+import { accountCents, openEscrow, payFromEscrow, refundEscrow, refundIfLive, releaseEscrow, type Nessie } from "./nessie";
 
 test("escrow, payout, and refund move both balances", async () => {
   const { baseUrl, close } = await fakeNessie();
@@ -21,6 +21,37 @@ test("escrow, payout, and refund move both balances", async () => {
     assert.equal(await accountCents(client, escrow.escrowId), 0);
     assert.equal(await accountCents(client, escrow.checkingId), 5400);
   } finally {
+    await close();
+  }
+});
+
+test("pay releases bank and treasury, then expiry refunds the rest", async () => {
+  const previous = process.env.NESSIE_MODE;
+  process.env.NESSIE_MODE = "live";
+  const { baseUrl, close } = await fakeNessie();
+  const client: Nessie = { baseUrl, key: "test-key" };
+  try {
+    const escrow = await openEscrow(client, 2000);
+    await payFromEscrow(client, {
+      escrowId: escrow.escrowId,
+      checkingId: escrow.checkingId,
+      bank: [{ payeeId: "finder-bank", cents: 1300 }],
+      treasuryId: "treasury",
+      treasuryCents: 300,
+      refundCents: 400,
+    });
+    assert.equal(await accountCents(client, escrow.escrowId), 0);
+    assert.equal(await accountCents(client, "finder-bank"), 1300);
+    assert.equal(await accountCents(client, "treasury"), 300);
+    assert.equal(await accountCents(client, escrow.checkingId), 5400);
+
+    const expired = await openEscrow(client, 1000);
+    await refundIfLive({ escrowId: expired.escrowId, checkingId: expired.checkingId, cents: 1000 }, client);
+    assert.equal(await accountCents(client, expired.escrowId), 0);
+    assert.equal(await accountCents(client, expired.checkingId), 6000);
+  } finally {
+    if (previous === undefined) delete process.env.NESSIE_MODE;
+    else process.env.NESSIE_MODE = previous;
     await close();
   }
 });

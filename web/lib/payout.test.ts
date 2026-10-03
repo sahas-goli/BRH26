@@ -131,6 +131,40 @@ test("devnet confirm uses one solana signature and a retry does not send again",
   }
 });
 
+test("live confirm pays the bank rail from escrow and a retry does not pay again", async () => {
+  const previous = process.env.NESSIE_MODE;
+  process.env.NESSIE_MODE = "live";
+  try {
+    const db = memoryDb();
+    db.state.bounties[0].nessie_escrow_acct = "escrow";
+    db.state.bounties[0].nessie_poster_acct = "checking";
+    const finder = db.state.holders.find((row) => row.id === "h_d");
+    if (finder) finder.nessie_acct = "finder-bank";
+    await claimBounty(db, { token: "finder-token", introMessage: "this is me" });
+    let moves = 0;
+    await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true }, {
+      moveBank: async (input) => {
+        moves += 1;
+        assert.deepEqual(input.bank, [{ payeeId: "finder-bank", cents: 1300 }]);
+        assert.equal(input.treasuryCents, 300);
+        assert.equal(input.refundCents, 400);
+        assert.equal(input.escrowId, "escrow");
+        assert.equal(input.checkingId, "checking");
+      },
+    });
+    assert.equal(moves, 1);
+    await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true }, {
+      moveBank: async () => {
+        moves += 1;
+      },
+    });
+    assert.equal(moves, 1);
+  } finally {
+    if (previous === undefined) delete process.env.NESSIE_MODE;
+    else process.env.NESSIE_MODE = previous;
+  }
+});
+
 function memoryDb() {
   const state: { bounties: Record<string, unknown>[]; holders: Record<string, unknown>[]; payouts: Record<string, unknown>[]; events: Record<string, unknown>[] } = {
     bounties: [{
