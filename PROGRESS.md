@@ -45,4 +45,18 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stay
 ## Next (humans)
 
 1. Copy Tiger `DATABASE_URL` into Vercel, then load the replay (`bash sim/load.sh`).
-2. GoDaddy domain (S3-07); Nessie (S2-06); Photon/xAI keys (AL-01).
+2. Nessie (S2-06); Photon/xAI keys (AL-01). Domain registration stays S3-07. Name search is AL-06 (no purchase).
+
+## Open tasks by env
+
+Claim with `bash scripts/task.sh claim <ID>` from Git Bash, then `git switch -c swe/<ID> origin/main`. Hold at most 2 claims.
+
+**Needs env (S)** — `web/.env.local`, API keys, or a logged-in Vercel/Tiger account. Do not send these to collaborators.
+
+- AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, S3-07
+
+**No env (collaborators)** — public site and the repo only. Three parallel files, no shared edits.
+
+- AL-05 brand/poster notes → `design/poster-direction.md`
+- AL-06 domain shortlist (search only, do not buy) → `submission/domain-shortlist.md`
+- AL-07 public-URL shot list → `submission/public-storyboard.md`
