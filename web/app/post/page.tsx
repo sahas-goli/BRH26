@@ -37,7 +37,6 @@ export default function PostPage() {
     const payload: Record<string, unknown> = {
       capCents,
       hours: Number(data.get("hours")),
-      ...(String(data.get("badge") ?? "").trim() ? { targetBadgeId: String(data.get("badge")).trim() } : {}),
     };
     if (text) payload.text = text;
     if (Object.keys(hint).length) payload.hint = hint;
@@ -109,7 +108,7 @@ export default function PostPage() {
             </p>
             <h2>Save your private poster details</h2>
             <p className={styles.muted}>
-              You’ll need the poster token to approve a claim without a badge. Keep it private. These details disappear when you leave this page.
+              You’ll need the poster token to confirm a claim before payment. Keep it private. These details disappear when you leave this page.
             </p>
             <p className={styles.secret}>
               Bounty: {created.bountyId}
@@ -182,16 +181,6 @@ export default function PostPage() {
               <p className={styles.muted}>
                 The initial offer is 60% of your cap; the remaining 40% is held in reserve. This demo uses test or simulated money.
               </p>
-              <details>
-                <summary>Venue game: optional target badge</summary>
-                <label className={styles.field}>
-                  Target badge ID
-                  <input name="badge" maxLength={80} disabled={pending} />
-                </label>
-                <p className={styles.muted}>
-                  Use the ID supplied by the organizer. Without a badge, you approve the target’s claim.
-                </p>
-              </details>
               {error && <p className={styles.error} role="alert">{error}</p>}
               <div className={styles.actions}>
                 <button className={styles.button} type="submit" disabled={pending}>

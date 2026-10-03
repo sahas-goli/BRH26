@@ -13,14 +13,13 @@ const open = {
   status: "open" as const,
   bountyCents: 1600,
   capCents: 2000,
-  hasBadge: false,
   posterHolderId: "h_poster",
   posterRail: "bank" as const,
   payouts: [],
 };
 
 test("a 4-deep mock claim pays the chain once", () => {
-  const found = applyClaim(open, null);
+  const found = applyClaim(open);
   assert.equal(found.error, undefined);
   assert.equal(found.ledger.status, "found");
   assert.equal(found.ledger.payouts.length, 0);
@@ -45,28 +44,13 @@ test("a 4-deep mock claim pays the chain once", () => {
 });
 
 test("a second claim is rejected", () => {
-  const found = applyClaim(open, null);
-  const again = applyClaim(found.ledger, null);
+  const found = applyClaim(open);
+  const again = applyClaim(found.ledger);
   assert.equal(again.error, "already_claimed");
 });
 
-test("a bad badge code does not pay", () => {
-  const denied = applyClaim({ ...open, hasBadge: true }, false);
-  assert.equal(denied.error, "bad_code");
-  assert.equal(denied.ledger.status, "open");
-});
-
-test("a valid badge pays immediately", () => {
-  const paid = applyClaim({ ...open, hasBadge: true }, true, chain, "b_badge");
-  assert.equal(paid.ledger.status, "paid");
-  assert.equal(
-    paid.ledger.payouts.filter((row) => row.role !== "refund").reduce((sum, row) => sum + row.cents, 0),
-    1600,
-  );
-});
-
 test("reject reopens a found bounty", () => {
-  const found = applyClaim(open, null);
+  const found = applyClaim(open);
   const reopened = applyConfirm(found.ledger, chain, false, "b_demo");
   assert.equal(reopened.ledger.status, "open");
   assert.equal(reopened.ledger.payouts.length, 0);
@@ -176,7 +160,7 @@ function memoryDb() {
   const state: { bounties: Record<string, unknown>[]; holders: Record<string, unknown>[]; payouts: Record<string, unknown>[]; events: Record<string, unknown>[] } = {
     bounties: [{
       id: "b_demo", poster_token: "poster-secret", status: "open", bounty_cents: 1600, cap_cents: 2000,
-      target_badge_id: null, expires_at: "2026-10-04T00:00:00Z",
+      expires_at: "2026-10-04T00:00:00Z",
     }],
     holders: [
       { id: "h_poster", bounty_id: "b_demo", token: "poster-token", parent_id: null, depth: 0, rail: "bank" },

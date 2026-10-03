@@ -21,7 +21,7 @@ function fixture(extra: Partial<BountyOptions> = {}) {
       queries.push(sql);
       let rows: Row[] = [];
       if (sql.startsWith("INSERT INTO bounties")) {
-        state.bounties.push({ id: values[0], poster_token: values[1], hint: JSON.parse(values[2] as string), hidden_hint: JSON.parse(values[3] as string), cap_cents: values[4], bounty_cents: values[5], expires_at: values[7], status: "open" });
+        state.bounties.push({ id: values[0], poster_token: values[1], hint: JSON.parse(values[2] as string), hidden_hint: JSON.parse(values[3] as string), cap_cents: values[4], bounty_cents: values[5], expires_at: values[6], status: "open" });
       } else if (sql.startsWith("INSERT INTO holders")) {
         const root = sql.includes("NULL,0,NULL");
         state.holders.push({ id: values[0], bounty_id: values[1], token: values[2], parent_id: root ? null : values[3], depth: root ? 0 : values[4], label: root ? null : values[5], salt: root ? values[3] : values[7], rail: root ? values[4] : "custodial", received_at: root ? values[5] : values[8], opened_at: null, forwards: 0 });

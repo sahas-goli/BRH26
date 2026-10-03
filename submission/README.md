@@ -13,5 +13,5 @@ One file per sponsor/judged track (PLAN §9, §13). Fill measurements and demo e
 | [gemini.md](gemini.md) | SWE |
 | [design.md](design.md) | SWE |
 | [godaddy.md](godaddy.md) | SWE |
-| [hardware.md](hardware.md) | HW |
-| [bigred.md](bigred.md) | HW |
+| [hardware.md](hardware.md) | not entered |
+| [bigred.md](bigred.md) | ALL |

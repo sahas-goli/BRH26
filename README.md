@@ -24,7 +24,7 @@ npm --prefix web run seed:demo && npm --prefix web run dev
 # open http://localhost:3000/live  (FEATURED_BOUNTY set by seed:demo)
 ```
 
-`seed:demo` writes `web/.data/demo` (`DATABASE_URL=pglite:.data/demo`), writes `FEATURED_BOUNTY=<id>` into `web/.env.local` so `/live` loads that cascade (never overwrites a Postgres Tiger URL), and checks `/api/stats` + `/api/graph` before exit. Pitch: [submission/pitch-2min.md](submission/pitch-2min.md). Deck shots: [hardware/deck-outline.md](hardware/deck-outline.md). Backup video: [submission/backup-video.md](submission/backup-video.md).
+`seed:demo` writes `web/.data/demo` (`DATABASE_URL=pglite:.data/demo`), writes `FEATURED_BOUNTY=<id>` into `web/.env.local` so `/live` loads that cascade (never overwrites a Postgres Tiger URL), and checks `/api/stats` + `/api/graph` before exit. Pitch: [submission/pitch-2min.md](submission/pitch-2min.md). Backup video: [submission/backup-video.md](submission/backup-video.md).
 
 ### Local `next dev` (no Tiger)
 
@@ -60,9 +60,7 @@ Most hops open on phones—test that before the venue:
    npm --prefix web run dev -- --hostname 0.0.0.0 --port 3000
    ```
 4. On the phone (same Wi‑Fi / disable VPN): open `http://192.168.x.x:3000/post`.
-5. Create a bounty → open the poster hop link → forward to yourself (AirDrop/SMS the child `/h/…` URL) → `/claim/…` with an intro.
-6. Optional gauge stub:  
-   `python hardware/bridge.py --base http://192.168.x.x:3000 --bounty b_XXXXXXXX --mock-serial`
+5. Create a bounty → open the poster hop link → forward to yourself (AirDrop/SMS the child `/h/…` URL) → `/claim/…` with an intro. The poster confirms before payment.
 
 Allow Node through the OS firewall if the phone cannot connect. Prefer cellular later for Vercel preview (Cornell Wi‑Fi oddities).
 
@@ -93,7 +91,6 @@ bash sim/load.sh
 
 Copy [`.env.example`](.env.example) → `web/.env.local` and `agent/.env.local`. See task [AL-01](tasks/AL-01.md).
 
-## Hardware / write-ups
+## Write-ups
 
-- Hardware ops: [hardware/README.md](hardware/README.md)
-- Track stubs: [submission/README.md](submission/README.md)
+- Track notes: [submission/README.md](submission/README.md)

@@ -13,7 +13,6 @@ function safeExplorer(value?: string): string | undefined {
 export default function ClaimPage() {
   const { token } = useParams<{ token: string }>();
   const [intro, setIntro] = useState("");
-  const [badge, setBadge] = useState("");
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const [error, setError] = useState("");
@@ -25,10 +24,10 @@ export default function ClaimPage() {
     if (!intro.trim()) { setError("Please write a short introduction."); return; }
     inFlight.current = true; setBusy(true); setError("");
     try {
-      const response = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, referrerPolicy: "no-referrer", body: JSON.stringify({ token, introMessage: intro.trim(), ...(badge ? { badgeCode: badge } : {}) }) });
+      const response = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, referrerPolicy: "no-referrer", body: JSON.stringify({ token, introMessage: intro.trim() }) });
       const data = await response.json();
       if (!response.ok) {
-        const messages: Record<string, string> = { bad_code: "That badge code was not accepted. Check the code on your badge.", already_claimed: "This bounty already has a claim. Return to your hint card to check its status.", closed: "This bounty is no longer open for claims.", not_found: "This personal link was not found.", rate_limited: "Too many attempts. Please wait before trying another badge code." };
+        const messages: Record<string, string> = { already_claimed: "This bounty already has a claim. Return to your hint card to check its status.", closed: "This bounty is no longer open for claims.", not_found: "This personal link was not found." };
         throw new Error(messages[data.error] ?? "Your claim was not confirmed. Return to your hint card to check its status before retrying.");
       }
       if (data.status !== "found" && data.status !== "paid") throw new Error("The claim returned an unexpected result. Check the bounty status before retrying.");
@@ -52,9 +51,7 @@ export default function ClaimPage() {
         <fieldset disabled={busy}><legend>Make an introduction</legend>
           <label htmlFor="intro">A short introduction</label>
           <textarea id="intro" required maxLength={2000} value={intro} onChange={(e) => setIntro(e.target.value)} placeholder="How do you match the clues, and what would you like the poster to know?" />
-          <label htmlFor="badge">Badge code (if you were given a badge)</label>
-          <input id="badge" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{4}" maxLength={4} value={badge} onChange={(e) => setBadge(e.target.value)} aria-describedby="badge-help" />
-          <p id="badge-help" className={styles.muted}>Enter all four digits, including any leading zero. Without a badge, the poster must confirm your introduction before payment.</p>
+          <p className={styles.muted}>The poster confirms your introduction before payment.</p>
         </fieldset>
         {error && <p role="alert" className={styles.error}>{error}</p>}
         <button type="submit" disabled={busy}>{busy ? "Submitting introduction…" : "Opt in and send introduction"}</button>

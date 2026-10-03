@@ -26,7 +26,6 @@ export interface Ledger {
   status: BountyStatus;
   bountyCents: number;
   capCents: number;
-  hasBadge: boolean;
   posterHolderId: string;
   posterRail: Rail;
   payouts: PayoutRow[];
@@ -74,29 +73,12 @@ export function settleChain(
   return { payoutSig: txSig, rows };
 }
 
-export function applyClaim(
-  ledger: Ledger,
-  badgeValid: boolean | null,
-  chain: HolderRef[] = [],
-  bountyId = "",
-): StepResult {
+export function applyClaim(ledger: Ledger): StepResult {
   if (ledger.status === "found" || ledger.status === "paid") {
     return { ledger, error: "already_claimed" };
   }
   if (ledger.status !== "open") return { ledger, error: "already_claimed" };
-  if (!ledger.hasBadge) return { ledger: { ...ledger, status: "found" } };
-  if (!badgeValid) return { ledger, error: "bad_code" };
-  const settled = settleChain(
-    bountyId,
-    chain,
-    ledger.bountyCents,
-    ledger.capCents,
-    ledger.posterHolderId,
-    ledger.posterRail,
-    ledger.payouts,
-  );
-  if (!settled) return { ledger, error: "bad_code" };
-  return { ledger: { ...ledger, status: "paid", payouts: settled.rows }, payoutSig: settled.payoutSig };
+  return { ledger: { ...ledger, status: "found" } };
 }
 
 export function applyConfirm(ledger: Ledger, chain: HolderRef[], accept: boolean, bountyId: string): StepResult {
@@ -216,7 +198,6 @@ function ledgerFrom(bounty: Record<string, unknown>, poster: Record<string, unkn
     status: bounty.status as BountyStatus,
     bountyCents: Number(bounty.bounty_cents),
     capCents: Number(bounty.cap_cents),
-    hasBadge: bounty.target_badge_id != null && bounty.target_badge_id !== "",
     posterHolderId: String(poster.id),
     posterRail: poster.rail as Rail,
     payouts,
@@ -311,18 +292,11 @@ async function finishDevnet(
   return paidBody(signature);
 }
 
-export type BadgeVerifyResult = boolean | { ok: true; counter: number };
-
 export async function claimBounty(
   db: PayoutDatabase,
   input: unknown,
-  opts: {
-    verifyBadge?: (badgeId: string, code: string) => Promise<BadgeVerifyResult>;
-    now?: () => Date;
-    signPayout?: SignPayout;
-    moveBank?: MoveBank;
-  } = {},
-): Promise<{ status: "found" | "paid"; payoutSig?: string; explorerUrl?: string }> {
+  opts: { now?: () => Date } = {},
+): Promise<{ status: "found" }> {
   const parsed = body(input);
   const token = requiredString(parsed.token);
   const introMessage = requiredString(parsed.introMessage);
@@ -331,7 +305,7 @@ export async function claimBounty(
     const bountyId = lookup.rows[0]?.bounty_id;
     if (!bountyId) throw new PayoutError("not_found", 404);
     const lockedBounty = await tx.query<Record<string, unknown>>(
-      "SELECT id,status,bounty_cents,cap_cents,target_badge_id,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE id=$1 FOR UPDATE",
+      "SELECT id,status,bounty_cents,cap_cents,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE id=$1 FOR UPDATE",
       [bountyId],
     );
     const bounty = lockedBounty.rows[0];
@@ -352,51 +326,12 @@ export async function claimBounty(
     );
     const poster = posters.rows[0];
     if (!poster) throw new PayoutError("not_found", 404);
-    let badgeValid: boolean | null = null;
-    let hotpCounter: number | undefined;
-    if (bounty.target_badge_id) {
-      if (!opts.verifyBadge) throw new PayoutError("hotp_unavailable", 503);
-      const verified = await opts.verifyBadge(String(bounty.target_badge_id), String(parsed.badgeCode ?? ""));
-      if (verified && typeof verified === "object") {
-        badgeValid = true;
-        hotpCounter = verified.counter;
-      } else {
-        badgeValid = Boolean(verified);
-      }
-    }
-    const chain = badgeValid ? await chainFrom(tx, String(holder.id)) : [];
-    if (badgeValid) await ensureCustodial(tx, chain);
-    const step = applyClaim(ledgerFrom(bounty, poster, []), badgeValid, chain, String(bountyId));
-    if (step.error === "bad_code") throw new PayoutError("bad_code", 401);
+    const step = applyClaim(ledgerFrom(bounty, poster, []));
     if (step.error) throw new PayoutError(step.error, 409);
-    await logEvent(tx, at.toISOString(), String(bountyId), holder, "claimed", {
-      introMessage,
-      ...(bounty.target_badge_id && hotpCounter !== undefined
-        ? { badgeId: String(bounty.target_badge_id), hotpCounter }
-        : {}),
-    });
-    if (step.ledger.status === "found") {
-      await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["found", bountyId]);
-      return { result: { status: "found" as const } };
-    }
-    if (process.env.PAYOUT_MODE === "devnet") {
-      await writePayouts(tx, String(bountyId), step.ledger.payouts.map((row) => ({ ...row, txSig: "" })));
-      return {
-        pay: {
-          bountyId: String(bountyId),
-          bounty,
-          poster,
-          rows: step.ledger.payouts,
-        },
-      };
-    }
-    const stamped = await stamp(String(bountyId), step.ledger.payouts, opts.signPayout);
-    await moveLiveBank(bounty, stamped, opts.moveBank);
-    await writePayouts(tx, String(bountyId), stamped);
-    await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
-    return { result: paidBody(stamped[0]?.txSig ?? step.payoutSig) };
+    await logEvent(tx, at.toISOString(), String(bountyId), holder, "claimed", { introMessage });
+    await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["found", bountyId]);
+    return { result: { status: "found" as const } };
   });
-  if ("pay" in outcome && outcome.pay) return finishDevnet(db, outcome.pay, opts);
   return outcome.result!;
 }
 

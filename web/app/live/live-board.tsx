@@ -326,14 +326,14 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
         <aside className="live-side">
           <section className="live-panel">
             <h2>Branching factor b</h2>
-            <div className="live-gauge-wrap">
-              <div className="live-gauge" aria-hidden>
+            <div className="live-dial-wrap">
+              <div className="live-dial" aria-hidden>
                 <svg viewBox="0 0 140 90">
                   <path d="M10 70 A60 60 0 0 1 130 70" fill="none" stroke="#2a342d" strokeWidth="10" strokeLinecap="round" />
                   <path d="M10 70 A60 60 0 0 1 70 10" fill="none" stroke="#ff5a45" strokeWidth="10" strokeLinecap="round" />
                   <path d="M70 10 A60 60 0 0 1 100 18" fill="none" stroke="#f0b429" strokeWidth="10" strokeLinecap="round" />
                   <path d="M100 18 A60 60 0 0 1 130 70" fill="none" stroke="#b6f24a" strokeWidth="10" strokeLinecap="round" />
-                  <g className="live-gauge-needle" style={{ transform: `rotate(${angle}deg)` }}>
+                  <g className="live-dial-needle" style={{ transform: `rotate(${angle}deg)` }}>
                     <line x1="70" y1="70" x2="70" y2="22" stroke="#e8f0e9" strokeWidth="3" strokeLinecap="round" />
                     <circle cx="70" cy="70" r="5" fill="#e8f0e9" />
                   </g>

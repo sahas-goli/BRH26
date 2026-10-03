@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS bounties (
   cap_cents       INT  NOT NULL CHECK (cap_cents >= 1000),
   bounty_cents    INT  NOT NULL,               -- current offer; starts at 60% of cap
   status          TEXT NOT NULL DEFAULT 'open',
-  target_badge_id TEXT,                        -- venue game: claim needs this badge's HOTP code
+  target_badge_id TEXT,                        -- unused column; left so apply does not rewrite the table
   controller_step INT  NOT NULL DEFAULT 0,
   low_b_since     TIMESTAMPTZ,                 -- when b first dropped below 2 (controller)
   nessie_poster_acct TEXT, nessie_escrow_acct TEXT,

@@ -29,7 +29,7 @@ scripts/task.sh done S2-03        # 5. drop the lock
 
 Your idea, "claim, push, pull before claiming," is the right shape. The weak spot is that two people can both pull, both see a task open, and both commit a claim to the same file. The second push then hits a merge conflict in the task file instead of a clean "no." We fix that with two rules.
 
-- **One software lane.** Every software task has `owner: SWE`. Anyone may claim any open SWE task. HW tasks stay with HW. ALL tasks are for anyone. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists the SWE lane.
+- **One software lane.** Every software task has `owner: SWE`. Anyone may claim any open SWE task. ALL tasks are for anyone. `scripts/task.sh list SWE1`, `SWE2`, or `SWE3` still lists the SWE lane.
 - **The lock is a branch, not a file edit.** `scripts/task.sh claim <ID>` pushes a brand-new branch `claim/<ID>` to GitHub. Creating a branch that already exists is rejected by the server, so exactly one claim can win. The loser sees `TAKEN: <ID> is claimed by <name> <time>`. There is no file edit, no merge conflict and no commit noise on main.
 - **Done lives in the task file.** The PR that finishes a task sets `status: done` in `tasks/<ID>.md`, so the board's history is in git. After merging, `scripts/task.sh done <ID>` deletes the lock branch.
 
@@ -59,7 +59,7 @@ Your idea, "claim, push, pull before claiming," is the right shape. The weak spo
 
 ## 5. Ownership and contracts
 
-- The ownership map is PLAN.md section 3. **SWE may edit any SWE path.** HW stays on HW paths. A change in the other role's files still needs a `REQUEST <owner>: <what>` in chat, or a tiny PR. Never edit it silently.
+- The ownership map is PLAN.md section 3. **SWE may edit any SWE path.** A change in a path you do not own still needs a `REQUEST <owner>: <what>` in chat, or a tiny PR. Never edit it silently.
 - **Shared contracts** are `web/lib/types.ts`, `db/schema.sql`, `.env.example`, `web/package.json` and its lockfile, and PLAN.md section 4. To change one:
   1. Post `CONTRACT: <one-line change>` in chat.
   2. Open a PR containing only the contract change (plus PLAN.md section 4 if relevant).
@@ -75,7 +75,7 @@ Your idea, "claim, push, pull before claiming," is the right shape. The weak spo
 
 ## 6. Secrets
 
-- **Never commit secrets.** That covers `.env.local`, Solana keypairs, `hardware/secrets.h` and API keys; `.gitignore` covers all of them. Agents must never print secret values in chat, commits or logs.
+- **Never commit secrets.** That covers `.env.local`, Solana keypairs, and API keys; `.gitignore` covers all of them. Agents must never print secret values in chat, commits or logs.
 - Share secrets in one pinned note in the team chat (or 1Password). SWE3 copies them into Vercel environment variables. `INTERNAL_SECRET` is shared by web, agent and bridge.
 - If a secret leaks into a commit, rotate it immediately. Rewriting history is a waste of time; the key is already burned.
 - 07:30 Sunday, before making the repo public: SWE3 runs `git log -p | grep -iE "secret|key=|private"` and checks the hits.
@@ -87,8 +87,7 @@ Your idea, "claim, push, pull before claiming," is the right shape. The weak spo
 - **Integration order:** the M1 mock loop (15:00) comes first, then each integration flips its flag on in a preview, then on prod. Flip a flag on prod only after its owner has run the path twice.
 - **Who runs what where:**
   - Vercel runs `web/`.
-  - The DGX runs `agent/` (SWE1, in `tmux`, with a `cloudflared` tunnel for `/send`) and `sim/` (SWE3).
-  - The demo laptop runs `hardware/bridge.py` (HW).
+  - The DGX runs `agent/` (in `tmux`, with a `cloudflared` tunnel for `/send`) and `sim/`.
 
 ## 8. Cursor evidence (SpaceX track)
 
@@ -118,8 +117,7 @@ behind its mock flag and tell me what to verify. Prefer the simplest code that m
 
 | Role | Paste into `<PATHS ...>` |
 |---|---|
-| SWE | Every path marked SWE in PLAN.md section 3. Do not edit HW paths. |
-| HW | `hardware/**`, `web/lib/hotp.ts`, `web/lib/hotp.test.ts` |
+| SWE | Every path marked SWE in PLAN.md section 3. |
 
 ## 10. Talking to each other
 
@@ -144,7 +142,7 @@ One team chat. Messages start with a tag, so a skim is enough:
 - **05:00 code freeze:** no code changes, except a fix the whole team agrees on for something that breaks the demo.
 - **After 05:00:**
   - write-ups in `submission/<track>.md` (owners in PLAN.md section 13);
-  - deck (HW);
+  - deck;
   - Cursor transcripts (everyone);
   - backup video (AL-03);
   - Devpost by 08:15 (AL-04);

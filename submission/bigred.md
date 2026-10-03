@@ -8,7 +8,7 @@ Decentralized social search: people navigate private contact graphs with local k
 
 1. **Theme fit.** Navigation through a social network, not a map UI bolted onto a directory.
 2. **Keynote-grounded.** Local routing with no global graph; we never see the network — humans choose the next hop.
-3. **Playable overnight.** Venue game + `/live` cascade make “2–4 hops away” measurable, not just a slide.
+3. **Playable demo.** `/live` cascade makes “2–4 hops away” measurable, not just a slide.
 4. **Incentive correctness.** Depth ≤ 8, fan-out ≤ 3, finder cannot profit from fake hops (attack slider / `split.ts`).
 
 ## Where in the code
@@ -20,7 +20,7 @@ Decentralized social search: people navigate private contact graphs with local k
 | Room navigation viz | `web/app/live/` (cascade, b, controller, attack) |
 | Replay / cliff | `sim/replay.py`, sweep charts on `/live` |
 | Demo script | PLAN.md §12 |
-| Deck PDF | HW-06 (Drive); ops in `hardware/game.md` |
+| Deck PDF | Drive; script in PLAN.md §12 |
 
 ## What judges see
 
