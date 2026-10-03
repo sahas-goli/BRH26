@@ -1,16 +1,16 @@
 /**
- * Six Hops Photon/Spectrum agent — S1-01 echo + /send stub.
+ * Six Hops Photon agent — S1-05 flows.
  *
- * Env:
- *   SPECTRUM_PROJECT_ID / SPECTRUM_PROJECT_SECRET (or PROJECT_ID / PROJECT_SECRET)
- *   INTERNAL_SECRET — shared with web for POST /send
- *   AGENT_PORT — default 8787
- *   PHOTON_ENABLED=true — attach iMessage provider
+ * Env: SPECTRUM_PROJECT_ID, SPECTRUM_PROJECT_SECRET, PHOTON_ENABLED,
+ *      INTERNAL_SECRET, PUBLIC_BASE_URL, AGENT_PORT
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { Spectrum } from "spectrum-ts";
 import { imessage } from "spectrum-ts/providers/imessage";
 import { terminal } from "spectrum-ts/providers/terminal";
+import { handleInboundText, handleReaction } from "./flows.js";
+import { deliverToHandle, rememberSpace } from "./session.js";
+import { lifecycleText, startTickLoop } from "./tick.js";
 
 const PORT = Number(process.env.AGENT_PORT ?? 8787);
 const INTERNAL = process.env.INTERNAL_SECRET?.trim() ?? "";
@@ -33,7 +33,7 @@ function json(res: ServerResponse, status: number, body: unknown): void {
 function startSendServer(): void {
   const server = createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/health") {
-      json(res, 200, { ok: true, photon: PHOTON });
+      json(res, 200, { ok: true, photon: PHOTON, flows: "S1-05" });
       return;
     }
     if (req.method === "POST" && (req.url === "/send" || req.url === "/send/")) {
@@ -41,76 +41,74 @@ function startSendServer(): void {
         json(res, 401, { error: "unauthorized" });
         return;
       }
-      let payload: { handle?: unknown; text?: unknown };
+      let payload: { handle?: unknown; text?: unknown; kind?: unknown; cents?: unknown; explorerUrl?: unknown };
       try {
-        payload = JSON.parse(await readBody(req)) as { handle?: unknown; text?: unknown };
+        payload = JSON.parse(await readBody(req)) as typeof payload;
       } catch {
         json(res, 400, { error: "invalid_json" });
         return;
       }
-      if (typeof payload.handle !== "string" || typeof payload.text !== "string") {
+      if (typeof payload.handle !== "string") {
         json(res, 400, { error: "invalid_input" });
         return;
       }
-      console.log(`[send] handle=${payload.handle.slice(0, 4)}… textLen=${payload.text.length}`);
-      json(res, 200, { ok: true });
+      let text: string;
+      if (typeof payload.text === "string") {
+        text = payload.text;
+      } else if (payload.kind === "found" || payload.kind === "paid" || payload.kind === "nudge") {
+        text = lifecycleText(
+          payload.kind,
+          typeof payload.cents === "number" ? payload.cents : undefined,
+          typeof payload.explorerUrl === "string" ? payload.explorerUrl : undefined,
+        );
+      } else {
+        json(res, 400, { error: "invalid_input" });
+        return;
+      }
+      const status = await deliverToHandle(payload.handle, text);
+      json(res, 200, { ok: true, delivery: status });
       return;
     }
     json(res, 404, { error: "not_found" });
   });
-  server.listen(PORT, () => {
-    console.log(`[agent] POST /send on :${PORT}`);
-  });
-}
-
-function contentType(content: { type: string }): string {
-  return content.type;
+  server.listen(PORT, () => console.log(`[agent] /send /health on :${PORT}`));
 }
 
 async function main(): Promise<void> {
   startSendServer();
+  startTickLoop();
 
   const projectId = process.env.SPECTRUM_PROJECT_ID?.trim() || process.env.PROJECT_ID?.trim();
   const projectSecret = process.env.SPECTRUM_PROJECT_SECRET?.trim() || process.env.PROJECT_SECRET?.trim();
 
   const app = PHOTON && projectId && projectSecret
-    ? await Spectrum({
-        projectId,
-        projectSecret,
-        providers: [imessage.config()],
-      })
-    : await Spectrum({
-        providers: [terminal.config()],
-      });
+    ? await Spectrum({ projectId, projectSecret, providers: [imessage.config()] })
+    : await Spectrum({ providers: [terminal.config()] });
 
-  if (PHOTON && projectId && projectSecret) {
-    console.log("[agent] iMessage provider enabled");
-  } else {
-    console.log("[agent] terminal provider only — set PHOTON_ENABLED=true + Spectrum credentials for go/no-go A");
-  }
+  console.log(PHOTON && projectId && projectSecret
+    ? "[agent] iMessage provider enabled"
+    : "[agent] terminal provider — set PHOTON_ENABLED=true + Spectrum credentials for live Photon");
 
-  console.log("[agent] listening for Spectrum messages (echo)");
   for await (const [space, message] of app.messages) {
-    const started = Date.now();
+    const handle = message.sender?.id ?? space.id;
+    rememberSpace(handle, async (text) => {
+      await space.send(text);
+    });
     try {
-      const kind = contentType(message.content);
-      if (kind === "reaction") {
-        await space.send("Got your tapback. (Six Hops echo — S1-01)");
-        console.log(`[echo] reaction replied in ${Date.now() - started}ms`);
+      if (message.content.type === "reaction") {
+        await space.send(handleReaction(handle));
         continue;
       }
-      if (kind === "text" && "text" in message.content && typeof message.content.text === "string") {
-        const text = message.content.text.trim();
-        const preview = text.length > 80 ? `${text.slice(0, 80)}…` : text;
-        console.log(`[inbound] ${message.platform} ${message.sender?.id ?? "?"}: ${preview}`);
-        await space.send(`Six Hops echo: ${text.slice(0, 200)}`);
-        console.log(`[echo] text replied in ${Date.now() - started}ms`);
+      if (message.content.type === "text" && "text" in message.content && typeof message.content.text === "string") {
+        const reply = await handleInboundText(handle, message.content.text);
+        await space.send(reply);
         continue;
       }
-      console.log(`[inbound] non-text type=${kind}`);
-      await space.send("Six Hops received a non-text message (logged for VERIFY A).");
+      // Contact card / attachment: ask for a typed name (VERIFY A shape logged).
+      console.log(`[inbound] type=${message.content.type}`);
+      await space.send(handleReaction(handle));
     } catch (error) {
-      console.error("[echo] reply failed", error instanceof Error ? error.message : "unknown");
+      console.error("[inbound] failed", error instanceof Error ? error.message : "unknown");
     }
   }
 }
