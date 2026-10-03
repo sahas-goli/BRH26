@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:25 ET.
+Updated 2026-10-03 12:30 ET.
 
 ## On main
 
@@ -13,10 +13,11 @@ Updated 2026-10-03 12:25 ET.
 | `fe72e97` | `web/lib/payout.ts` ledger. A 4-deep chain at 1600 cents pays 100 + 100 + 100 + 1300. A second confirm returns `mock_<bountyId>` and adds no rows. | Superseded by the claim routes in `7d487e5`. |
 | `b7fa142` | `POST /api/attack`. Ours gain is 0%. MIT gain is 50 / 75 / 87.5 / 93.75 for k=1..4. | S2-04 done. |
 | `9a37154` | Controller. A seeded stall steps nudge, widen, raise. An overdue bounty refunds the full cap. Tick route is 503 until `pool` exists. | S2-07 done. |
+| `c8f09bc` | `web/lib/solana.ts` builds one payout transaction: N transfers plus a `sixhops:pay` memo. | S2-05 still open. |
 
 ## This branch
 
-`web/lib/solana.ts` builds one payout transaction: N `SystemProgram.transfer` instructions plus one memo `sixhops:pay:<bountyId>:<sha256>`. Bank shares are omitted by the caller. Edge memos use `sixhops:edge:<bountyId>:<sha256>`. The devnet send is not done: no funded payer, and `@solana/web3.js` is not in `web/package.json` yet (scaffold still missing). S2-05 stays open.
+`submitPayout` sends that transaction once. A retry with an existing signature does not send again. Devnet confirm is still blocked: faucet returned 429 again, no `SOLANA_PAYER_SECRET`, and `@solana/web3.js` is not in `web/package.json`. S2-05 stays open.
 
 ## Plan changes
 

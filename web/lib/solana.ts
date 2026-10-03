@@ -73,3 +73,19 @@ export function buildEdgeTransaction(memo: string) {
   }));
   return tx;
 }
+
+export async function submitPayout(input: {
+  payerAddress: string;
+  bountyId: string;
+  shares: SolShare[];
+  salts: string[];
+  existingSig?: string | null;
+  send: (tx: ReturnType<typeof buildPayoutTransaction>) => Promise<string>;
+}): Promise<{ signature: string; explorerUrl: string; idempotent: boolean }> {
+  if (input.existingSig) {
+    return { signature: input.existingSig, explorerUrl: explorerUrl(input.existingSig), idempotent: true };
+  }
+  const plan = payoutPlan(input.bountyId, input.shares, input.salts);
+  const signature = await input.send(buildPayoutTransaction(input.payerAddress, plan));
+  return { signature, explorerUrl: explorerUrl(signature), idempotent: false };
+}
