@@ -52,10 +52,20 @@ export async function openEscrow(client: Nessie, capCents: number): Promise<Escr
   return { customerId, checkingId, escrowId };
 }
 
-export async function releaseEscrow(client: Nessie, escrowId: string, payouts: { payeeId: string; cents: number }[]): Promise<void> {
+export async function releaseEscrow(
+  client: Nessie,
+  escrowId: string,
+  payouts: { payeeId: string; cents: number }[],
+  treasury?: { payeeId: string; cents: number },
+): Promise<void> {
   for (const payout of payouts) {
     await call(client, "POST", `/accounts/${escrowId}/transfers`, {
       medium: "balance", payee_id: payout.payeeId, amount: dollars(payout.cents), description: "payout",
+    });
+  }
+  if (treasury && treasury.cents > 0) {
+    await call(client, "POST", `/accounts/${escrowId}/transfers`, {
+      medium: "balance", payee_id: treasury.payeeId, amount: dollars(treasury.cents), description: "treasury",
     });
   }
 }

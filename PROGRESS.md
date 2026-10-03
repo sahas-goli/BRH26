@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:28 ET.
+Updated 2026-10-03 12:30 ET.
 
 ## On main
 
@@ -20,7 +20,7 @@ Updated 2026-10-03 12:28 ET.
 
 ## This branch
 
-Nothing in flight. Mock payouts stay `mock_<bountyId>` unless `PAYOUT_MODE=devnet`.
+`releaseEscrow` can also move the Solana share from escrow to a treasury account, so the bank ledger still balances. The local stand-in shows holder, treasury, and escrow all move. Live Nessie was not called. Faucet still 429. S2-06 stays open.
 
 ## Plan changes
 
