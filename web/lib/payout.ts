@@ -173,6 +173,21 @@ async function chainFrom(tx: PayoutQuery, holderId: string): Promise<HolderRef[]
   return chain.sort((a, b) => a.depth - b.depth);
 }
 
+async function ensureCustodial(tx: PayoutQuery, chain: HolderRef[]): Promise<void> {
+  if (process.env.PAYOUT_MODE !== "devnet") return;
+  const { newCustodialAccount } = await import("./solana");
+  for (const holder of chain) {
+    if (holder.rail === "bank" || holder.solAddress) continue;
+    if (holder.rail === "wallet") throw new PayoutError("payout_unavailable", 503);
+    const created = newCustodialAccount();
+    await tx.query(
+      "UPDATE holders SET sol_address=$1, custodial_secret=$2 WHERE id=$3 AND sol_address IS NULL",
+      [created.address, created.secret, holder.holderId],
+    );
+    holder.solAddress = created.address;
+  }
+}
+
 async function writePayouts(tx: PayoutQuery, bountyId: string, rows: PayoutRow[]): Promise<void> {
   for (const row of rows) {
     await tx.query(
@@ -313,6 +328,7 @@ export async function claimBounty(
       badgeValid = await opts.verifyBadge(String(bounty.target_badge_id), String(parsed.badgeCode ?? ""));
     }
     const chain = badgeValid ? await chainFrom(tx, String(holder.id)) : [];
+    if (badgeValid) await ensureCustodial(tx, chain);
     const step = applyClaim(ledgerFrom(bounty, poster, []), badgeValid, chain, String(bountyId));
     if (step.error === "bad_code") throw new PayoutError("bad_code", 401);
     if (step.error) throw new PayoutError(step.error, 409);
@@ -362,6 +378,7 @@ export async function confirmBounty(
     );
     const finderId = claimed.rows[0]?.holder_id ? String(claimed.rows[0].holder_id) : "";
     const chain = finderId ? await chainFrom(tx, finderId) : [];
+    await ensureCustodial(tx, chain);
     const step = applyConfirm(ledgerFrom(bounty, poster, await loadPayouts(tx, bountyId)), chain, accept, bountyId);
     if (step.error) throw new PayoutError("not_claimed", 409);
     const at = new Date().toISOString();

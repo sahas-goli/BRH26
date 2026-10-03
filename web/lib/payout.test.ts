@@ -111,6 +111,9 @@ test("devnet confirm uses one solana signature and a retry does not send again",
       signPayout: async ({ rows }) => {
         calls += 1;
         assert.equal(rows.length, 3);
+        assert.equal(rows[0].solAddress && rows[0].solAddress !== "wallet-addr", true);
+        assert.equal(rows[1].solAddress, "wallet-addr");
+        assert.equal(rows[2].solAddress && rows[2].solAddress !== "wallet-addr", true);
         return "devnetsig";
       },
     });
@@ -175,7 +178,7 @@ function memoryDb() {
     holders: [
       { id: "h_poster", bounty_id: "b_demo", token: "poster-token", parent_id: null, depth: 0, rail: "bank" },
       { id: "h_a", bounty_id: "b_demo", token: "a", parent_id: "h_poster", depth: 1, rail: "custodial" },
-      { id: "h_b", bounty_id: "b_demo", token: "b", parent_id: "h_a", depth: 2, rail: "wallet" },
+      { id: "h_b", bounty_id: "b_demo", token: "b", parent_id: "h_a", depth: 2, rail: "wallet", sol_address: "wallet-addr" },
       { id: "h_c", bounty_id: "b_demo", token: "c", parent_id: "h_b", depth: 3, rail: "custodial" },
       { id: "h_d", bounty_id: "b_demo", token: "finder-token", parent_id: "h_c", depth: 4, rail: "bank" },
     ],
@@ -202,6 +205,12 @@ function memoryDb() {
       rows = state.payouts.filter((row) => row.bounty_id === values[0]).slice(0, 1);
     } else if (sql.startsWith("SELECT holder_id,role")) {
       rows = state.payouts.filter((row) => row.bounty_id === values[0]);
+    } else if (sql.startsWith("UPDATE holders SET sol_address")) {
+      const holder = state.holders.find((row) => row.id === values[2]);
+      if (holder && holder.sol_address == null) {
+        holder.sol_address = values[0];
+        holder.custodial_secret = values[1];
+      }
     } else if (sql.startsWith("INSERT INTO events")) {
       state.events.push({
         time: values[0], bounty_id: values[1], holder_id: values[2], parent_id: values[3],
