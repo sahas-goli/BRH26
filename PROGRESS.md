@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 14:00 ET.
+Updated 2026-10-03 14:05 ET.
 
 ## On main
 
@@ -19,20 +19,21 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 
 ## This branch
 
-Progress note only.
+S2-05 closeout. The devnet claim and the `/live` explorer link are already on main.
 
 ## Blocked
 
-- S3-02 / S3-03: need `DATABASE_URL` to run `node db/apply.mjs` and `bash sim/load.sh`.
+- S3-02 / S3-03: need `DATABASE_URL` to run `node db/apply.mjs` and `bash sim/load.sh`. On stock Postgres, `apply.mjs` stops at `create_hypertable` after the plain events table exists.
 - Claim/confirm/stats/graph return 503 without `DATABASE_URL`.
+- S2-06 cannot go live. Nessie balances do not move after a 201 transfer. `NESSIE_MODE` stays mock.
 - S3-06a / S3-06: need `XAI_API_KEY`.
 - S3-07: domain registration.
 - `swe1/S1-02` still has bounty code with no PR.
 
 ## Claims
 
-SWE3 (Selina) holds S3-02 and S3-03. S3-04 and S3-05 are done.
+Selina holds S3-02 and S3-03. S2-06 stays claimed. S2-05 is done. S3-04 and S3-05 are done.
 
 ## Next
 
-Paste Tiger `DATABASE_URL` into the environment, then: `node db/apply.mjs` → `bash sim/load.sh` → fill `submission/tiger.md` → point `FEATURED_BOUNTY` at an `r_####` replay id for `/live`.
+Paste Tiger `DATABASE_URL` into the environment, then: `node db/apply.mjs` → `bash sim/load.sh` → fill `submission/tiger.md` → point `FEATURED_BOUNTY` at an `r_####` replay id for `/live`. S2-06 stays on the mock.
