@@ -2,19 +2,28 @@
 
 ## Short description
 
-HOTP target badges (EEPROM counter, 4-digit TM1637, no clock) plus a physical branching-factor gauge driven by `hardware/bridge.py` polling `/api/stats`.
+Venue target badges (Arduino + TM1637 + button, EEPROM HOTP counter, no clock) plus a physical branching-factor gauge: `hardware/bridge.py` polls `GET /api/stats` and writes `B x.xx` over serial so a servo needle tracks live `b`.
 
 ## Why Hardware specifically
 
-1. Badge code proves the pre-registered venue target without a phone clock.
-2. Gauge makes Kleinberg-style branching tangible in the room.
-3. Power-cycle survival is a real constraint we design for (EEPROM counter).
+1. **Pre-registered targets without a phone clock.** HOTP (RFC 4226) + EEPROM survives power cycles; 4 digits fit the Grove display.
+2. **Branching factor you can feel.** Red zone below b = 2 matches the controller and `/live` gauge.
+3. **Honest fallback.** If VERIFY F fails: printed one-time codes + gauge still count as the hardware piece (PLAN §7.8).
 
 ## Where in the code
 
-- `web/lib/hotp.ts` (RFC vectors + look-ahead); `hardware/bridge.py`; `hardware/INVENTORY.md`
-- Firmware under `hardware/badge/` (forthcoming)
+| Piece | Path |
+|---|---|
+| Server HOTP + claim window | `web/lib/hotp.ts`, `web/lib/hotp.test.ts` (RFC vectors + look-ahead) |
+| Badge sketch | `hardware/badge/badge.ino`, `hardware/badge/README.md` |
+| Secrets template (never commit real) | `hardware/secrets.h.example` → gitignored `hardware/secrets.h` |
+| Gauge bridge | `hardware/bridge.py` → `GET /api/stats` → serial `B 1.73\n` |
+| Ops / parts | `hardware/INVENTORY.md`, `hardware/game.md`, `hardware/README.md` |
 
-## Demo look-at
+**Software side:** HOTP verify is on main and covered by tests. **Physical side:** flash, power-cycle VERIFY F, servo calibration, and volunteer targets remain open (HW-01 / HW-02 / HW-03).
 
-Target presses badge, types code on `/claim`; needle tracks `b` on the table.
+## What judges see
+
+1. Target presses badge → 4-digit code → types it on `/claim/[token]` with intro → paid chain on Explorer (or mock).
+2. Table gauge needle moves with `/live` b as the overnight game runs.
+3. If badges unavailable: one-time code cards + gauge demo.
