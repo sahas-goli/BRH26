@@ -70,9 +70,3 @@ No Devpost page found. 2020 apparently not run on Devpost; 2023 unknown.
 
 ## Earlier years (2015-2019)
 Dropped as less relevant (different formats, unverified prizes). Devpost links in [03-devpost-and-website.md](03-devpost-and-website.md); full lists are in git history (commit 41113f2).
-
-## Patterns worth using
-- BigRed track winners 2024-2025 were polished, demo-able consumer apps with a clear audience: music (3 of 6), scheduling/health, learning; webcam/hand-tracking (wubwub, Road Rage) and Gemini show up repeatedly.
-- Hardware, Beginner and Design winners are often distinct small teams, so side tracks are less contested than BigRed.
-- Past MLH bounties winners are usually the best use of the API, not necessarily top overall (2025: Bear Escape took Design and Gemini).
-- Navigation-adjacent past winners: Pathway (accessibility map, 2024 Beginner) and Inneroute (weather-aware routing, 2021).

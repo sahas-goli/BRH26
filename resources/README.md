@@ -2,6 +2,9 @@
 
 Cornell, Oct 2-4, 2026. **Theme: Navigation.** Devpost submission due **Sun Oct 4, 8:30 AM** (no late). Team form due Fri 11:59 PM. Scope: only what helps build and submit a winning project (no prize amounts, workshops, meals, social events).
 
+## Our team
+3 software engineers + 1 hardware person (team of 4, the max). Hardware we control: NVIDIA DGX Spark, 3D printer, plus MLH rentals ([hardware.md](hardware.md)). Hard deadline: Devpost submission **Sun Oct 4, 8:30 AM**; judging starts 9:00 AM.
+
 | File | Contents |
 |---|---|
 | [01-general-info-doc.md](01-general-info-doc.md) | Key times, submission requirements, judging format, links |

@@ -10,8 +10,6 @@ Use any Presage SDK.
 ## Judging
 Not specified; demonstrate the "future of human-computer interaction."
 
-## Theme tie-in
-Accessibility/driver-state or user-state aware navigation. Pairs with MLH webcams and Pi kits.
 
 ## Resources / claiming
 - Partner page: https://www.mlh.com/partners/presage (https://mlh.link/presage). MLH login: not needed.

@@ -10,8 +10,6 @@ Use ElevenLabs in the project. Nothing else listed.
 ## Judging
 Not specified; best overall use of ElevenLabs.
 
-## Theme tie-in
-Audio navigation for blind/low-vision users (theme doc's own idea prompt).
 
 ## Resources / claiming
 - Partner page: https://www.mlh.com/partners/elevenlabs (short link https://mlh.link/elevenlabs). MLH login on the prizes page needed for a claim code.

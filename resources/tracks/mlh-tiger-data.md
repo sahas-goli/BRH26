@@ -10,8 +10,6 @@ Build using Tiger Data (PostgreSQL extension).
 ## Judging
 "Most innovative, impactful, and performance-driven use of Tiger Data."
 
-## Theme tie-in
-Time-series fits tracking movement/location/telemetry for navigation.
 
 ## Resources / claiming
 - Partner page: https://mlh.com/partners/tigerdata (https://mlh.link/tigerdata). MLH login: not needed.

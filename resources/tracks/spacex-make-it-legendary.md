@@ -14,4 +14,3 @@ Space offers huge public datasets, decades of missions, and literature no human 
 ## Context and contacts
 - Speaker Yvette (field engineer, Cursor SpaceX team): Cursor was acquired by SpaceX AI; they also ship Grok Bot, Grok Build, Grok Imagine, Grok Voice. Booth downstairs with Yvette and Christian for getting-started help.
 - xAI API: https://x.ai/api . No credits or promo code published.
-- Theme tie-in: space data fits Navigation (orbital navigation, star maps, trajectory/route planning).
