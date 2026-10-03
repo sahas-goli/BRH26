@@ -1,23 +1,23 @@
 # BRH26 resources: BigRed//Hacks 2026
 
-Cornell, Oct 2-4, 2026. **Theme: Navigation.** Devpost submission due **Sun Oct 4, 8:30 AM** (no late). Team form due Fri 11:59 PM. Scope: only what helps build and submit a winning project (no prize amounts, workshops, meals, social events).
+Cornell, Oct 2-4, 2026. **Theme: Navigation.** Scope: only what helps build and submit a winning project.
 
 ## Our team
-3 software engineers + 1 hardware person (team of 4, the max). Hardware we control: NVIDIA DGX Spark, 3D printer, plus MLH rentals ([hardware.md](hardware.md)). Hard deadline: Devpost submission **Sun Oct 4, 8:30 AM**; judging starts 9:00 AM.
+3 software engineers + 1 hardware person (team of 4, the max). Hardware we control: NVIDIA DGX Spark, 3D printer, plus MLH rentals. Hard deadline: Devpost submission **Sun Oct 4, 8:30 AM**; judging starts 9:00 AM.
 
 | File | Contents |
 |---|---|
-| [01-general-info-doc.md](01-general-info-doc.md) | Key times, submission requirements, judging format, links |
-| [02-theme-navigation.md](02-theme-navigation.md) | Theme brief, Kleinberg talk and hints |
-| [03-devpost-and-website.md](03-devpost-and-website.md) | Rules, judges, sponsors, past-year Devpost links |
-| [hardware.md](hardware.md) | MLH rentals + 3D printer, how checkout works |
+| [01-general-info-doc.md](01-general-info-doc.md) | Deadlines, submission requirements, judging format, links |
+| [02-theme-navigation.md](02-theme-navigation.md) | Theme brief, Kleinberg talk |
+| [03-rules-and-judges.md](03-rules-and-judges.md) | Rules, judges, past project galleries |
+| [hardware.md](hardware.md) | DGX Spark, 3D printer, MLH rentals |
 | [software.md](software.md) | Free MLH perks: GitHub pack, MongoDB $50, Auth0, free domain |
-| [past-winners.md](past-winners.md) | Winners 2021-2025 and patterns |
-| [tracks/](tracks/README.md) | One file per track/bounty: requirements and judging |
+| [past-winners.md](past-winners.md) | Winners 2021-2025 |
+| [tracks/](tracks/README.md) | One file per track/bounty: requirements, judging, build docs |
 | [SOURCES.md](SOURCES.md) | Every source link (user-given first) and how to repull |
 
 ## Known gaps
 - Spoken vs written conflicts: Capital One, SpaceX space theme (see track files).
-- Sponsor API docs for Capital One Nessie and xAI/Grok not pulled. Photon, MLH partner docs and Presage SDK are summarized.
-- 3D printer, rental stock and checkout limits unknown. Judge names and the MLH track slides not captured.
+- Sponsor API docs for Capital One Nessie and xAI/Grok not pulled.
+- 3D printer details, rental stock and checkout limits unknown. Judge names and the MLH track slides not captured.
 - Devpost blocks direct download; re-check its track text in a browser.

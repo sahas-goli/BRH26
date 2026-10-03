@@ -1,4 +1,4 @@
 # Hardware Track (side)
 
 - 1 winner. Hack that best embodies hardware usage; judged on hardware, functionality, technical skill.
-- What we can use: [../hardware.md](../hardware.md) (MLH rentals + 3D printer). Camera-based option: [mlh-presage.md](mlh-presage.md).
+- What we can use: [../hardware.md](../hardware.md) (MLH rentals + 3D printer).

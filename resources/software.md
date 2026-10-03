@@ -11,8 +11,5 @@ Source: https://www.mlh.com/resources/software ("FREE access to their APIs this 
 
 ## Perks that are also bounties (details in the track files)
 - **Google Gemini API:** [tracks/mlh-gemini-api.md](tracks/mlh-gemini-api.md)
-- **GoDaddy Registry:** free domain of your choice **for 1 year**; guide https://hackp.ac/GoDaddy-medium , signup https://hackp.ac/GoDaddyRegistry . Claim steps and the bounty: [tracks/mlh-godaddy-registry.md](tracks/mlh-godaddy-registry.md)
+- **GoDaddy Registry:** free domain of your choice **for 1 year**; guide https://hackp.ac/GoDaddy-medium , signup https://hackp.ac/GoDaddyRegistry . Claim steps: [tracks/mlh-godaddy-registry.md](tracks/mlh-godaddy-registry.md)
 - Other free credits are listed in each MLH track file (ElevenLabs, Tiger Data, Presage, Solana).
-
-## More
-- MLH prizes page (claim codes need MLH login): https://www.mlh.com/events/bigred-hacks-2026/prizes

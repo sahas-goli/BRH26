@@ -1,6 +1,5 @@
 # MLH: Best Use of ElevenLabs (sponsor, via MLH)
 
-
 ## Challenge
 Deploy natural, human-sounding audio with ElevenLabs: realistic, dynamic, emotionally expressive voices for any project, from interactive AI companions to narrated stories and voice-enabled apps.
 
@@ -10,9 +9,8 @@ Use ElevenLabs in the project. Nothing else listed.
 ## Judging
 Not specified; best overall use of ElevenLabs.
 
-
-## Resources / claiming
-- Partner page: https://www.mlh.com/partners/elevenlabs (short link https://mlh.link/elevenlabs). MLH login on the prizes page needed for a claim code.
+## Build resources
+- Partner page: https://www.mlh.com/partners/elevenlabs (short link https://mlh.link/elevenlabs).
 - **Free perk:** 3-month free ElevenLabs subscription via promo code (MLH emails it during event week to registered hackers; redeem on the ElevenLabs signup page).
 - API key: https://elevenlabs.io/app/settings/api-keys, put in `.env` as `ELEVENLABS_API_KEY`.
 - Install: `pip install elevenlabs python-dotenv` | `npm install @elevenlabs/elevenlabs-js dotenv` | CLI `npm install -g @elevenlabs/cli`.

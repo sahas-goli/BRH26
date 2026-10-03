@@ -11,6 +11,6 @@ Space offers huge public datasets, decades of missions, and literature no human 
 - Bonus: Grok Bot for project planning and collaboration.
 - Spoken at the ceremony: a space theme is **not** required ("would love if it was"); the written brief asks for space data. Submit the project to SpaceX.
 
-## Context and contacts
-- Speaker Yvette (field engineer, Cursor SpaceX team): Cursor was acquired by SpaceX AI; they also ship Grok Bot, Grok Build, Grok Imagine, Grok Voice. Booth downstairs with Yvette and Christian for getting-started help.
+## Context
+- Cursor was acquired by SpaceX AI; the team also ships Grok Bot, Grok Build, Grok Imagine, Grok Voice.
 - xAI API: https://x.ai/api . No credits or promo code published.

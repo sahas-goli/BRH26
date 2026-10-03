@@ -1,6 +1,5 @@
 # MLH: Best Use of Presage (sponsor, via MLH)
 
-
 ## Challenge
 Integrate Presage's human-sensing to understand real-time physical and emotional state: heart rate, breathing rate, engagement, facial expression (camera-based). Use cases: games with dynamic difficulty from player excitement, contactless wellness/stress/fitness apps, accessibility/security, focus-monitoring productivity tools.
 
@@ -10,9 +9,8 @@ Use any Presage SDK.
 ## Judging
 Not specified; demonstrate the "future of human-computer interaction."
 
-
-## Resources / claiming
-- Partner page: https://www.mlh.com/partners/presage (https://mlh.link/presage). MLH login: not needed.
+## Build resources
+- Partner page: https://www.mlh.com/partners/presage (https://mlh.link/presage).
 - Sign up (free tier, API key): https://physiology.presagetech.com/auth/register
 - SDK = **SmartSpectra**, camera-based (no wearables). Platforms: iOS 17+ (Swift), Android SDK 28+ (Kotlin), C++20 (macOS/Linux/Windows), Node.js 20+/Electron 28+. **No Python, web, or REST option.** Docs https://smartspectra.presagetech.com/docs, samples https://github.com/Presage-Security/SmartSpectra
 - Metrics: pulse rate + HRV, breathing waveform/rate, face landmarks/iris/blink/speech, facial expression, relative arterial pressure waveform, quality/stability scores. Focus and emotion are advertised on MLH's page.

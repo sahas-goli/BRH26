@@ -1,6 +1,6 @@
 # Past BigRed//Hacks winners
 
-Scraped 2026-10-02 from each year's Devpost gallery (`<event>.devpost.com/project-gallery?winner=true`) plus individual project pages. Event links: [03-devpost-and-website.md](03-devpost-and-website.md). Team names omitted; open the Devpost link.
+Scraped 2026-10-02 from each year's Devpost gallery (`<event>.devpost.com/project-gallery?winner=true`) plus individual project pages. Event links: [03-rules-and-judges.md](03-rules-and-judges.md). Team names omitted; open the Devpost link.
 
 **Reliability:** the winner-filtered gallery lists real winners first, then pads with non-winners, so I kept only projects confirmed by a winner label or a project page. Prize names come from page-fetch summaries (Devpost blocks direct downloads). Where two reads disagreed, both are shown. Treat prize names for 2021-2022 as approximate.
 
@@ -69,4 +69,4 @@ No Devpost page found. 2020 apparently not run on Devpost; 2023 unknown.
 | [The Night Sky](https://devpost.com/software/the-night-sky-8pe14k) | MLH Best Space App (Space Force) |
 
 ## Earlier years (2015-2019)
-Dropped as less relevant (different formats, unverified prizes). Devpost links in [03-devpost-and-website.md](03-devpost-and-website.md); full lists are in git history (commit 41113f2).
+Dropped as less relevant (different formats, unverified prizes). Devpost links in [03-rules-and-judges.md](03-rules-and-judges.md); full lists are in git history (commit 41113f2).
