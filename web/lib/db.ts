@@ -12,6 +12,11 @@ export interface Database extends DbQuery {
   transaction<T>(work: (tx: DbQuery) => Promise<T>): Promise<T>;
 }
 
+export function isPgliteUrl(url = process.env.DATABASE_URL): boolean {
+  if (!url) return false;
+  return url === "pglite" || url.startsWith("pglite:");
+}
+
 function buildPool(connectionString: string): Pool {
   return new Pool({
     connectionString,
@@ -24,11 +29,12 @@ function buildPool(connectionString: string): Pool {
 
 /**
  * Shared pg Pool for route handlers. Undefined when DATABASE_URL is unset
- * so claim/confirm/tick can return 503 without crashing the import.
+ * or when DATABASE_URL=pglite (use getDatabase() instead).
  */
-export const pool: Pool | undefined = process.env.DATABASE_URL
-  ? buildPool(process.env.DATABASE_URL)
-  : undefined;
+export const pool: Pool | undefined =
+  process.env.DATABASE_URL && !isPgliteUrl(process.env.DATABASE_URL)
+    ? buildPool(process.env.DATABASE_URL)
+    : undefined;
 
 function requirePool(): Pool {
   if (!pool) throw new Error("DATABASE_URL is not set");
@@ -43,6 +49,7 @@ function wrap(client: Pool | PoolClient): DbQuery {
   };
 }
 
+/** Tiger / remote Postgres adapter (sync module init). */
 export const db: Database = {
   query<T extends QueryResultRow = QueryResultRow>(sql: string, values?: unknown[]) {
     return wrap(requirePool()).query<T>(sql, values);
@@ -66,3 +73,18 @@ export const db: Database = {
     }
   },
 };
+
+let pgliteSingleton: Promise<Database> | undefined;
+
+/**
+ * Resolve the active database: Tiger pool, or lazy PGlite when DATABASE_URL=pglite.
+ * Prefer this from async route handlers that must support local smoke.
+ */
+export async function getDatabase(): Promise<Database> {
+  if (isPgliteUrl(process.env.DATABASE_URL)) {
+    pgliteSingleton ??= import("./pglite-db").then((m) => m.openPgliteDatabase());
+    return pgliteSingleton;
+  }
+  if (!pool) throw new Error("DATABASE_URL is not set");
+  return db;
+}

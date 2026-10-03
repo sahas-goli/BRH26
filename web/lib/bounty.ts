@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { db } from "./db";
+import { db, isPgliteUrl } from "./db";
 import { FANOUT, H, INITIAL_SHARE } from "./types";
 import type { HintCard, HolderView, PublicBounty, ForwardResult, Rail } from "./types";
 
@@ -64,9 +64,11 @@ export function configureBounty(options: BountyOptions): void {
 }
 
 // Route modules import this file in the Node runtime. Configure the core with
-// the shared pool only when it is available, so deployments with a missing
-// DATABASE_URL keep returning the contract's 503 rather than an internal error.
-if (process.env.DATABASE_URL) configureBounty({ database: db });
+// the shared pool when Tiger/Postgres URL is set. PGlite is wired asynchronously
+// via getDatabase() + instrumentation / smoke-mvp (DATABASE_URL=pglite).
+if (process.env.DATABASE_URL && !isPgliteUrl(process.env.DATABASE_URL)) {
+  configureBounty({ database: db });
+}
 
 function options(): BountyOptions {
   if (!configured) throw new BountyError("database_unavailable", 503);

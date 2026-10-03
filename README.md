@@ -6,14 +6,15 @@ Friend-to-friend bounties: post → forward → claim. Plan: [PLAN.md](PLAN.md).
 
 ```bash
 npm --prefix web ci
-npm --prefix web run check          # typecheck + lib + API tests (mock post/forward/claim)
-npm --prefix web run smoke:mock     # mock MVP path only
+npm --prefix web run check          # typecheck + lib + API tests
+npm --prefix web run smoke:mock     # PGlite: create → forward×3 → claim → confirm (real SQL)
+npm --prefix web run smoke:unit     # in-memory fixture unit tests only
 node db/apply.mjs --dry-run         # schema extract / Tiger SSL plan (no DATABASE_URL)
 # optional offline replay smoke (needs python3 + numpy):
 # bash sim/smoke_replay.sh
 ```
 
-Mock flags default off/mock (`.env.example`). `configureBounty` wires automatically when `DATABASE_URL` is set (`web/lib/bounty.ts` + `web/lib/db.ts`).
+Mock flags default off/mock (`.env.example`). Tiger: `configureBounty` wires when `DATABASE_URL` is a Postgres URL. Local: set `DATABASE_URL=pglite` (applies `db/schema.local.sql`; Next `instrumentation.ts` configures the core). Production Tiger path is unchanged.
 
 ## Preview smoke (after Vercel deploy)
 
