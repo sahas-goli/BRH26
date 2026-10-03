@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:30 ET.
+Updated 2026-10-03 12:35 ET.
 
 ## On main
 
@@ -14,10 +14,11 @@ Updated 2026-10-03 12:30 ET.
 | `b7fa142` | `POST /api/attack`. Ours gain is 0%. MIT gain is 50 / 75 / 87.5 / 93.75 for k=1..4. | S2-04 done. |
 | `9a37154` | Controller. A seeded stall steps nudge, widen, raise. An overdue bounty refunds the full cap. Tick route is 503 until `pool` exists. | S2-07 done. |
 | `c8f09bc` | `web/lib/solana.ts` builds one payout transaction: N transfers plus a `sixhops:pay` memo. | S2-05 still open. |
+| `a62857f` | `submitPayout` sends that transaction once. A retry returns the existing signature. | S2-05 still open. |
 
 ## This branch
 
-`submitPayout` sends that transaction once. A retry with an existing signature does not send again. Devnet confirm is still blocked: faucet returned 429 again, no `SOLANA_PAYER_SECRET`, and `@solana/web3.js` is not in `web/package.json`. S2-05 stays open.
+`web/lib/nessie.ts` opens an escrow (checking funded at cap + $50, then the cap moves into escrow), pays holders from escrow, and refunds the rest to checking. A local stand-in proved both balances move on each step. Live Nessie was not called. `NESSIE_KEY` is still unset, so S2-06 stays open. S2-01's claim was released: the split is on main, and `npm run check` still waits on the scaffold.
 
 ## Plan changes
 
@@ -33,8 +34,8 @@ Updated 2026-10-03 12:30 ET.
 
 ## Claims
 
-SWE2 holds S2-01 and S2-05. S2-02 is open. S2-03, S2-04, and S2-07 are done.
+SWE2 holds S2-05 and S2-06. S2-01 and S2-02 are open. S2-03, S2-04, and S2-07 are done.
 
 ## Next
 
-S2-05 still needs a funded devnet payer and `@solana/web3.js` on the scaffold before a claim can land one transaction. S2-06 needs `NESSIE_KEY`. S2-01 needs `npm run check`.
+S2-05 still needs a funded devnet payer. S2-06 still needs `NESSIE_KEY` before `NESSIE_MODE=live`. S2-01 needs `npm run check`.
