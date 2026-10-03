@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 15:30 ET.
+Updated 2026-10-03 15:40 ET.
 
 ## On main
 
@@ -23,14 +23,15 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 - `npm run smoke:http` → real route handlers post→forward→claim→confirm→og (`SMOKE_HTTP_OK`)
 - `next dev`: `DATABASE_URL=pglite:.data/local` in `web/.env.local` (see README)
 - `web/lib/hotp.ts` RFC vectors + claim wiring (HW-02 software; firmware still open)
+- Tiger service `hldtuqlvht` is ready. Schema and caggs are applied. The real `DATABASE_URL` is in local `web/.env.local` only.
 
 ## Blocked / needs humans
 
-- **S3-02 / S3-03:** need Tiger `DATABASE_URL`. Offline: `node db/apply.mjs --dry-run`, `bash sim/smoke_replay.sh`.
-- **Live preview MVP:** Vercel env with Tiger `DATABASE_URL` (or accept pglite only locally). Also `INTERNAL_SECRET`, `PUBLIC_BASE_URL`.
+- **S3-02 / S3-03:** schema and caggs are on service `hldtuqlvht`. Still need the 100k-row copy, the cagg-versus-raw timing, and `bash sim/load.sh`.
+- **Live preview MVP:** put the same `DATABASE_URL` in Vercel, plus `INTERNAL_SECRET` and `PUBLIC_BASE_URL`.
 - **S2-06:** claimed by Sahas Goli (`claim/S2-06` since 16:20Z). Nessie live still failing VERIFY D — keep mock.
 - **S3-07:** GoDaddy / MLH domain claim for `milgram.study`.
-- **AL-01:** no `web/.env.local` on this workstation — see checklist in `tasks/AL-01.md`.
+- **AL-01:** Photon, xAI, and Gemini keys are still missing. Solana, Nessie, and Tiger are set in local `web/.env.local`.
 - **AL-02:** local smoke green; prod double-run still blocked on secrets.
 
 ## Also on main (demo readiness)
@@ -46,7 +47,7 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 
 ## Next (humans)
 
-1. Tiger `DATABASE_URL` → apply → Vercel preview MVP.
+1. Copy Tiger `DATABASE_URL` into Vercel, then load the replay (`bash sim/load.sh`).
 2. MLH table: fill `hardware/INVENTORY.md` + flash one badge (HW-01).
 3. Organizer approval + 5 volunteers in `hardware/game.md` (HW-03).
 4. GoDaddy domain (S3-07); Nessie (S2-06); Photon/xAI keys (AL-01).
