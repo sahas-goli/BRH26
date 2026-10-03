@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 13:25 ET.
+Updated 2026-10-03 13:35 ET.
 
 ## On main
 
@@ -34,11 +34,12 @@ Nothing in flight.
 - 2026-10-03: rent exemption is 650,240 lamports, not the earlier 890,880. Recorded in PLAN.md 6.1. Relay floor is 10 cents, so B ≥ 160 cents. The $10 cap still clears it.
 - 2026-10-03: test B passed. Treasury `DgGpjfFcuZkvQDpMDyPC7fnbJovzQjpXfycRpLMXuA1a` held 5 SOL. Five 6-transfer memos confirmed. Median 611 ms. PLAN.md 6.1.
 - 2026-10-03: test D failed. Nessie creates the customer and accounts, then a completed transfer returns 201 and does not change either balance within 2 minutes. The live body has no payee. `NESSIE_MODE` stays mock. PLAN.md 7.3.
+- 2026-10-03: a local claim and confirm confirmed devnet signature `61a5bLrJdUqZkYqjvptTqJ5KGqj2dGWdhvSjoDrgJG16sTwwNqkdNbTcdbbRphtmxRyFjFbz3kuMqgbPU7NjQiXS`. One transfer plus a pay memo. S2-05 stays open until `/live` links it.
 
 ## Blocked
 
 - Claim and confirm return 503 until `DATABASE_URL` is set. `pool` is exported from `web/lib/db.ts`.
-- S2-05 still needs a claim against that database, then a link from `/live` (SWE3). The payer is funded. No backup RPC is set.
+- S2-05: a local claim and confirm already produced confirmed devnet signature `61a5bLrJdUqZkYqjvptTqJ5KGqj2dGWdhvSjoDrgJG16sTwwNqkdNbTcdbbRphtmxRyFjFbz3kuMqgbPU7NjQiXS` (one transfer plus a `sixhops:pay` memo). The task stays open because `/live` is still the SWE3 stub and `DATABASE_URL` is unset. No backup RPC is set.
 - S2-06 cannot go live. Nessie balances do not move after a 201 transfer.
 - `swe1/S1-02` has bounty code on its branch and no pull request.
 
@@ -48,4 +49,4 @@ SWE2 holds S2-05 and S2-06. S2-01, S2-02, S2-03, S2-04, and S2-07 are done.
 
 ## Next
 
-S2-05 needs `DATABASE_URL` and the `/live` page before a claim can show one confirmed devnet transaction. S2-06 stays on the mock because the sandbox does not move balances. S3-01 still needs a Vercel preview.
+S2-05 has a confirmed devnet claim signature. It still needs the `/live` page to link that signature, and `DATABASE_URL` for the shared database. S2-06 stays on the mock because the sandbox does not move balances. S3-01 still needs a Vercel preview.
