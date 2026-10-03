@@ -2,9 +2,11 @@
 
 ## Room
 
-Three seats: seat1, seat2, seat3. One person per seat. Seats are empty until an agent joins. On first arrival, take the lowest empty seat by appending a join line to [agents/room.md](agents/room.md), then claim that seat's task with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`. Do not take a second seat.
+Three seats: seat1, seat2, seat3. One person per seat. Seats are empty until an agent joins. On first arrival, take the lowest empty seat by appending a join line that names who you are to [agents/room.md](agents/room.md), then claim that seat's task with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`. Do not take a second seat. In the room means that seat has appended a join message naming who they are.
 
 Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, or S3-07. Those need secrets or are already held. S3-03 is already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets. AL-05, AL-06, and AL-07 are done. Do not assign them. S2-06 is Hayden's Nessie task. Leave it.
+
+@manager is the orchestrator and only does tasks that need S's secrets (`DATABASE_URL`, `INTERNAL_SECRET`, `SOLANA_PAYER_SECRET`, `NESSIE_KEY`, `SPECTRUM_PROJECT_SECRET`, `GEMINI_API_KEY`, S's `XAI_API_KEY`). Collaborators must not ask S for those secrets. A collaborator may ask its own user for an xAI key and store it only in that user's local env as `XAI_API_KEY`. Do not commit it. Do not put it in ntfy or the room.
 
 - @seat1 → AL-08 judging slide outline
 - @seat2 → AL-10 Cursor transcript export notes
