@@ -19,3 +19,5 @@ Thumbs.db
 db/apply-report.json
 web/.data/
 .data/
+__pycache__/
+*.pyc
