@@ -24,6 +24,17 @@ Per-bounty bank-rail escrow on Capital One’s Nessie sandbox: fund on post, rel
 
 **VERIFY D (2026-10-03, failed):** customer + accounts create; `POST …/transfers` with planned `{medium, payee_id, …}` rejects; alternate bodies return 201 but GET balances stay flat. Keep mock until a working transfer shape is confirmed.
 
+## Problem for the next person (2026-10-03)
+
+- `NESSIE_MODE` stays mock. Do not mark S2-06 done. Do not change `web/lib/nessie.ts` to the body the API accepts today, because that body cannot name a destination account.
+- Base URL `https://api.nessieisreal.com`, key in `?key=`, HTTPS only.
+- Customer and two checking accounts create; starting balances stick (last run checking 80, escrow 0).
+- `POST /accounts/{checkingId}/transfers` with `{medium:"balance", payee_id, amount, description}` returns 400. Pydantic `TransferCreate` requires `transaction_date`, `status`, `amount`, `description` and rejects `medium` and `payee_id` as extra fields.
+- The four-field body returns 201. `GET /transfers/{id}` shows status completed, amount 10, and no `payee_id`.
+- A completed deposit (`medium` balance is allowed on deposits), a completed purchase against a new merchant, and `PUT /accounts/{id}` with `{balance: 12}` (HTTP 202, "Accepted account update") all leave `GET /accounts/{id}` at the creation balance. Polled 45 seconds after the 202, and earlier for 2 minutes.
+- The GET balance is only the number from account creation.
+- What still needs a working shape: move money checking→escrow on post, escrow→holders and treasury on pay, escrow→checking on expiry, such that both GET balances change. The local stand-in in `nessie.ts` still sends `{medium, payee_id, amount, description}` so mock tests keep describing the intended transfer.
+
 ## What judges see
 
 - Under mock: lifecycle still completes; money panel labeled mock / unavailable.
