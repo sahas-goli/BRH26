@@ -19,15 +19,23 @@ export function isPgliteUrl(url = process.env.DATABASE_URL): boolean {
 
 let poolInstance: Pool | undefined;
 
+function withoutSslMode(connectionString: string): string {
+  const query = connectionString.indexOf("?");
+  if (query < 0) return connectionString;
+  const params = new URLSearchParams(connectionString.slice(query + 1));
+  params.delete("sslmode");
+  const rest = params.toString();
+  return rest ? `${connectionString.slice(0, query)}?${rest}` : connectionString.slice(0, query);
+}
+
 function buildPool(connectionString: string): Pool {
+  const local = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
   // Hide from static bundlers; `pg` stays a Node runtime dependency (serverExternalPackages).
   // eslint-disable-next-line no-eval, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const { Pool: PoolCtor } = (eval("require") as NodeRequire)("pg") as typeof import("pg");
   return new PoolCtor({
-    connectionString,
-    ssl: connectionString.includes("localhost") || connectionString.includes("127.0.0.1")
-      ? undefined
-      : { rejectUnauthorized: false }, // Tiger Cloud (PLAN.md 7.1)
+    connectionString: local ? connectionString : withoutSslMode(connectionString),
+    ssl: local ? undefined : { rejectUnauthorized: false }, // Tiger Cloud (PLAN.md 7.1)
     max: 5,
   });
 }
