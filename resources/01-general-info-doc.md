@@ -11,7 +11,7 @@ Sources: organizer Google Doc "BigRed//Hacks 2026 General Information" (https://
 - **Check-in:** from 6:00 PM Oct 2, Klarman Atrium, 232 Feeney Wy, Ithaca. Can't make it? Tell organizers for a late check-in.
 - **Food:** wear the shirt from check-in to get meals.
 - **Teams:** 1-4. Fill out the team form even if already formed. No team: Discord, the form, or Fri team matching.
-- **Hardware (MLH table, rent, return by end of final judging):** Raspberry Pi kits, Arduinos + base shields, Logitech webcams, Google Home Mini, SenseCAP Indicator, Echo Show, Echo Dot, breadboards, wire cutters, multimeter, cables, Grove components.
+- **Hardware:** MLH rentals plus a 3D printer, see [hardware.md](hardware.md). Return rentals by end of final judging.
 - **MLH on site:** coaches Farhan and Ena (reach out any time). Everything MLH is at the link on their slide (not captured). MLH hardware lab is at the check-in tables (set up right after opening ceremony). MLH Code of Conduct applies: no abuse or harassment; tell an MLH coach or organizer, or use the email/phone on the slide. Limited-edition 2027 MLH mascot T-shirts handed out at workshops. October is Hacktoberfest.
 - **Help:** emergency CUPD (607) 255-1111 (911 is slower: Tompkins County transfer), then find an organizer (black "STAFF" shirt). Technical: `#technical-inquiries` on Discord. General: `#general`.
 

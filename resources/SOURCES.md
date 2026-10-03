@@ -9,6 +9,8 @@ Captured 2026-10-02. **User-given** links come first; keep them verbatim.
 | https://docs.google.com/document/d/1NHrE-zrTy1DDI-0d1FkQAStY7yizpfoao3BqESUHHM0/edit?tab=t.0 | [02](02-theme-navigation.md) | Drive MCP id `1NHrE-zrTy1DDI-0d1FkQAStY7yizpfoao3BqESUHHM0` |
 | https://docs.google.com/presentation/d/1HytL8PP48KtWOhP_aJ7BdhmIkyhY8bUU2go4iSU_tO0/edit?slide=id.p#slide=id.p | [01](01-general-info-doc.md), [02](02-theme-navigation.md), Photon track | Drive MCP id `1HytL8PP48KtWOhP_aJ7BdhmIkyhY8bUU2go4iSU_tO0` |
 | https://www.mlh.com/events/bigred-hacks-2026/prizes | `tracks/mlh-*.md` | WebFetch |
+| https://www.mlh.com/resources/hardware | [hardware.md](hardware.md) | WebFetch (or curl; plain HTML, links via `mail.mlh.io/e/c/<base64>` tracking redirects) |
+| https://www.mlh.com/resources/software | [software.md](software.md) | curl; plain HTML, links are `hackp.ac/*` short links |
 | https://www.bigredhacks.com/ | [03](03-devpost-and-website.md) sponsors, site FAQ | React SPA (also names the registration portal): `curl` index, then grep the `assets/index-*.js` bundle (arrays `C9` tracks, `kc` FAQ, `qc` schedule, `ax` sponsors; names change per build) |
 
 ## Verbal (merged, raw files deleted)
