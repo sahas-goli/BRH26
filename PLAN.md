@@ -66,7 +66,7 @@ flowchart LR
   SIM[sim/ on DGX: 1M-event replay] -->|COPY| DB
 ```
 
-**Repo layout.** Software paths have one owner, SWE. Any software person may edit them. Collaborators with no `web/.env.local` claim exactly one of AL-05, AL-06, or AL-07 (top of WORKFLOW.md). Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who edits the work.
+**Repo layout.** Software paths have one owner, SWE. Any software person may edit them. Collaborators with no `web/.env.local` claim exactly one of AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, or AL-11 (top of WORKFLOW.md). Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who edits the work.
 
 | Path | Owner |
 |---|---|
@@ -500,7 +500,7 @@ Claim `milgram.study` through the MLH GoDaddy Registry offer (https://www.tech.s
 
 ## 8. Tasks
 
-The authoritative list is `tasks/<ID>.md`: one file per task, with owner, dependencies and done-when. Claim and track them with `scripts/task.sh` (WORKFLOW.md section 3). Collaborators with no `web/.env.local` claim exactly one of AL-05, AL-06, or AL-07. Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Summary:
+The authoritative list is `tasks/<ID>.md`: one file per task, with owner, dependencies and done-when. Claim and track them with `scripts/task.sh` (WORKFLOW.md section 3). Collaborators with no `web/.env.local` claim exactly one of AL-05, AL-06, AL-07, AL-08, AL-09, AL-10, or AL-11. Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Summary:
 
 | ID | Owner | Task | Depends | Est h | By |
 |---|---|---|---|---|---|
@@ -529,6 +529,13 @@ The authoritative list is `tasks/<ID>.md`: one file per task, with owner, depend
 | AL-02 | ALL | M2 integration: real payout, Nessie, Photon, voice, smoke test | all M2 tasks | 2 | 23:00 |
 | AL-03 | ALL | Backup demo video (2 min screen recording) | AL-02 | 1 | 06:00 |
 | AL-04 | ALL | Per-track write-ups + Devpost + make repo public | AL-02 | 2 | 08:15 |
+| AL-05 | ALL | Brand and poster direction | none | 1 | 05:00 |
+| AL-06 | ALL | Domain shortlist, search only | none | 0.5 | 05:00 |
+| AL-07 | ALL | Public-site demo storyboard | none | 1 | 06:00 |
+| AL-08 | ALL | Judging slide outline | none | 1.5 | 07:00 |
+| AL-09 | ALL | People's Choice share copy | none | 0.5 | 08:00 |
+| AL-10 | ALL | Cursor transcript export notes | none | 0.5 | 05:00 |
+| AL-11 | ALL | Team registration form check | none | 0.5 | 18:00 |
 
 ---
 
