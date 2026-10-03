@@ -4,9 +4,9 @@ What we build: [PLAN.md](PLAN.md). This file covers how we build it without step
 
 Collaborators with no `web/.env.local`: the room protocol is at the top of [AGENTS.md](AGENTS.md). Three seats, one person each. Take the lowest empty seat, then claim only that seat's task.
 
-Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets. AL-05 and AL-07 are done.
+Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets. AL-05, AL-06, and AL-07 are done.
 
-@seat1 is AL-08 (judging slide outline). @seat2 is AL-06 (domain shortlist: search only, do not buy, ignore `.study`). @seat3 is AL-09 (People's Choice share copy, do not post it). AL-10 and AL-11 are queued. AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+@seat1 is AL-08 (judging slide outline). @seat2 is AL-10 (Cursor transcript export notes). @seat3 is AL-09 (People's Choice share copy, do not post it). AL-06 is done (domain shortlist: search only, do not buy, ignore `.study`). AL-11 is queued. AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
 
 S2-06 is Hayden's Nessie task. Leave it.
 
@@ -115,7 +115,7 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: if you have no web/.env.local, read the end of agents/room.md and take the lowest empty seat in AGENTS.md, then claim only that seat's task with bash scripts/task.sh claim <ID> (one person per seat; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05 and AL-07 are done);
+Work loop: if you have no web/.env.local, read the end of agents/room.md and take the lowest empty seat in AGENTS.md, then claim only that seat's task with bash scripts/task.sh claim <ID> (one person per seat; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05, AL-06, and AL-07 are done);
 branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.
