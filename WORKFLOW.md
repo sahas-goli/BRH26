@@ -2,11 +2,11 @@
 
 What we build: [PLAN.md](PLAN.md). This file covers how we build it without stepping on each other. Agents: read this file fully, then the PLAN.md sections your task's `spec:` line points to.
 
-Collaborators with no `web/.env.local` take exactly one of AL-06, AL-08, AL-09, AL-10, AL-11. One person per task. Claim with `bash scripts/task.sh claim <ID>`, then `git switch -c swe/<ID> origin/main`.
+Collaborators with no `web/.env.local`: the room protocol is at the top of [AGENTS.md](AGENTS.md). Three seats, one person each. Take the lowest empty seat, then claim only that seat's task.
 
 Do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07. Those need secrets or are already held. AL-01 needs `DATABASE_URL` and `INTERNAL_SECRET` and stays with S. Do not ask S for those secrets. AL-05 and AL-07 are done.
 
-AL-06 is the domain shortlist (search only, do not buy, ignore `.study`). AL-08 is the judging slide outline. AL-09 is the People's Choice share copy (do not post it). AL-10 is the Cursor transcript export notes. AL-11 is the team registration form check (no personal data in git). AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
+@seat1 is AL-08 (judging slide outline). @seat2 is AL-06 (domain shortlist: search only, do not buy, ignore `.study`). @seat3 is AL-09 (People's Choice share copy, do not post it). AL-10 and AL-11 are queued. AL-05 was the poster. AL-07 was the public-site storyboard. Public site: https://brh26-brh-26.vercel.app.
 
 S2-06 is Hayden's Nessie task. Leave it.
 
@@ -115,7 +115,7 @@ Your owned paths: <PATHS FROM PLAN.md SECTION 3>. Edit nothing else. If you need
 stop and tell me what to ask its owner. Shared contracts (web/lib/types.ts, db/schema.sql,
 .env.example, web/package.json) change only via the CONTRACT procedure in WORKFLOW.md section 5:
 stop and ask me first.
-Work loop: if you have no web/.env.local, claim exactly one of AL-06, AL-08, AL-09, AL-10, AL-11 with bash scripts/task.sh claim <ID> (one person per task; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05 and AL-07 are done);
+Work loop: if you have no web/.env.local, read the end of agents/room.md and take the lowest empty seat in AGENTS.md, then claim only that seat's task with bash scripts/task.sh claim <ID> (one person per seat; do not claim AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, or S3-07; AL-05 and AL-07 are done);
 branch swe/<ID> from origin/main; small commits prefixed with the task ID; run
 npm --prefix web run check before every push; set status: done in tasks/<ID>.md; open and merge the PR
 with --rebase; scripts/task.sh done <ID>; tell me the one-line MERGED message to post.
@@ -129,7 +129,7 @@ behind its mock flag and tell me what to verify. Prefer the simplest code that m
 
 ## 10. Talking to each other
 
-When you are stuck, blocked on S, or finished a claimed task, POST one notification as in [AGENTS.md](AGENTS.md) under "Notify S". Do not send progress spam, secrets, env values, or stack traces.
+The chat is the room at the top of [AGENTS.md](AGENTS.md): append to `agents/room.md`, then one ntfy ping whose title contains the @target. Reply when stuck, done, or joining. Do not spam progress, secrets, env values, or stack traces.
 
 One team chat. Messages start with a tag, so a skim is enough:
 
