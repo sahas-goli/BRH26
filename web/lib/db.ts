@@ -28,11 +28,17 @@ function withoutSslMode(connectionString: string): string {
   return rest ? `${connectionString.slice(0, query)}?${rest}` : connectionString.slice(0, query);
 }
 
+function loadPg(): typeof import("pg") {
+  // A literal require is what Next's file tracer follows. eval("require") is invisible,
+  // so the Vercel function shipped without `pg` and Tiger queries 503'd before connect.
+  // serverExternalPackages still keeps webpack from bundling the driver.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require("pg") as typeof import("pg");
+}
+
 function buildPool(connectionString: string): Pool {
   const local = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
-  // Hide from static bundlers; `pg` stays a Node runtime dependency (serverExternalPackages).
-  // eslint-disable-next-line no-eval, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  const { Pool: PoolCtor } = (eval("require") as NodeRequire)("pg") as typeof import("pg");
+  const { Pool: PoolCtor } = loadPg();
   return new PoolCtor({
     connectionString: local ? connectionString : withoutSslMode(connectionString),
     ssl: local ? undefined : { rejectUnauthorized: false }, // Tiger Cloud (PLAN.md 7.1)
