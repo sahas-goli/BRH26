@@ -12,13 +12,14 @@ test("escrow, payout, and refund move both balances", async () => {
     assert.equal(await accountCents(client, escrow.escrowId), 1000);
 
     const holderId = "holder-1";
-    await releaseEscrow(client, escrow.escrowId, [{ payeeId: holderId, cents: 400 }]);
-    assert.equal(await accountCents(client, escrow.escrowId), 600);
+    await releaseEscrow(client, escrow.escrowId, [{ payeeId: holderId, cents: 400 }], { payeeId: "treasury", cents: 200 });
+    assert.equal(await accountCents(client, escrow.escrowId), 400);
     assert.equal(await accountCents(client, holderId), 400);
+    assert.equal(await accountCents(client, "treasury"), 200);
 
-    await refundEscrow(client, escrow.escrowId, escrow.checkingId, 600);
+    await refundEscrow(client, escrow.escrowId, escrow.checkingId, 400);
     assert.equal(await accountCents(client, escrow.escrowId), 0);
-    assert.equal(await accountCents(client, escrow.checkingId), 5600);
+    assert.equal(await accountCents(client, escrow.checkingId), 5400);
   } finally {
     await close();
   }
