@@ -7,14 +7,31 @@ Friend-to-friend bounties: post → forward → claim. Plan: [PLAN.md](PLAN.md).
 ```bash
 npm --prefix web ci
 npm --prefix web run check          # typecheck + lib + API tests
-npm --prefix web run smoke:mock     # PGlite: create → forward×3 → claim → confirm (real SQL)
+npm --prefix web run smoke:mock     # PGlite lib path: create → forward×3 → claim → confirm
+npm --prefix web run smoke:http     # same via real route handlers (pages API surface)
 npm --prefix web run smoke:unit     # in-memory fixture unit tests only
 node db/apply.mjs --dry-run         # schema extract / Tiger SSL plan (no DATABASE_URL)
 # optional offline replay smoke (needs python3 + numpy):
 # bash sim/smoke_replay.sh
 ```
 
-Mock flags default off/mock (`.env.example`). Tiger: `configureBounty` wires when `DATABASE_URL` is a Postgres URL. Local: set `DATABASE_URL=pglite` (applies `db/schema.local.sql`; Next `instrumentation.ts` configures the core). Production Tiger path is unchanged.
+### Local `next dev` (no Tiger)
+
+```bash
+# web/.env.local
+DATABASE_URL=pglite:.data/local
+PUBLIC_BASE_URL=http://localhost:3000
+PAYOUT_MODE=mock
+NESSIE_MODE=mock
+GROK_ENABLED=false
+GEMINI_ENABLED=false
+PHOTON_ENABLED=false
+
+npm --prefix web run dev
+# then /post → /h/<token> → forward → /claim/<token>
+```
+
+Tiger: `configureBounty` wires when `DATABASE_URL` is a Postgres URL. PGlite uses `db/schema.local.sql` + `ensureBountyDatabase()` on each API route. Production Tiger path is unchanged.
 
 ## Preview smoke (after Vercel deploy)
 

@@ -311,10 +311,17 @@ async function finishDevnet(
   return paidBody(signature);
 }
 
+export type BadgeVerifyResult = boolean | { ok: true; counter: number };
+
 export async function claimBounty(
   db: PayoutDatabase,
   input: unknown,
-  opts: { verifyBadge?: (badgeId: string, code: string) => Promise<boolean>; now?: () => Date; signPayout?: SignPayout; moveBank?: MoveBank } = {},
+  opts: {
+    verifyBadge?: (badgeId: string, code: string) => Promise<BadgeVerifyResult>;
+    now?: () => Date;
+    signPayout?: SignPayout;
+    moveBank?: MoveBank;
+  } = {},
 ): Promise<{ status: "found" | "paid"; payoutSig?: string; explorerUrl?: string }> {
   const parsed = body(input);
   const token = requiredString(parsed.token);
@@ -346,16 +353,28 @@ export async function claimBounty(
     const poster = posters.rows[0];
     if (!poster) throw new PayoutError("not_found", 404);
     let badgeValid: boolean | null = null;
+    let hotpCounter: number | undefined;
     if (bounty.target_badge_id) {
       if (!opts.verifyBadge) throw new PayoutError("hotp_unavailable", 503);
-      badgeValid = await opts.verifyBadge(String(bounty.target_badge_id), String(parsed.badgeCode ?? ""));
+      const verified = await opts.verifyBadge(String(bounty.target_badge_id), String(parsed.badgeCode ?? ""));
+      if (verified && typeof verified === "object") {
+        badgeValid = true;
+        hotpCounter = verified.counter;
+      } else {
+        badgeValid = Boolean(verified);
+      }
     }
     const chain = badgeValid ? await chainFrom(tx, String(holder.id)) : [];
     if (badgeValid) await ensureCustodial(tx, chain);
     const step = applyClaim(ledgerFrom(bounty, poster, []), badgeValid, chain, String(bountyId));
     if (step.error === "bad_code") throw new PayoutError("bad_code", 401);
     if (step.error) throw new PayoutError(step.error, 409);
-    await logEvent(tx, at.toISOString(), String(bountyId), holder, "claimed", { introMessage });
+    await logEvent(tx, at.toISOString(), String(bountyId), holder, "claimed", {
+      introMessage,
+      ...(bounty.target_badge_id && hotpCounter !== undefined
+        ? { badgeId: String(bounty.target_badge_id), hotpCounter }
+        : {}),
+    });
     if (step.ledger.status === "found") {
       await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["found", bountyId]);
       return { result: { status: "found" as const } };

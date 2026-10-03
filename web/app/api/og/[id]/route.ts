@@ -1,4 +1,5 @@
 import { BountyError, getBountyOgSource } from "../../../../lib/bounty";
+import { ensureBountyDatabase } from "../../../../lib/ensure-db";
 import { fallbackWantedCardResponse } from "../../../../lib/imagine";
 
 export const runtime = "nodejs";
@@ -22,6 +23,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   try {
+    await ensureBountyDatabase();
     const { id } = await context.params;
     const { hint, png } = await getBountyOgSource(id);
     if (png) {

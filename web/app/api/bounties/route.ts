@@ -1,4 +1,5 @@
 import { BountyError, createBounty } from "../../../lib/bounty";
+import { ensureBountyDatabase } from "../../../lib/ensure-db";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    await ensureBountyDatabase();
     return json(await createBounty(input), 201);
   } catch (error) {
     if (error instanceof BountyError) {

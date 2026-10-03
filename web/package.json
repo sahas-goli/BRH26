@@ -7,6 +7,7 @@
     "start": "next start",
     "check": "tsc --noEmit && tsx --test \"./lib/**/*.test.ts\" \"./app/api/**/*.test.ts\"",
     "smoke:mock": "tsx scripts/smoke-mvp.ts",
+    "smoke:http": "tsx scripts/smoke-http.ts",
     "smoke:unit": "tsx --test \"./app/api/bounties/lifecycle.test.ts\" \"./app/api/bounties/bounty.test.ts\""
   },
   "dependencies": {

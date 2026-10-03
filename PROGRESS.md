@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 15:20 ET.
+Updated 2026-10-03 15:25 ET.
 
 ## On main
 
@@ -19,7 +19,10 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 
 ## Local MVP evidence (no Tiger)
 
-`npm --prefix web run smoke:mock` → PGlite create→forward×3→claim→confirm (`SMOKE_MVP_OK`). Set `DATABASE_URL=pglite` for local Next.
+- `npm run smoke:mock` → PGlite lib path (`SMOKE_MVP_OK`)
+- `npm run smoke:http` → real route handlers post→forward→claim→confirm→og (`SMOKE_HTTP_OK`)
+- `next dev`: `DATABASE_URL=pglite:.data/local` in `web/.env.local` (see README)
+- `web/lib/hotp.ts` RFC vectors + claim wiring (HW-02 software; firmware still open)
 
 ## Blocked / needs humans
 

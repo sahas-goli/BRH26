@@ -1,4 +1,5 @@
 import { confirmBounty, envBank, envSigner, PayoutError } from "../../../../../lib/payout";
+import { ensureBountyDatabase } from "../../../../../lib/ensure-db";
 import { payoutDatabase } from "../../../../../lib/runtime-db";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }): Promise<Response> {
@@ -6,6 +7,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const { id } = await context.params;
   const input = body && typeof body === "object" ? { ...body, bountyId: id } : body;
   try {
+    await ensureBountyDatabase();
     const result = await confirmBounty(await payoutDatabase(), input, { signPayout: envSigner(), moveBank: envBank() });
     return Response.json(result);
   } catch (error) {

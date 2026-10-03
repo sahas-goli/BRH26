@@ -6,9 +6,11 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   try {
+    const { ensureBountyDatabase } = await import("../../../../lib/ensure-db");
+    await ensureBountyDatabase();
     const db = await import("../../../../lib/db");
-    if (!db.pool) throw new Error("no pool");
-    const actions = await tickOpen(db.pool);
+    const database = await db.getDatabase();
+    const actions = await tickOpen(database);
     return Response.json({ actions });
   } catch {
     return Response.json({ error: "database_unavailable" }, { status: 503 });

@@ -1,4 +1,5 @@
 import { BountyError, getPublicBounty } from "../../../../lib/bounty";
+import { ensureBountyDatabase } from "../../../../lib/ensure-db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   try {
+    await ensureBountyDatabase();
     const { id } = await context.params;
     return json(await getPublicBounty(id), 200);
   } catch (error) {

@@ -17,3 +17,5 @@ Thumbs.db
 *.log
 .vercel
 db/apply-report.json
+web/.data/
+.data/
