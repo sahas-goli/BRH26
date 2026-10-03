@@ -25,11 +25,12 @@ Updated 2026-10-03 13:50 ET.
 | `52cb84f` | `createEscrow` funds escrow once per bounty id. A second call returns the same accounts. | S2-06 still open. Live balances do not move. |
 | `86d8523` | In devnet mode the payout rows are committed before the signature is requested. The bounty stays `found` until that signature is stored. A retry that already has a signature does not send again. | S2-05 still open. No claim transaction yet. |
 | `a51d8a0` | `db/schema.sql`, `db/caggs.sql`, and `db/apply.mjs` with VERIFY E fallbacks. | S3-02 still open until applied to Tiger. |
-| (this PR) | `GET /api/stats` and `GET /api/graph/[id]`. Gauge JSON uses PLAN 4.2 queries. Graph hides salts until paid and links the payout explorer URL. | S3-04 done. |
+| `1744638` | `GET /api/stats` and `GET /api/graph/[id]`. Gauge JSON uses PLAN 4.2 queries. Graph hides salts until paid and links the payout explorer URL. | S3-04 done. |
+| (this PR) | Full-screen `/live`: d3 cascade, b gauge, attack slider, series chart, explorer link, demo fallback. | S3-05 done pending laptop prod check. |
 
 ## This branch
 
-`web/lib/stats.ts` plus the stats and graph routes. Unit tests cover gauge JSON and salt reveal rules. Routes return 503 without `DATABASE_URL`.
+`/live` board polls stats/graph every 5 s. Without `DATABASE_URL` it shows a seeded demo cascade so the demo laptop still has something to project.
 
 ## Plan changes
 
