@@ -4,6 +4,7 @@
  *
  * DATABASE_URL=pglite              → memory (scripts)
  * DATABASE_URL=pglite:.data/local  → file-backed (next dev; survives reload)
+ * DATABASE_URL=pglite:.data/demo   → table /live seed (npm run seed:demo)
  */
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

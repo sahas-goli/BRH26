@@ -8,7 +8,7 @@ export async function payoutDatabase(): Promise<PayoutDatabase> {
     if (mod.isPgliteUrl()) {
       return await mod.getDatabase();
     }
-    const pool = mod.pool;
+    const pool = mod.getPool();
     if (!pool) throw new Error("no pool");
     return {
       query: (sql, values) => pool.query(sql, values),

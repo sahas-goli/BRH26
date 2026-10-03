@@ -8,7 +8,8 @@
     "check": "tsc --noEmit && tsx --test \"./lib/**/*.test.ts\" \"./app/api/**/*.test.ts\"",
     "smoke:mock": "tsx scripts/smoke-mvp.ts",
     "smoke:http": "tsx scripts/smoke-http.ts",
-    "smoke:unit": "tsx --test \"./app/api/bounties/lifecycle.test.ts\" \"./app/api/bounties/bounty.test.ts\""
+    "smoke:unit": "tsx --test \"./app/api/bounties/lifecycle.test.ts\" \"./app/api/bounties/bounty.test.ts\"",
+    "seed:demo": "tsx scripts/seed-demo.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

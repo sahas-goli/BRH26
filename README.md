@@ -15,10 +15,21 @@ node db/apply.mjs --dry-run         # schema extract / Tiger SSL plan (no DATABA
 # bash sim/smoke_replay.sh
 ```
 
+### Table demo: `/live` with real PGlite data (no Tiger)
+
+One command to seed a branching cascade, then serve it:
+
+```bash
+npm --prefix web run seed:demo && npm --prefix web run dev
+# open http://localhost:3000/live
+```
+
+`seed:demo` writes `web/.data/demo` (`DATABASE_URL=pglite:.data/demo`), sets `FEATURED_BOUNTY` in `web/.env.local` (never overwrites a Postgres Tiger URL), and checks `/api/stats` + `/api/graph` shape before exit. Pitch crib: [submission/pitch-2min.md](submission/pitch-2min.md).
+
 ### Local `next dev` (no Tiger)
 
 ```bash
-# web/.env.local
+# web/.env.local (or use seed:demo above for a pre-filled cascade)
 DATABASE_URL=pglite:.data/local
 PUBLIC_BASE_URL=http://localhost:3000
 PAYOUT_MODE=mock
