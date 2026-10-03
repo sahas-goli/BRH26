@@ -18,6 +18,6 @@ Cornell, Oct 2-4, 2026. **Theme: Navigation.** Scope: only what helps build and 
 
 ## Known gaps
 - Spoken vs written conflicts: Capital One, SpaceX space theme (see track files).
-- Sponsor API docs for Capital One Nessie and xAI/Grok not pulled.
+- Sponsor API notes and gotchas added 2026-10-03 (each track file, "Verified" section). Unconfirmed: xAI signup credits, GoDaddy 2026 TLD list and claim code.
 - 3D printer details, rental stock and checkout limits unknown. Judge names and the MLH track slides not captured.
 - Devpost blocks direct download; re-check its track text in a browser.
