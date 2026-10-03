@@ -33,7 +33,7 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 ## Claims (remote locks)
 
 - `claim/S2-06` — Sahas Goli
-- `claim/AL-02` — haydenmfu (local smoke; leave open until prod demo)
+- AL-02 claim released after local smoke merge (task stays open for prod double-run)
 
 ## Next
 
