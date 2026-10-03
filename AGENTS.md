@@ -10,3 +10,27 @@ S2-06 is Hayden's Nessie task. Leave it.
 
 Read WORKFLOW.md fully before doing anything, then the PLAN.md sections your task's `spec:` line names.
 SWE may edit any path marked SWE in PLAN.md section 3. Claim only a task named above that is still free, with `bash scripts/task.sh`.
+
+## Notify S
+
+POST once to this ntfy topic when you are stuck, blocked on S, or finished a claimed task. One notification per event. Do not send progress spam, secrets, env values, or stack traces.
+
+S subscribes on the web at https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea, or in the ntfy app with topic `brh26-11a5192222b1bdc25d0b45c23a2e1aea` on server `https://ntfy.sh`.
+
+Git Bash (`curl`):
+
+```bash
+curl -fsS -H "Title: BRH26 stuck" -H "Priority: high" -H "Tags: warning" -d "AL-08: one-sentence blocker" "https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea"
+curl -fsS -H "Title: BRH26 done" -H "Priority: default" -H "Tags: white_check_mark" -d "AL-08: https://github.com/Sahas266/BRH26/pull/1" "https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea"
+curl -fsS -H "Title: BRH26 needs S" -H "Priority: high" -H "Tags: rotating_light" -d "AL-01: only S can apply the hosted database env" "https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea"
+```
+
+PowerShell (`curl.exe`, because `curl` is an alias):
+
+```powershell
+curl.exe -fsS -H "Title: BRH26 stuck" -H "Priority: high" -H "Tags: warning" -d "AL-08: one-sentence blocker" "https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea"
+curl.exe -fsS -H "Title: BRH26 done" -H "Priority: default" -H "Tags: white_check_mark" -d "AL-08: https://github.com/Sahas266/BRH26/pull/1" "https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea"
+curl.exe -fsS -H "Title: BRH26 needs S" -H "Priority: high" -H "Tags: rotating_light" -d "AL-01: only S can apply the hosted database env" "https://ntfy.sh/brh26-11a5192222b1bdc25d0b45c23a2e1aea"
+```
+
+Replace the task id, the one-sentence blocker, and the PR url. Omit the PR url on done if there is none.
