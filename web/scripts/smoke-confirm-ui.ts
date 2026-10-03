@@ -1,5 +1,5 @@
 /**
- * Lib-level check: claim without badge → found → HolderView.pendingClaim → confirm → paid.
+ * Lib-level check: claim → found → HolderView.pendingClaim → confirm → paid.
  *   npx tsx scripts/smoke-confirm-ui.ts
  */
 import { configureBounty, createBounty, forwardBounty, getHolderView } from "../lib/bounty";

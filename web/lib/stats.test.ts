@@ -6,7 +6,7 @@ import {
   resolveStatsBountyId,
 } from "./stats";
 
-test("assembleStats shapes gauge-ready JSON", () => {
+test("assembleStats shapes stats JSON", () => {
   const stats = assembleStats({
     bountyId: "b_live",
     status: "open",

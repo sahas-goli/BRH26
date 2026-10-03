@@ -198,7 +198,6 @@ export async function createBounty(input: unknown): Promise<{
   const hours = body.hours === undefined ? 24 : body.hours;
   if (typeof hours !== "number" || !Number.isFinite(hours) || hours <= 0 || hours > 8760) throw new BountyError("invalid_hours", 400);
   if (body.posterRail !== undefined && body.posterRail !== "bank") throw new BountyError("invalid_rail", 400);
-  const badge = body.targetBadgeId === undefined ? null : string(body.targetBadgeId, 128);
   const o = options();
   liveRequired(process.env.NESSIE_MODE === "live", o.createEscrow, "escrow_unavailable");
   liveRequired(enabled("GROK_ENABLED"), o.generateWantedCard, "wanted_card_unavailable");
@@ -234,8 +233,8 @@ export async function createBounty(input: unknown): Promise<{
       ? await o.createEscrow!({ bountyId, capCents: cap, posterRail: body.posterRail as "bank" | undefined })
       : undefined;
     await tx.query(
-      "INSERT INTO bounties (id,poster_token,hint,hidden_hint,cap_cents,bounty_cents,target_badge_id,expires_at,created_at,nessie_poster_acct,nessie_escrow_acct) VALUES ($1,$2,$3::jsonb,$4::jsonb,$5,$6,$7,$8,$9,$10,$11)",
-      [bountyId, posterToken, JSON.stringify(hint), JSON.stringify(hidden), cap, Math.round(cap * INITIAL_SHARE), badge,
+      "INSERT INTO bounties (id,poster_token,hint,hidden_hint,cap_cents,bounty_cents,expires_at,created_at,nessie_poster_acct,nessie_escrow_acct) VALUES ($1,$2,$3::jsonb,$4::jsonb,$5,$6,$7,$8,$9,$10)",
+      [bountyId, posterToken, JSON.stringify(hint), JSON.stringify(hidden), cap, Math.round(cap * INITIAL_SHARE),
         new Date(at.getTime() + hours * 3_600_000).toISOString(), at.toISOString(), escrow?.posterAccount ?? null, escrow?.escrowAccount ?? null],
     );
     await tx.query(

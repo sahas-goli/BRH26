@@ -49,7 +49,7 @@ test("allowed cap boundaries persist exact integer cents and initial sixty perce
     const insert = calls.find((call) => call.sql.startsWith("INSERT INTO bounties"))!;
     assert.equal(insert.values[4], capCents);
     assert.equal(insert.values[5], Math.round(0.6 * capCents));
-    assert.equal(insert.values[7], "2026-10-04T16:00:00.000Z");
+    assert.equal(insert.values[6], "2026-10-04T16:00:00.000Z");
     assert.match(result.bountyId, /^b_[A-Za-z0-9]{8}$/);
     assert.match(result.posterToken, /^[A-Za-z0-9_-]{22}$/);
     assert.match(result.posterLink, /^\/h\/[A-Za-z0-9_-]{22}$/);

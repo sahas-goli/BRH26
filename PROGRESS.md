@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 16:00 ET.
+Updated 2026-10-03 16:30 ET.
 
 ## On main
 
@@ -15,14 +15,13 @@ Updated 2026-10-03 16:00 ET.
 
 ## Plan changes
 
-Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays HW.
+Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stays. The hardware lane, `hardware/`, HOTP, and the venue badge game were removed. Claim is an introduction; poster confirm pays. `bounties.target_badge_id` remains an unused column.
 
 ## Local MVP evidence (no Tiger)
 
 - `npm run smoke:mock` → PGlite lib path (`SMOKE_MVP_OK`)
 - `npm run smoke:http` → real route handlers post→forward→claim→confirm→og (`SMOKE_HTTP_OK`)
 - `next dev`: `DATABASE_URL=pglite:.data/local` in `web/.env.local` (see README)
-- `web/lib/hotp.ts` RFC vectors + claim wiring (HW-02 software; firmware still open)
 - Tiger service `hldtuqlvht` is ready. Schema and caggs are applied. The real `DATABASE_URL` is in local `web/.env.local` only.
 
 ## Blocked / needs humans
@@ -36,18 +35,14 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 
 ## Also on main (demo readiness)
 
-- `hardware/INVENTORY.md`, `hardware/game.md`, `hardware/bridge.py` (stats → `B x.xx`)
-- `submission/*.md` track stubs (PLAN §9/§13)
+- `submission/*.md` track write-ups (PLAN §9/§13). Hardware is not a track.
 - README phone LAN local test steps
 
 ## Claims (remote locks)
 
 - `claim/S2-06` — Sahas Goli
-- HW-01 / HW-05 claims released after scaffold merge (physical work still open)
 
 ## Next (humans)
 
 1. Copy Tiger `DATABASE_URL` into Vercel, then load the replay (`bash sim/load.sh`).
-2. MLH table: fill `hardware/INVENTORY.md` + flash one badge (HW-01).
-3. Organizer approval + 5 volunteers in `hardware/game.md` (HW-03).
-4. GoDaddy domain (S3-07); Nessie (S2-06); Photon/xAI keys (AL-01).
+2. GoDaddy domain (S3-07); Nessie (S2-06); Photon/xAI keys (AL-01).

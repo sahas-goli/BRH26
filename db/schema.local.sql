@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS bounties (
   cap_cents       INT  NOT NULL CHECK (cap_cents >= 1000),
   bounty_cents    INT  NOT NULL,
   status          TEXT NOT NULL DEFAULT 'open',
-  target_badge_id TEXT,
+  target_badge_id TEXT,                        -- unused column; left so apply does not rewrite the table
   controller_step INT  NOT NULL DEFAULT 0,
   low_b_since     TIMESTAMPTZ,
   nessie_poster_acct TEXT, nessie_escrow_acct TEXT,

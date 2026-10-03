@@ -24,4 +24,4 @@ Every forward can commit a salted edge memo on Solana. A successful claim pays t
 
 ## What judges see
 
-After badge claim or poster confirm: Explorer link (`explorer.solana.com/tx/…?cluster=devnet`) with N transfers + memo. Attack slider on `/live` explains why the split is Solana-settled the way it is.
+After poster confirm: Explorer link (`explorer.solana.com/tx/…?cluster=devnet`) with N transfers + memo. Attack slider on `/live` explains why the split is Solana-settled the way it is.

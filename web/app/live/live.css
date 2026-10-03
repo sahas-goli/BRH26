@@ -165,26 +165,26 @@
   min-height: 0;
 }
 
-.live-gauge-wrap {
+.live-dial-wrap {
   display: grid;
   grid-template-columns: 140px 1fr;
   gap: 12px;
   align-items: center;
 }
 
-.live-gauge {
+.live-dial {
   width: 140px;
   height: 90px;
   position: relative;
 }
 
-.live-gauge svg {
+.live-dial svg {
   width: 100%;
   height: 100%;
   overflow: visible;
 }
 
-.live-gauge-needle {
+.live-dial-needle {
   transform-origin: 70px 70px;
   transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -320,7 +320,7 @@
   .live-grid,
   .live-bottom,
   .live-side,
-  .live-gauge-wrap {
+  .live-dial-wrap {
     grid-template-columns: 1fr;
   }
 

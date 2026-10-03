@@ -20,17 +20,17 @@ npm --prefix web run seed:demo && npm --prefix web run dev
 | Time | On screen | Say / do |
 |---|---|---|
 | 0:00–0:20 | Title slide or `/` | Hook: 2–4 hops, Kleinberg, “we made the chain pay, correctly.” |
-| 0:20–0:50 | **`/live`** after seed | Cascade + depths; point at **b** / gauge / controller step 2 |
+| 0:20–0:50 | **`/live`** after seed | Cascade + depths; point at **b** / controller step 2 |
 | 0:50–1:10 | **`/post`** → create bounty | Fill hint + cap; submit; copy poster `/h/…` |
 | 1:10–1:25 | **`/h/[token]`** | Show wanted card + depth; forward 1 label (or cut to pre-seeded edge) |
-| 1:25–1:40 | **`/claim/[token]`** | Intro (badge optional); success + payout / Explorer (mock ok) |
+| 1:25–1:40 | **`/claim/[token]`** | Intro; found, then poster confirm; payout / Explorer (mock ok) |
 | 1:40–2:00 | **`/live` attack slider** | k=1..4: MIT gains vs ours **+0%**; freeze on k=2 |
 
 **Cuts if short:** skip fresh `/post` and stay on seeded `/live` + hop tab + claim + attack (still ~2 min with VO).
 
 ## Clip checklist
 
-- [ ] `clip-live.mp4` — `/live` cascade + gauge (~20–30 s)
+- [ ] `clip-live.mp4` — `/live` cascade + branching factor (~20–30 s)
 - [ ] `clip-post.mp4` — `/post` create (~15 s) *or skip if using seed only*
 - [ ] `clip-hop.mp4` — `/h/…` forward UI (~15 s)
 - [ ] `clip-claim.mp4` — claim success + explorer/mock sig (~15 s)

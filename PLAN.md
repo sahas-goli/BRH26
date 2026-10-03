@@ -29,18 +29,17 @@ All times are Saturday Oct 3 to Sunday Oct 4, Eastern.
 | Time | Milestone | Exit criteria |
 |---|---|---|
 | 11:30 | **M-1 Scaffold** | S3-01 merged: `web/` Next.js app, `types.ts`, `db.ts`, `.env.example`, `npm run check` passes. Everyone branches from this. |
-| 12:30 | **M0 Contracts + go/no-go** | Schema applied on Tiger; split tests pass; go/no-go A to G run and results posted in team chat. |
-| 15:00 | **M1 Mock end to end** | On the Vercel URL: post, forward, claim, mock payout, and `/live` shows the cascade from Tiger. Organizer approval for the venue game secured. |
-| 17:00 | **Venue game launch** | 5 volunteer targets with badges; launch post in the BRH Discord. |
-| 21:00 to 23:00 | **M2 Integration window** | Real devnet payout, Nessie escrow and release, Photon flows, Grok Voice, gauge. **Nobody sleeps in this window.** |
+| 12:30 | **M0 Contracts + go/no-go** | Schema applied on Tiger; split tests pass; go/no-go A–E and G run and results posted in team chat. |
+| 15:00 | **M1 Mock end to end** | On the Vercel URL: post, forward, claim, poster confirm, mock payout, and `/live` shows the cascade from Tiger. |
+| 21:00 to 23:00 | **M2 Integration window** | Real devnet payout, Nessie escrow and release, Photon flows, Grok Voice. **Nobody sleeps in this window.** |
 | 03:00 | Feature freeze | Bug fixes only. |
 | 05:00 | Code freeze | Only write-ups, deck, and video after this. |
 | 08:15 | Devpost submitted | Hard deadline 08:30. |
 | 09:00 | Table judging | 2 min pitch plus 2 min Q&A. |
 
 **Sleep shifts (minimum 3 h each).**
-- Shift A (SWE1, HW): 23:30 to 03:00.
-- Shift B (SWE2, SWE3): 03:00 to 06:00.
+- Shift A: 23:30 to 03:00.
+- Shift B: 03:00 to 06:00.
 - Optional 1 h naps before 17:00 are fine, as long as nobody holding an unmerged M1 task is asleep at 15:00.
 
 ---
@@ -52,7 +51,7 @@ flowchart LR
   subgraph Phones
     P[Poster browser] --> W
     H[Holder browser /h/token] --> W
-    T[Target /claim/token + badge code] --> W
+    T[Target /claim/token] --> W
     IM[iMessage users] <--> PH[Photon Spectrum cloud]
     V[Voice browser /talk/token] <--> XV[xAI Grok Voice realtime]
   end
@@ -65,17 +64,13 @@ flowchart LR
   W --> GM[Gemini: hint-card compiler]
   W -->|ephemeral token| V
   SIM[sim/ on DGX: 1M-event replay] -->|COPY| DB
-  BR[hardware/bridge.py] -->|GET /api/stats| W
-  BR -->|serial| GA[Arduino gauge]
-  BD[Arduino HOTP badges] -.code typed by target.-> T
 ```
 
-**Repo layout.** Software paths have one owner, SWE. Any software person may edit them and claim any SWE task. HW paths stay with HW. Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who claims or edits the work.
+**Repo layout.** Software paths have one owner, SWE. Any software person may edit them and claim any SWE task. ALL tasks are for anyone. Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who claims or edits the work.
 
 | Path | Owner |
 |---|---|
 | `web/**`, `agent/**`, `db/**`, `sim/**` | SWE |
-| `hardware/**`, `web/lib/hotp.ts`, `web/lib/hotp.test.ts` | HW |
 | **Shared contracts:** `web/lib/types.ts`, `db/schema.sql`, `.env.example`, `web/package.json` + lockfile, section 4 of this file | change only via a CONTRACT PR (WORKFLOW.md section 5) |
 | `submission/<track>.md` | one owner per track (section 12) |
 | `tasks/**`, `scripts/task.sh`, `PLAN.md`, `WORKFLOW.md` | anyone, small edits |
@@ -151,7 +146,7 @@ CREATE TABLE bounties (
   cap_cents       INT  NOT NULL CHECK (cap_cents >= 1000),
   bounty_cents    INT  NOT NULL,               -- current offer; starts at 60% of cap
   status          TEXT NOT NULL DEFAULT 'open',
-  target_badge_id TEXT,                        -- venue game: claim needs this badge's HOTP code
+  target_badge_id TEXT,                        -- unused column; left so apply does not rewrite the table
   controller_step INT  NOT NULL DEFAULT 0,
   low_b_since     TIMESTAMPTZ,                 -- when b first dropped below 2 (controller)
   nessie_poster_acct TEXT, nessie_escrow_acct TEXT,
@@ -278,15 +273,15 @@ Every error returns `{ "error": "<code>" }`.
 
 | Method and path | Owner | Request | Response |
 |---|---|---|---|
-| `POST /api/bounties` | SWE | `{ text?: string, hint?: HintCard, hidden?: {attr,value}[], capCents: number, hours?: number, targetBadgeId?: string, posterRail?: "bank" }` (`text` goes through Gemini when `GEMINI_ENABLED`; otherwise send `hint`) | `201 { bountyId, posterToken, posterLink: "/h/<rootToken>", publicUrl }`. Creates the bounty plus a depth-0 root holder for the poster, Nessie escrow, and the wanted-card job. |
+| `POST /api/bounties` | SWE | `{ text?: string, hint?: HintCard, hidden?: {attr,value}[], capCents: number, hours?: number, posterRail?: "bank" }` (`text` goes through Gemini when `GEMINI_ENABLED`; otherwise send `hint`) | `201 { bountyId, posterToken, posterLink: "/h/<rootToken>", publicUrl }`. Creates the bounty plus a depth-0 root holder for the poster, Nessie escrow, and the wanted-card job. |
 | `GET /api/bounties/[id]` | SWE | | `PublicBounty` |
 | `GET /api/h/[token]` | SWE | | `HolderView`; sets `opened_at` and logs `opened` once |
 | `POST /api/forward` | SWE | `{ token, recipients: ForwardRecipient[] (1..3 minus forwards used), rail?: Rail, solAddress?: string }` | `200 ForwardResult`. `409 fanout_exceeded`, `409 too_deep` (child depth > 8), `410 closed`. Creates child holders, logs `received` and `forwarded` (with `latency_s`), and fires the edge memo (S2-04) without awaiting it. |
-| `POST /api/claim` | SWE | `{ token, badgeCode?: string, introMessage: string }` | `200 { status: "found" \| "paid", payoutSig?, explorerUrl? }`. `401 bad_code`, `409 already_claimed`. See section 5. |
-| `POST /api/bounties/[id]/confirm` | SWE | `{ posterToken, accept: boolean }` | `200 { status, payoutSig? }`. Releases the payout for bounties without a badge. |
+| `POST /api/claim` | SWE | `{ token, introMessage: string }` | `200 { status: "found" }`. `409 already_claimed`. See section 5. |
+| `POST /api/bounties/[id]/confirm` | SWE | `{ posterToken, accept: boolean }` | `200 { status, payoutSig? }`. Poster confirm releases the payout. |
 | `POST /api/attack` | SWE | `{ h: 1..8, k: 0..4, budgetCents }` | `AttackComparison` (pure, no DB) |
 | `POST /api/controller/tick` | SWE | header secret | `{ actions: { bountyId, step, kind, nudge?: {handle, text}[] }[] }`. The agent sends each `nudge` over iMessage. Also expires and refunds overdue bounties. |
-| `GET /api/stats?bounty=<id>` | SWE | | `Stats`. With no `bounty`, it returns the "featured" bounty (env `FEATURED_BOUNTY`), which the gauge reads. |
+| `GET /api/stats?bounty=<id>` | SWE | | `Stats`. With no `bounty`, it returns the featured bounty (env `FEATURED_BOUNTY`) for `/live`. |
 | `GET /api/graph/[id]` | SWE | | `GraphPayload`. Revealed salts are included only once the bounty is `paid`. |
 | `POST /api/grok/token` | SWE | `{ token }` (holder token) | `{ clientSecret, expiresAt, model }` (VERIFY G) |
 | `GET /api/og/[id]` | SWE | | `image/png` wanted card, 1200x630 (fallback: static template rendered with `next/og`) |
@@ -296,9 +291,9 @@ Every error returns `{ "error": "<code>" }`.
 
 ```
 DATABASE_URL=postgres://...tsdb.cloud.timescale.com:.../tsdb?sslmode=require
-INTERNAL_SECRET=                 # long random string; web, agent and bridge share it
+INTERNAL_SECRET=                 # long random string; web and agent share it
 PUBLIC_BASE_URL=https://milgram.study
-FEATURED_BOUNTY=                 # bounty id shown on the gauge and /live by default
+FEATURED_BOUNTY=                 # bounty id shown on /live by default
 PAYOUT_MODE=mock                 # mock | devnet
 SOLANA_RPC_URL=https://api.devnet.solana.com
 SOLANA_RPC_BACKUP=               # Helius devnet URL
@@ -315,7 +310,6 @@ GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.8-flash
 GROK_ENABLED=false
 XAI_API_KEY=
-HOTP_SECRETS=                    # JSON {"badge1":"<hex secret>",...}
 ```
 
 Mock flags exist so nobody blocks. With every flag off or mock, the full post, forward, claim and pay loop still runs and writes the same rows and events.
@@ -324,16 +318,14 @@ Mock flags exist so nobody blocks. With every flag off or mock, the full post, f
 
 ## 5. How a bounty is satisfied (lifecycle)
 
-1. **Post.** The poster describes who they need. Gemini compiles the text into a `HintCard`; the attributes-only schema has no name or address field. It also produces an ordered `hidden_hint` list that the controller reveals later. The poster sets a cap of at least $10 and a deadline (default 24 h; venue game until 06:00). The server then:
+1. **Post.** The poster describes who they need. Gemini compiles the text into a `HintCard`; the attributes-only schema has no name or address field. It also produces an ordered `hidden_hint` list that the controller reveals later. The poster sets a cap of at least $10 and a deadline (default 24 h). The server then:
    1. creates the bounty with `bounty_cents = round(0.6 * cap)`;
    2. creates the poster's Nessie checking account (if `posterRail` is bank or on first use) and an escrow account, and transfers the full cap from checking to escrow;
    3. generates the wanted card;
    4. returns the poster's own forward link (the depth-0 root holder, which is never paid).
 2. **Forward.** A holder opens `/h/<token>`, reads the hint card, picks a payout rail (custodial by default, a pasted Solana address, or bank), and forwards to 1 to 3 people. Each recipient becomes a child holder at `depth + 1` with a fresh token, and gets their link by iMessage (if `handle` is set and Photon is on) or as a link the holder copies. Each edge is committed to Solana as a memo of `sha256(salt_parent || salt_child || bountyId || iso_time)`, so edges can be proven later without revealing who is in a losing branch. A recipient at depth 8 cannot forward.
-3. **Find.** The person who matches the card opens their link and taps "This is me", which takes them to `/claim/<token>`. They write an intro message and, in the venue game, type the 4-digit code from their badge. This is the **target**. Their depth h is the chain length, and they are the **finder** in the split.
-4. **Verify.**
-   - **Venue bounties** (`target_badge_id` set): a valid HOTP code proves the target the poster pre-registered, so the claim moves straight to payment.
-   - **Other bounties:** the bounty becomes `found`. The poster reads the intro on their link and calls `/confirm` with `accept`. A `false` reopens the bounty and logs `detail.rejected`.
+3. **Find.** The person who matches the card opens their link and taps "This is me", which takes them to `/claim/<token>`. They write an intro message. This is the **target**. Their depth h is the chain length, and they are the **finder** in the split.
+4. **Verify.** The bounty becomes `found`. The poster reads the intro on their link and calls `/confirm` with `accept`. A `false` reopens the bounty and logs `detail.rejected`. Payment happens only after that confirm.
 5. **Pay.** In one DB transaction (`SELECT ... FOR UPDATE` on the bounty row; first valid claim wins), the server:
    1. computes `split(h, bounty_cents)` over the chain from depth 1 to the target;
    2. writes `payouts` rows (the primary key makes retries idempotent);
@@ -486,34 +478,17 @@ Base URL is `https://api.nessieisreal.com`; use HTTPS only, because plain HTTP r
 
 Claim `milgram.study` through the MLH GoDaddy Registry offer (https://www.tech.study/; get the claim code from the MLH prizes page or a coach). Point it at Vercel. Fallback: any `sixhops.*` the offer allows. Register it by 13:00 so link previews use the real domain.
 
-### 7.8 Hardware and game ops (HW)
-
-- **Target badges (2 to 3):** Arduino Uno + Grove base shield + Grove 4-digit display (TM1637) + Grove button, powered by a USB power bank, in a 3D-printed lanyard case.
-  - Pressing the button increments an EEPROM counter and shows `HOTP(secret, counter) mod 10^4` (RFC 4226 HMAC-SHA1 with dynamic truncation; 4 digits because of the display).
-  - No clock is needed, and the code survives power cycles.
-  - Libraries: `TM1637Display` (Avishay Orpaz) and an HMAC-SHA1 implementation such as the `Sha1` class in Cryptosuite; VERIFY F in Library Manager.
-  - Per-badge secrets are flashed from `hardware/secrets.h` (gitignored) and mirrored in `HOTP_SECRETS`.
-- **`web/lib/hotp.ts`:** accepts a code if it matches any counter in [last+1, last+10] (a look-ahead window knob), then stores the new counter in `detail` on the `claimed` event. It allows 5 failed attempts per bounty per 10 minutes. `hotp.test.ts` uses the RFC 4226 Appendix D test vectors (6-digit), plus mod 10^4.
-- **Gauge:** a servo needle on a printed dial (0 to 3, red zone below 2) plus red/amber/green LEDs. `hardware/bridge.py` polls `GET /api/stats` every 5 s and writes `B 1.73\n` over serial at 9600 baud; the firmware maps b to an angle with calibration constants `ANGLE_MIN` and `ANGLE_MAX` (servos vary, so tune them on the bench).
-- **Fallback (F fails):** printed one-time code cards (each code valid once) replace the badges, and the gauge becomes the hardware piece.
-- **Game ops:**
-  - get organizer approval by 15:00 ("an opt-in forwarding game, no real money, volunteers as targets");
-  - recruit 5 volunteer targets (hackers or organizers) and write each one's hint card with them;
-  - launch in the BRH Discord at 17:00 with one bounty link per target;
-  - check the cascade every 2 h overnight;
-  - export the data at 06:00.
-
 ### 7.9 Web app and UI
 
 - **SWE1 pages:**
   - `/` explains the game in one screen and lists the featured bounty;
   - `/post` takes free text or the form, cap, and deadline;
   - `/h/[token]` shows the wanted card, hint card, depth ("you are hop 3 of at most 8"), forward form (1 to 3 rows: label, optional iMessage handle), rail picker, a "talk instead" link, and a "this is me" link;
-  - `/claim/[token]` takes the intro message and badge code, then shows a success screen with the Explorer link.
+  - `/claim/[token]` takes the intro message, marks the bounty found, and tells the finder that payment waits on poster confirm.
   - Mobile first, since most opens come from phones.
 - **SWE3 `/live`, the demo screen:**
   - d3-force cascade colored by depth, with paid nodes glowing and edges linking to their memo signatures;
-  - the b gauge (red/amber/green, threshold 2) and a time series from `bounty_minute`;
+  - the on-screen branching-factor display (red below 2) and a time series from `bounty_minute`;
   - controller step indicator;
   - **attack slider** (k = 0..4 fakes) calling `/api/attack`, with MIT and ours side by side;
   - replay scrubber over the 1M-event replay with the `sweep.json` chart;
@@ -535,7 +510,6 @@ The authoritative list is `tasks/<ID>.md`: one file per task, with owner, depend
 | S1-01 | SWE | Go/no-go A: Photon echo agent | AL-01 | 1 | 12:30 |
 | S2-02 | SWE | Go/no-go B (Solana) + D (Nessie) | AL-01 | 1 | 12:30 |
 | S3-02 | SWE | Go/no-go E: Tiger service, apply schema + caggs | S3-01 | 1 | 12:30 |
-| HW-01 | HW | Go/no-go F: parts inventory, HOTP on one Uno, start printing the badge case | none | 1.5 | 12:30 |
 | S3-06a | SWE | Go/no-go G: Grok key, ephemeral token, one tool call | AL-01 | 0.5 | 12:30 |
 | S1-02 | SWE | `bounty.ts` + bounties, h, forward APIs (mock memos) | S3-02 | 3 | 15:00 |
 | S1-03 | SWE | Pages `/`, `/post`, `/h/[token]`, `/claim/[token]` | S1-02 | 2.5 | 15:00 |
@@ -544,8 +518,6 @@ The authoritative list is `tasks/<ID>.md`: one file per task, with owner, depend
 | S3-03 | SWE | `sim/replay.py`, load 1M rows, benchmark numbers | S3-02 | 3 | 17:00 |
 | S3-04 | SWE | `/api/stats`, `/api/graph/[id]` | S3-02 | 1.5 | 15:00 |
 | S3-07 | SWE | Domain milgram.study on Vercel | AL-01 | 0.5 | 13:00 |
-| HW-02 | HW | Badge firmware + `hotp.ts` + `hotp.test.ts` | HW-01, S3-01 | 2.5 | 15:00 |
-| HW-03 | HW | Organizer approval, 5 targets, hint cards, Discord post draft | none | 1.5 | 15:00 |
 | S1-04 | SWE | Grok Imagine wanted card + `/api/og` + og meta | S1-02 | 1.5 | 19:00 |
 | S1-05 | SWE | Photon agent flows + `/send` + 30 s tick loop, deployed on the DGX | S1-01, S1-02 | 4 | 21:00 |
 | S2-05 | SWE | `solana.ts`: edge memos + one-tx payout (devnet) | S2-02, S2-03 | 3 | 21:00 |
@@ -553,11 +525,8 @@ The authoritative list is `tasks/<ID>.md`: one file per task, with owner, depend
 | S2-07 | SWE | `controller.ts` + `/api/controller/tick` + expiry | S3-04 | 2.5 | 21:00 |
 | S3-05 | SWE | `/live` visualizer, attack slider, replay, benchmarks, balances | S3-04, S2-04 | 4 | 21:00 |
 | S3-06 | SWE | Grok Voice `/talk/[token]` | S3-06a, S1-02 | 3 | 21:00 |
-| HW-04 | HW | Launch the venue game at 17:00, monitor overnight | S1-03, HW-02, HW-03 | ongoing | 17:00 |
-| HW-05 | HW | Gauge hardware + `bridge.py` | S3-04 | 2 | 21:00 |
 | S1-06 | SWE | Gemini hint-card compiler (cut first) | S1-02 | 1 | 23:00 |
-| AL-02 | ALL | M2 integration: real payout, Nessie, Photon, voice, gauge, smoke test | all M2 tasks | 2 | 23:00 |
-| HW-06 | HW | Main deck PDF on Drive | none | 2.5 | 06:30 |
+| AL-02 | ALL | M2 integration: real payout, Nessie, Photon, voice, smoke test | all M2 tasks | 2 | 23:00 |
 | AL-03 | ALL | Backup demo video (2 min screen recording) | AL-02 | 1 | 06:00 |
 | AL-04 | ALL | Per-track write-ups + Devpost + make repo public | AL-02 | 2 | 08:15 |
 
@@ -569,17 +538,16 @@ Each sponsor gets one spoke: a real, working feature that only that sponsor's pr
 
 | Track | Hard requirement | How Six Hops satisfies it | What the judge sees | Write-up owner | p_win |
 |---|---|---|---|---|---|
-| **MLH Solana** | Use Solana | Per-edge salted commitment memos; the whole chain paid in one atomic multi-transfer transaction | The Explorer tx with N transfers + memo, about 2 s after the claim | SWE | 0.45 |
+| **MLH Solana** | Use Solana | Per-edge salted commitment memos; the whole chain paid in one atomic multi-transfer transaction | The Explorer tx with N transfers + memo, about 2 s after poster confirm | SWE | 0.45 |
 | **MLH Tiger Data** | Use Tiger Data | Events hypertable; `bounty_minute` cagg with real-time aggregation and `percentile_agg` driving the controller's p75; hierarchical rollup; columnstore over the 1M replay | Cagg vs raw ms, compression ratio, refresh lag on `/live` | SWE | 0.35 |
 | **Photon iMessage** | Spectrum integration | Agent in 1:1 threads: deliver bounty, tapback to pass on, name to personal link, nudges from the controller, found and paid messages, deterministic privacy rules | A judge registered at the table forwards a bounty from their own iMessage | SWE | 0.28 |
-| **BigRed (main)** | Theme: Navigation | Decentralized search through a social network, built on the keynote speaker's papers | The whole demo | HW (deck) | 0.24 |
-| **Capital One Nessie** | Nessie API | Real escrow account per bounty; release only after target opt-in and poster confirm (or badge proof); refund on expiry; bank-rail payouts | Balances panel moving on claim; refund on an expired bounty | SWE | 0.22 |
+| **BigRed (main)** | Theme: Navigation | Decentralized search through a social network, built on the keynote speaker's papers | The whole demo | ALL | 0.24 |
+| **Capital One Nessie** | Nessie API | Real escrow account per bounty; release only after target opt-in and poster confirm; refund on expiry; bank-rail payouts | Balances panel moving on claim; refund on an expired bounty | SWE | 0.22 |
 | **SpaceX Make it Legendary** | Built with Cursor + Grok Imagine or Voice | Grok Voice "talk instead" with 3 tools in 20+ languages; Grok Imagine wanted card as the link preview; whole team in Cursor | Voice forward in another language; wanted card in the iMessage preview; Cursor transcripts in the repo | SWE | 0.22 |
 | **MLH GoDaddy Registry** | Domain via GoDaddy Registry | milgram.study ("Milgram study", the 1967 experiment we replicate) hosts everything | The URL on every link | SWE | 0.22 |
 | **Software** | (judged) | Babaioff split with brute-force proof test, controller, strict contracts | `split.test.ts` output, architecture slide | SWE | 0.22 |
-| **Hardware** | (judged) | HOTP target badges (EEPROM counter, no clock) and the live b gauge | Target presses badge, types code, gets paid; gauge needle moves | HW | 0.20 |
-| **People's Choice** | Upvotes | Every game player got a link; one opt-in "your chain found them, vote here" message after 08:30 | | HW | 0.20 |
-| **Design** | (judged) | `/live` cascade, gauge, attack slider; mobile hop page; wanted cards | `/live` on the big screen | SWE | 0.15 |
+| **People's Choice** | Upvotes | Every player got a link; one opt-in "your chain found them, vote here" message after 08:30 | | ALL | 0.20 |
+| **Design** | (judged) | `/live` cascade, branching-factor display, attack slider; mobile hop page; wanted cards | `/live` on the big screen | SWE | 0.15 |
 | **MLH Gemini API** | Use Gemini | Structured-output hint-card compiler that strips names | `/post` turning a messy request into a card | SWE | 0.05 |
 | ElevenLabs, Presage | | **Not entered**: no honest fit | | | |
 
@@ -598,7 +566,6 @@ A failed test cuts that spoke, not the project.
 | C | SWE | `npm run check` passes `split.test.ts` | It's a bug; fix it |
 | D | SWE | Over HTTPS: create a customer, 2 accounts and a transfer; both balances change on GET within 2 min | `NESSIE_MODE=mock`, drop the track |
 | E | SWE | `schema.sql` + `caggs.sql` apply; COPY 100k rows in < 30 s; the cagg answers ≥ 10x faster than the raw scan | Use the fallback syntax noted in 4.2 |
-| F | HW | ≥ 2 TM1637 displays + buttons in stock; a code verifies against `hotp.ts` and still verifies after a power cycle; the power bank lasts 30 min | Printed one-time code cards; the gauge is the hardware |
 | G | SWE | The xAI key has credits (or prepay $10); the server mints an ephemeral token; a browser voice session calls one tool; one Imagine image returns | `GROK_ENABLED=false`, Imagine only, or drop SpaceX |
 
 ---
@@ -610,9 +577,7 @@ At 21:00, cut from the top of this list down:
 2. Grok Voice (keep Imagine)
 3. contact-card intake in Photon
 4. Nessie bank rail (keep Nessie escrow if it works)
-5. gauge
-6. controller step 3 (raise)
-7. venue game (lead with the replay)
+5. controller step 3 (raise)
 
 **Never cut:** split + attack slider, one-tx Solana payout, `/live` with the replay, the claim flow.
 
@@ -621,9 +586,9 @@ At 21:00, cut from the top of this list down:
 ## 12. Demo (2 min) and Q&A
 
 1. **0:00 to 0:20.** "The person you need is usually 2 to 4 hops away in someone's private contacts. Jon Kleinberg proved strangers can find each other with local knowledge alone. We made the chain pay, correctly."
-2. **0:20 to 0:50.** `/live` shows the overnight game: real cascades and their depths next to the 1M-event replay. Point to where b fell below 2 and the controller widened the hint; the physical gauge on the table moves with it.
+2. **0:20 to 0:50.** `/live` shows cascades and their depths next to the 1M-event replay. Point to where b fell below 2 and the controller widened the hint.
 3. **0:50 to 1:15.** A judge (registered at the table) gets a fresh bounty in iMessage with the wanted-card preview. They reply with a name, and a new edge appears on the graph.
-4. **1:15 to 1:40.** A teammate plays the target: presses the badge, types the code, opts in. Within about 2 s one devnet transaction pays every hop; open it in Explorer. The Nessie panel shows escrow released.
+4. **1:15 to 1:40.** A teammate plays the target: writes an intro and opts in. The poster confirms. Within about 2 s one devnet transaction pays every hop; open it in Explorer. The Nessie panel shows escrow released when live balances work.
 5. **1:40 to 2:00.** Attack slider: the finder adds 1 to 4 fake recruiters. MIT pays +50/75/88/94%; ours pays +0, and the poster's total is unchanged.
 
 **Fallbacks:**
@@ -645,13 +610,13 @@ At 21:00, cut from the top of this list down:
 ## 13. Submission checklist (owner of each line in brackets)
 
 - [ ] Repo public at 07:30, after a secret scrub (`git log -p | grep -iE "secret|key=|PRIVATE"`) [SWE]
-- [ ] Deck PDF on Google Drive: name and members, problem, solution + screenshots, tech stack, impact [HW]
+- [ ] Deck PDF on Google Drive: name and members, problem, solution + screenshots, tech stack, impact [ALL]
 - [ ] Devpost sections (Inspiration, What it does, How we built it, Challenges, Accomplishments, What we learned, What's next) [SWE drafts, all review]
-- [ ] `submission/{solana,nessie,software,tiger,spacex,design,godaddy,photon,gemini}.md` [SWE], `{hardware,bigred}.md` [HW]
-- [ ] Tick tracks: BigRed, Software, Hardware, Design, People's Choice, Solana, Tiger Data, Photon, Nessie, SpaceX, GoDaddy, Gemini [SWE]
+- [ ] `submission/{solana,nessie,software,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` [SWE]
+- [ ] Tick tracks: BigRed, Software, Design, People's Choice, Solana, Tiger Data, Photon, Nessie, SpaceX, GoDaddy, Gemini [SWE]
 - [ ] Cursor evidence: transcripts exported to `cursor-transcripts/`, Co-authored-by trailers visible, screen recording [everyone]
 - [ ] Backup video link [SWE]
-- [ ] People's Choice share push right after 08:30 [HW]
+- [ ] People's Choice share push right after 08:30 [ALL]
 
 ---
 

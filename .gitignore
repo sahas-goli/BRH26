@@ -10,7 +10,6 @@ coverage/
 
 .env
 .env*.local
-hardware/secrets.h
 *.keypair.json
 .DS_Store
 Thumbs.db

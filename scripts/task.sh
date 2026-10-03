@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Task board for 4 people + their agents. See WORKFLOW.md section 3.
+# Task board. Lanes are SWE and ALL. See WORKFLOW.md section 3.
 #   tasks/<ID>.md on main      = the task definition and its status (open | done)
 #   origin branch claim/<ID>   = the lock. Pushing a new branch is atomic, so two
 #                                people can never both claim the same task.
