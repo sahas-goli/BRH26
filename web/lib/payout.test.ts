@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { applyClaim, applyConfirm, settleChain } from "./payout";
+import { applyClaim, applyConfirm, claimBounty, confirmBounty, settleChain } from "./payout";
 
 const chain = [
   { holderId: "h_a", depth: 1, rail: "custodial" as const },
@@ -80,3 +80,96 @@ test("settleChain returns null past depth 8", () => {
   }));
   assert.equal(settleChain("b_x", tooLong, 1600, 2000, "h_poster", "bank", []), null);
 });
+
+test("mock claim writes payout rows for a 4-deep chain and a retry is idempotent", async () => {
+  const db = memoryDb();
+  const found = await claimBounty(db, { token: "finder-token", introMessage: "this is me" });
+  assert.equal(found.status, "found");
+  assert.equal(db.state.payouts.length, 0);
+  assert.equal(db.state.bounties[0].status, "found");
+
+  const paid = await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true });
+  assert.equal(paid.status, "paid");
+  assert.equal(paid.payoutSig, "mock_b_demo");
+  assert.equal(db.state.bounties[0].status, "paid");
+  const shares = db.state.payouts.filter((row) => row.role !== "refund");
+  assert.equal(shares.reduce((sum, row) => sum + Number(row.cents), 0), 1600);
+
+  const again = await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true });
+  assert.equal(again.payoutSig, "mock_b_demo");
+  assert.equal(db.state.payouts.length, 5);
+});
+
+function memoryDb() {
+  const state: { bounties: Record<string, unknown>[]; holders: Record<string, unknown>[]; payouts: Record<string, unknown>[]; events: Record<string, unknown>[] } = {
+    bounties: [{
+      id: "b_demo", poster_token: "poster-secret", status: "open", bounty_cents: 1600, cap_cents: 2000,
+      target_badge_id: null, expires_at: "2026-10-04T00:00:00Z",
+    }],
+    holders: [
+      { id: "h_poster", bounty_id: "b_demo", token: "poster-token", parent_id: null, depth: 0, rail: "bank" },
+      { id: "h_a", bounty_id: "b_demo", token: "a", parent_id: "h_poster", depth: 1, rail: "custodial" },
+      { id: "h_b", bounty_id: "b_demo", token: "b", parent_id: "h_a", depth: 2, rail: "wallet" },
+      { id: "h_c", bounty_id: "b_demo", token: "c", parent_id: "h_b", depth: 3, rail: "custodial" },
+      { id: "h_d", bounty_id: "b_demo", token: "finder-token", parent_id: "h_c", depth: 4, rail: "bank" },
+    ],
+    payouts: [],
+    events: [],
+  };
+  const query = async (sql: string, values: unknown[] = []) => {
+    let rows: Record<string, unknown>[] = [];
+    if (sql.startsWith("SELECT bounty_id FROM holders WHERE token")) {
+      rows = state.holders.filter((row) => row.token === values[0]);
+    } else if (sql.includes("FROM bounties WHERE id=$1 FOR UPDATE")) {
+      rows = state.bounties.filter((row) => row.id === values[0]);
+    } else if (sql.includes("FROM bounties WHERE id=$1 AND poster_token")) {
+      rows = state.bounties.filter((row) => row.id === values[0] && row.poster_token === values[1]);
+    } else if (sql.includes("FROM holders WHERE token")) {
+      rows = state.holders.filter((row) => row.token === values[0]);
+    } else if (sql.includes("depth=0")) {
+      rows = state.holders.filter((row) => row.bounty_id === values[0] && row.depth === 0);
+    } else if (sql.startsWith("SELECT id,parent_id,depth,rail FROM holders WHERE id")) {
+      rows = state.holders.filter((row) => row.id === values[0]);
+    } else if (sql.includes("kind='claimed'")) {
+      rows = state.events.filter((row) => row.bounty_id === values[0] && row.kind === "claimed").slice(-1);
+    } else if (sql.startsWith("SELECT tx_sig")) {
+      rows = state.payouts.filter((row) => row.bounty_id === values[0]).slice(0, 1);
+    } else if (sql.startsWith("SELECT holder_id,role")) {
+      rows = state.payouts.filter((row) => row.bounty_id === values[0]);
+    } else if (sql.startsWith("INSERT INTO events")) {
+      state.events.push({
+        time: values[0], bounty_id: values[1], holder_id: values[2], parent_id: values[3],
+        depth: values[4], kind: values[5], detail: values[6],
+      });
+    } else if (sql.startsWith("UPDATE bounties")) {
+      const bounty = state.bounties.find((row) => row.id === values[1]);
+      if (bounty) bounty.status = values[0];
+    } else if (sql.startsWith("INSERT INTO payouts")) {
+      const exists = state.payouts.some((row) => row.bounty_id === values[0] && row.holder_id === values[1]);
+      if (!exists) {
+        state.payouts.push({
+          bounty_id: values[0], holder_id: values[1], role: values[2], cents: values[3], rail: values[4], tx_sig: values[5],
+        });
+      }
+    } else {
+      throw new Error(`Unhandled test query: ${sql}`);
+    }
+    return { rows: rows.map((row) => ({ ...row })) };
+  };
+  return {
+    state,
+    query,
+    async transaction<T>(work: (tx: { query: typeof query }) => Promise<T>) {
+      const snapshot = structuredClone(state);
+      try {
+        return await work({ query });
+      } catch (error) {
+        state.bounties = snapshot.bounties;
+        state.holders = snapshot.holders;
+        state.payouts = snapshot.payouts;
+        state.events = snapshot.events;
+        throw error;
+      }
+    },
+  };
+}
