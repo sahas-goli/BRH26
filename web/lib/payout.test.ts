@@ -116,6 +116,7 @@ test("devnet confirm uses one solana signature and a retry does not send again",
     });
     assert.equal(calls, 1);
     assert.equal(paid.payoutSig, "devnetsig");
+    assert.equal(paid.explorerUrl, "https://explorer.solana.com/tx/devnetsig?cluster=devnet");
     assert.equal(db.state.payouts.every((row) => row.tx_sig === "devnetsig"), true);
     const again = await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true }, {
       signPayout: async () => {

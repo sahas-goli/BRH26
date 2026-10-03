@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:37 ET.
+Updated 2026-10-03 12:40 ET.
 
 ## On main
 
@@ -18,10 +18,11 @@ Updated 2026-10-03 12:37 ET.
 | `4b3c8e2` | `web/lib/nessie.ts` opens an escrow (checking funded at cap + $50, then the cap moves into escrow), pays holders from escrow, and refunds the rest to checking. A local stand-in proved both balances move on each step. Live Nessie was not called. | S2-06 still open. `NESSIE_KEY` unset. |
 | `37731b0` | When `PAYOUT_MODE=devnet`, claim and confirm stamp one signature onto the payout rows before insert. Bank rails and refunds stay off that transaction. A second confirm returns the stored signature and does not sign again. The test injects the signature; no devnet send ran. | S2-05 still open. `SOLANA_PAYER_SECRET` unset. |
 | `4902fca` | `releaseEscrow` also moves the Solana share from escrow to a treasury account. The local stand-in shows holder, treasury, and escrow all move. | S2-06 still open. Live Nessie not called. |
+| `46c5b82` | When `NESSIE_MODE=live`, confirm pays bank-rail holders from escrow, moves the Solana share to treasury, and refunds `cap - bounty`. An overdue tick refunds the full escrow before it marks the bounty refunded. | S2-06 still open. Live Nessie not called. |
 
 ## This branch
 
-When `NESSIE_MODE=live`, confirm pays bank-rail holders from escrow, moves the Solana share to treasury, and refunds `cap - bounty`. An overdue tick refunds the full escrow before it marks the bounty refunded. The local stand-in shows those balances move. Live Nessie was not called. S2-06 stays open.
+Paid claim and confirm responses include `explorerUrl` (`https://explorer.solana.com/tx/<sig>?cluster=devnet`). `/live` is still the S3-05 page, so the link is on the API. S2-05 stays open until a claim produces a confirmed devnet signature. `swe3/S3-01` has the scaffold and no pull request.
 
 ## Plan changes
 
@@ -30,7 +31,7 @@ When `NESSIE_MODE=live`, confirm pays bank-rail holders from escrow, moves the S
 
 ## Blocked
 
-- S2-01 and later web tasks that need the app runner: S3-01 is claimed (`claim/S3-01`) and the scaffold is not on main. No `package.json`, no `web/lib/db.ts`, no `npm run check`. Claim and confirm return 503 until `pool` exists.
+- S2-01 and later web tasks that need the app runner: `swe3/S3-01` has `web/package.json` and `web/lib/db.ts` and no pull request. Those files are not on main, so `npm run check` still does not exist here. Claim and confirm return 503 until `pool` exists.
 - S2-02 test B, the 6-transfer half: devnet faucet returned 429 again at 12:32 ET. No `SOLANA_PAYER_SECRET`.
 - S2-02 test D: no `NESSIE_KEY`.
 - `swe1/S1-02` has bounty code on its branch and no pull request.

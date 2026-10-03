@@ -1,4 +1,5 @@
 import { splitCents } from "./split";
+import { explorerUrl } from "./solana";
 
 export type Rail = "custodial" | "wallet" | "bank";
 export type BountyStatus = "open" | "found" | "paid" | "expired" | "refunded";
@@ -267,11 +268,16 @@ export function envSigner(): SignPayout | undefined {
   };
 }
 
+function paidBody(payoutSig?: string): { status: "paid"; payoutSig?: string; explorerUrl?: string } {
+  if (!payoutSig) return { status: "paid" };
+  return { status: "paid", payoutSig, explorerUrl: explorerUrl(payoutSig) };
+}
+
 export async function claimBounty(
   db: PayoutDatabase,
   input: unknown,
   opts: { verifyBadge?: (badgeId: string, code: string) => Promise<boolean>; now?: () => Date; signPayout?: SignPayout; moveBank?: MoveBank } = {},
-): Promise<{ status: "found" | "paid"; payoutSig?: string }> {
+): Promise<{ status: "found" | "paid"; payoutSig?: string; explorerUrl?: string }> {
   const parsed = body(input);
   const token = requiredString(parsed.token);
   const introMessage = requiredString(parsed.introMessage);
@@ -319,7 +325,7 @@ export async function claimBounty(
     await moveLiveBank(bounty, stamped, opts.moveBank);
     await writePayouts(tx, String(bountyId), stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
-    return { status: "paid", payoutSig: stamped[0]?.txSig ?? step.payoutSig };
+    return paidBody(stamped[0]?.txSig ?? step.payoutSig);
   });
 }
 
@@ -327,7 +333,7 @@ export async function confirmBounty(
   db: PayoutDatabase,
   input: unknown,
   opts: { signPayout?: SignPayout; moveBank?: MoveBank } = {},
-): Promise<{ status: string; payoutSig?: string }> {
+): Promise<{ status: string; payoutSig?: string; explorerUrl?: string }> {
   const parsed = body(input);
   const bountyId = requiredString(parsed.bountyId);
   const posterToken = requiredString(parsed.posterToken);
@@ -341,7 +347,7 @@ export async function confirmBounty(
     if (!bounty) throw new PayoutError("not_found", 404);
     if (bounty.status === "paid") {
       const sigs = await tx.query<Record<string, unknown>>("SELECT tx_sig FROM payouts WHERE bounty_id=$1 LIMIT 1", [bountyId]);
-      return { status: "paid", payoutSig: sigs.rows[0] ? String(sigs.rows[0].tx_sig) : undefined };
+      return paidBody(sigs.rows[0] ? String(sigs.rows[0].tx_sig) : undefined);
     }
     const posters = await tx.query<Record<string, unknown>>(
       "SELECT id,parent_id,depth,rail FROM holders WHERE bounty_id=$1 AND depth=0",
@@ -368,6 +374,6 @@ export async function confirmBounty(
     await writePayouts(tx, bountyId, stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
     await logEvent(tx, at, bountyId, poster, "paid", {});
-    return { status: "paid", payoutSig: stamped[0]?.txSig ?? step.payoutSig };
+    return paidBody(stamped[0]?.txSig ?? step.payoutSig);
   });
 }
