@@ -393,7 +393,7 @@ export function splitCents(h: number, B: number): { relay: number; finder: numbe
 
 **Honest limits** (say these out loud if asked): a *relay* who inserts fakes moves money from the finder to themselves. The paper proves that is dominated only in equilibrium, and its Theorem 3.1 shows no rule makes it dominated outright for H ≥ 3. Mitigations: a cap of 8, distinct handles for iMessage payouts, and flagging forwards that land within a second of each other (visible in slot order).
 
-**Minimum budget.** A brand-new Solana account needs 650,240 lamports (rent exemption for 0 bytes; `getMinimumBalanceForRentExemption(0)` on `api.devnet.solana.com`, 2026-10-03). At `DEMO_USD_PER_SOL=150`, that is about 9.8 cents, so a relay share B/16 must be at least 10 cents, meaning B ≥ 160 cents. The minimum cap is $10, so B starts at $6 or more and clears this easily. The 6-transfer half of test B is still open: the devnet faucet returned 429.
+**Minimum budget.** A brand-new Solana account needs 650,240 lamports (rent exemption for 0 bytes; `getMinimumBalanceForRentExemption(0)` on `api.devnet.solana.com`, 2026-10-03). At `DEMO_USD_PER_SOL=150`, that is about 9.8 cents, so a relay share B/16 must be at least 10 cents, meaning B ≥ 160 cents. The minimum cap is $10, so B starts at $6 or more and clears this easily. Test B, same day, from treasury `DgGpjfFcuZkvQDpMDyPC7fnbJovzQjpXfycRpLMXuA1a` (5,000,000,000 lamports before the run): five confirmed transactions, each 6 transfers of the rent amount plus memo `sixhops:gonogo`. Times 611, 906, 598, 771, 566 ms. Median 611 ms.
 
 **`split.test.ts`** (node:test, run by `npm run check`) brute-forces every h in 1..8, k in 0..(8 - h), and B in {1000, 1001, 1337, 99999}, asserting:
 - shares sum to B exactly;
@@ -452,7 +452,7 @@ Base URL is `https://api.nessieisreal.com`; use HTTPS only, because plain HTTP r
 - `POST /customers/{id}/accounts` with `{type:"Checking", nickname, rewards:0, balance}` creates the poster checking (balance = cap + $50), the bounty escrow (balance 0), and holder accounts.
 - `POST /accounts/{id}/transfers` with `{medium:"balance", payee_id, amount, description}` moves money: checking to escrow on post; escrow to holders and treasury on pay; escrow to checking on refund.
 - `GET /accounts/{id}` reads balances for the `/live` money panel.
-- **VERIFY D:** writes to the shared sandbox are untested, and transfers may settle as "pending". The go/no-go checks that both balances change. If writes fail, set `NESSIE_MODE=mock` and drop Nessie from the track list rather than fake it. 2026-10-03: not run, `NESSIE_KEY` unset.
+- **VERIFY D (2026-10-03, failed):** customer and two checking accounts create, and the initial balances stick (checking 50, escrow 0). `POST /accounts/{id}/transfers` rejects `medium` and `payee_id`. The body it accepts is `{transaction_date, status, amount, description}` and returns 201, with no payee. A completed transfer, a deposit, a withdrawal, and `PUT` balance all left the GET balances unchanged for 2 minutes. `NESSIE_MODE` stays `mock`. The client keeps the planned payee body for the local stand-in.
 
 ### 7.4 Photon iMessage agent (SWE1)
 
