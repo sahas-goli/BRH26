@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 15:25 ET.
+Updated 2026-10-03 15:30 ET.
 
 ## On main
 
@@ -33,13 +33,20 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. HW stays
 - **AL-01:** no `web/.env.local` on this workstation — see checklist in `tasks/AL-01.md`.
 - **AL-02:** local smoke green; prod double-run still blocked on secrets.
 
+## Also on main (demo readiness)
+
+- `hardware/INVENTORY.md`, `hardware/game.md`, `hardware/bridge.py` (stats → `B x.xx`)
+- `submission/*.md` track stubs (PLAN §9/§13)
+- README phone LAN local test steps
+
 ## Claims (remote locks)
 
 - `claim/S2-06` — Sahas Goli
-- AL-02 claim released after local smoke merge (task stays open for prod double-run)
+- HW-01 / HW-05 claims released after scaffold merge (physical work still open)
 
-## Next
+## Next (humans)
 
-1. Paste Tiger `DATABASE_URL` → `node db/apply.mjs` → preview post→forward→claim.
-2. Or run local Next with `DATABASE_URL=pglite` for UI smoke.
-3. S2-06 stays mock until Nessie transfers move balances.
+1. Tiger `DATABASE_URL` → apply → Vercel preview MVP.
+2. MLH table: fill `hardware/INVENTORY.md` + flash one badge (HW-01).
+3. Organizer approval + 5 volunteers in `hardware/game.md` (HW-03).
+4. GoDaddy domain (S3-07); Nessie (S2-06); Photon/xAI keys (AL-01).

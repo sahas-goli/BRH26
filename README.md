@@ -33,14 +33,38 @@ npm --prefix web run dev
 
 Tiger: `configureBounty` wires when `DATABASE_URL` is a Postgres URL. PGlite uses `db/schema.local.sql` + `ensureBountyDatabase()` on each API route. Production Tiger path is unchanged.
 
+### Phone on the same Wi‑Fi (local UI smoke)
+
+Most hops open on phones—test that before the venue:
+
+1. Find your laptop LAN IP (e.g. `ipconfig` → `192.168.x.x`).
+2. In `web/.env.local` set:
+   ```bash
+   DATABASE_URL=pglite:.data/local
+   PUBLIC_BASE_URL=http://192.168.x.x:3000
+   PAYOUT_MODE=mock
+   ```
+3. Start Next bound to all interfaces:
+   ```bash
+   npm --prefix web run dev -- --hostname 0.0.0.0 --port 3000
+   ```
+4. On the phone (same Wi‑Fi / disable VPN): open `http://192.168.x.x:3000/post`.
+5. Create a bounty → open the poster hop link → forward to yourself (AirDrop/SMS the child `/h/…` URL) → `/claim/…` with an intro.
+6. Optional gauge stub:  
+   `python hardware/bridge.py --base http://192.168.x.x:3000 --bounty b_XXXXXXXX --mock-serial`
+
+Allow Node through the OS firewall if the phone cannot connect. Prefer cellular later for Vercel preview (Cornell Wi‑Fi oddities).
+
+API-only regression without a browser: `npm --prefix web run smoke:http`.
+
 ## Preview smoke (after Vercel deploy)
 
 1. Open the preview URL for `main` (or your branch; `claim/*` branches are ignored by `vercel.json`).
 2. `/post` → create a bounty (Gemini can stay off; edit hint fields).
 3. Open the poster `/h/<token>` → forward to 1–3 labels → open a child link → `/claim/<token>` with an intro.
-4. `/live` shows the seeded demo cascade until `DATABASE_URL` + `FEATURED_BOUNTY` point at Tiger.
+4. `/live` shows the seeded demo cascade until Tiger `DATABASE_URL` + `FEATURED_BOUNTY` are set.
 
-Without Tiger, claim/confirm/stats/graph return `503` by design.
+With only PGlite locally, APIs work; Vercel preview still needs a real `DATABASE_URL` (Tiger) for serverful post/forward/claim.
 
 ## Go/no-go E (Tiger) — human + `DATABASE_URL`
 
@@ -57,3 +81,8 @@ bash sim/load.sh
 ## Env checklist
 
 Copy [`.env.example`](.env.example) → `web/.env.local` and `agent/.env.local`. See task [AL-01](tasks/AL-01.md).
+
+## Hardware / write-ups
+
+- Hardware ops: [hardware/README.md](hardware/README.md)
+- Track stubs: [submission/README.md](submission/README.md)

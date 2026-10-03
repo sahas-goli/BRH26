@@ -3,6 +3,8 @@
  * Simulates the page API path: POST /api/bounties → forward → h → claim → confirm → og.
  *
  *   npm --prefix web run smoke:http
+ *
+ * For the same flow on a phone UI, see README "Phone on the same Wi‑Fi".
  */
 import { ensureBountyDatabase } from "../lib/ensure-db";
 
