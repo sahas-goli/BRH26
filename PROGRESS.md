@@ -2,14 +2,14 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 16:30 ET.
+Updated 2026-10-03 17:05 ET.
 
 ## On main
 
 | Commit | What landed | Task |
 |---|---|---|
 | (earlier) | `db/schema.sql`, `db/caggs.sql`, `db/apply.mjs` | S3-02 open until Tiger apply |
-| (earlier) | `sim/replay.py`, `sim/load.sh`, `submission/tiger.md` | S3-03 open until Tiger load + benches |
+| (this PR) | 1M replay proof: `/api/graph/r_0000`, benchmarks in `submission/tiger.md` | S3-03 done |
 | `65853ac` | Grok Voice `/talk` + three tools | S3-06 done (live mint still needs `XAI_API_KEY`) |
 | `b52f7ea` | Grok ephemeral token + VERIFY G notes | S3-06a done (partial) |
 
@@ -26,8 +26,7 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stay
 
 ## Blocked / needs humans
 
-- **S3-03:** schema, caggs, and VERIFY E are done on `hldtuqlvht` (100k COPY in 1.7 s, cagg 92x faster). Still need `bash sim/load.sh` for the 1M replay and the compression number.
-- **Live preview MVP:** put the same `DATABASE_URL` in Vercel, plus `INTERNAL_SECRET` and `PUBLIC_BASE_URL`.
+- **Live preview MVP:** put the same `DATABASE_URL` in Vercel, plus `INTERNAL_SECRET` and `PUBLIC_BASE_URL`. `FEATURED_BOUNTY=r_0000` makes `/live` open on the replay cascade.
 - **S2-06:** claimed by Sahas Goli (`claim/S2-06` since 16:20Z). Nessie live still failing VERIFY D — keep mock.
 - **S3-07:** GoDaddy / MLH domain claim for `milgram.study`.
 - **AL-01:** Photon, xAI, and Gemini keys are still missing. Solana, Nessie, and Tiger are set in local `web/.env.local`.
@@ -44,7 +43,7 @@ Software tasks have one owner, SWE. Anyone may claim any open SWE task. ALL stay
 
 ## Next (humans)
 
-1. Copy Tiger `DATABASE_URL` into Vercel, then load the replay (`bash sim/load.sh`).
+1. Set Vercel `FEATURED_BOUNTY=r_0000` if `/live` should open on the replay cascade.
 2. Nessie (S2-06); Photon/xAI keys (AL-01). Domain registration stays S3-07. Name search is AL-06 (no purchase).
 
 ## Open tasks by env
@@ -53,7 +52,7 @@ Claim with `bash scripts/task.sh claim <ID>` from Git Bash, then `git switch -c 
 
 **Needs env (S)** — `web/.env.local`, API keys, or a logged-in Vercel/Tiger account. Do not send these to collaborators.
 
-- AL-01, AL-02, AL-03, AL-04, S2-06, S3-03, S3-07
+- AL-01, AL-02, AL-03, AL-04, S2-06, S3-07
 
 **No env (collaborators)** — public site and the repo only. Three parallel files, no shared edits.
 
