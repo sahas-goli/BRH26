@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:32 ET.
+Updated 2026-10-03 12:37 ET.
 
 ## On main
 
@@ -21,7 +21,7 @@ Updated 2026-10-03 12:32 ET.
 
 ## This branch
 
-Nothing in flight. Faucet probed again at 12:32 ET: 429.
+When `NESSIE_MODE=live`, confirm pays bank-rail holders from escrow, moves the Solana share to treasury, and refunds `cap - bounty`. An overdue tick refunds the full escrow before it marks the bounty refunded. The local stand-in shows those balances move. Live Nessie was not called. S2-06 stays open.
 
 ## Plan changes
 

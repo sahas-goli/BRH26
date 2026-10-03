@@ -71,9 +71,39 @@ export async function releaseEscrow(
 }
 
 export async function refundEscrow(client: Nessie, escrowId: string, checkingId: string, cents: number): Promise<void> {
+  if (cents <= 0) return;
   await call(client, "POST", `/accounts/${escrowId}/transfers`, {
     medium: "balance", payee_id: checkingId, amount: dollars(cents), description: "refund",
   });
+}
+
+export async function payFromEscrow(client: Nessie, input: {
+  escrowId: string;
+  checkingId: string;
+  bank: { payeeId: string; cents: number }[];
+  treasuryId?: string;
+  treasuryCents: number;
+  refundCents: number;
+}): Promise<void> {
+  await releaseEscrow(
+    client,
+    input.escrowId,
+    input.bank,
+    input.treasuryId && input.treasuryCents > 0 ? { payeeId: input.treasuryId, cents: input.treasuryCents } : undefined,
+  );
+  await refundEscrow(client, input.escrowId, input.checkingId, input.refundCents);
+}
+
+export function liveClient(): Nessie {
+  const key = process.env.NESSIE_KEY;
+  if (!key) throw new Error("nessie_unavailable");
+  return { baseUrl: process.env.NESSIE_BASE_URL || "https://api.nessieisreal.com", key };
+}
+
+export async function refundIfLive(accounts: { escrowId: string | null; checkingId: string | null; cents: number }, client?: Nessie): Promise<void> {
+  if (process.env.NESSIE_MODE !== "live") return;
+  if (!accounts.escrowId || !accounts.checkingId) throw new Error("nessie_unavailable");
+  await refundEscrow(client ?? liveClient(), accounts.escrowId, accounts.checkingId, accounts.cents);
 }
 
 export async function accountCents(client: Nessie, accountId: string): Promise<number> {

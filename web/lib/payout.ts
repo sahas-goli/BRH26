@@ -8,6 +8,7 @@ export interface HolderRef {
   depth: number;
   rail: Rail;
   solAddress?: string;
+  nessieAcct?: string;
 }
 
 export interface PayoutRow {
@@ -17,6 +18,7 @@ export interface PayoutRow {
   rail: Rail;
   txSig: string;
   solAddress?: string;
+  nessieAcct?: string;
 }
 
 export interface Ledger {
@@ -59,6 +61,7 @@ export function settleChain(
     rail: holder.rail,
     txSig,
     solAddress: holder.solAddress,
+    nessieAcct: holder.nessieAcct,
   }));
   rows.push({
     holderId: posterHolderId,
@@ -148,7 +151,7 @@ async function chainFrom(tx: PayoutQuery, holderId: string): Promise<HolderRef[]
   let id: string | null = holderId;
   while (id) {
     const { rows } = await tx.query<Record<string, unknown>>(
-      "SELECT id,parent_id,depth,rail,sol_address FROM holders WHERE id=$1",
+      "SELECT id,parent_id,depth,rail,sol_address,nessie_acct FROM holders WHERE id=$1",
       [id],
     );
     const row = rows[0];
@@ -160,6 +163,7 @@ async function chainFrom(tx: PayoutQuery, holderId: string): Promise<HolderRef[]
         depth,
         rail: row.rail as Rail,
         solAddress: row.sol_address == null ? undefined : String(row.sol_address),
+        nessieAcct: row.nessie_acct == null ? undefined : String(row.nessie_acct),
       });
     }
     id = row.parent_id == null ? null : String(row.parent_id);
@@ -220,6 +224,40 @@ async function stamp(bountyId: string, rows: PayoutRow[], sign?: SignPayout): Pr
   return rows.map((row) => ({ ...row, txSig: signature }));
 }
 
+export type BankMove = {
+  escrowId: string;
+  checkingId: string;
+  bank: { payeeId: string; cents: number }[];
+  treasuryCents: number;
+  refundCents: number;
+};
+
+export type MoveBank = (input: BankMove) => Promise<void>;
+
+async function moveLiveBank(bounty: Record<string, unknown>, rows: PayoutRow[], move?: MoveBank): Promise<void> {
+  if (process.env.NESSIE_MODE !== "live") return;
+  if (!move) throw new PayoutError("nessie_unavailable", 503);
+  const escrowId = bounty.nessie_escrow_acct == null ? "" : String(bounty.nessie_escrow_acct);
+  const checkingId = bounty.nessie_poster_acct == null ? "" : String(bounty.nessie_poster_acct);
+  if (!escrowId || !checkingId) throw new PayoutError("nessie_unavailable", 503);
+  const bank = rows.filter((row) => row.role !== "refund" && row.rail === "bank").map((row) => {
+    if (!row.nessieAcct) throw new PayoutError("nessie_unavailable", 503);
+    return { payeeId: row.nessieAcct, cents: row.cents };
+  });
+  const treasuryCents = rows.filter((row) => row.role !== "refund" && row.rail !== "bank").reduce((sum, row) => sum + row.cents, 0);
+  const refundCents = rows.filter((row) => row.role === "refund").reduce((sum, row) => sum + row.cents, 0);
+  await move({ escrowId, checkingId, bank, treasuryCents, refundCents });
+}
+
+export function envBank(): MoveBank | undefined {
+  if (process.env.NESSIE_MODE !== "live") return undefined;
+  return async (input) => {
+    if (!process.env.NESSIE_KEY) throw new PayoutError("nessie_unavailable", 503);
+    const { liveClient, payFromEscrow } = await import("./nessie");
+    await payFromEscrow(liveClient(), { ...input, treasuryId: process.env.NESSIE_TREASURY_ACCT });
+  };
+}
+
 export function envSigner(): SignPayout | undefined {
   if (process.env.PAYOUT_MODE !== "devnet") return undefined;
   return async (input) => {
@@ -232,7 +270,7 @@ export function envSigner(): SignPayout | undefined {
 export async function claimBounty(
   db: PayoutDatabase,
   input: unknown,
-  opts: { verifyBadge?: (badgeId: string, code: string) => Promise<boolean>; now?: () => Date; signPayout?: SignPayout } = {},
+  opts: { verifyBadge?: (badgeId: string, code: string) => Promise<boolean>; now?: () => Date; signPayout?: SignPayout; moveBank?: MoveBank } = {},
 ): Promise<{ status: "found" | "paid"; payoutSig?: string }> {
   const parsed = body(input);
   const token = requiredString(parsed.token);
@@ -242,7 +280,7 @@ export async function claimBounty(
     const bountyId = lookup.rows[0]?.bounty_id;
     if (!bountyId) throw new PayoutError("not_found", 404);
     const lockedBounty = await tx.query<Record<string, unknown>>(
-      "SELECT id,status,bounty_cents,cap_cents,target_badge_id,expires_at FROM bounties WHERE id=$1 FOR UPDATE",
+      "SELECT id,status,bounty_cents,cap_cents,target_badge_id,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE id=$1 FOR UPDATE",
       [bountyId],
     );
     const bounty = lockedBounty.rows[0];
@@ -278,6 +316,7 @@ export async function claimBounty(
       return { status: "found" };
     }
     const stamped = await stamp(String(bountyId), step.ledger.payouts, opts.signPayout);
+    await moveLiveBank(bounty, stamped, opts.moveBank);
     await writePayouts(tx, String(bountyId), stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
     return { status: "paid", payoutSig: stamped[0]?.txSig ?? step.payoutSig };
@@ -287,7 +326,7 @@ export async function claimBounty(
 export async function confirmBounty(
   db: PayoutDatabase,
   input: unknown,
-  opts: { signPayout?: SignPayout } = {},
+  opts: { signPayout?: SignPayout; moveBank?: MoveBank } = {},
 ): Promise<{ status: string; payoutSig?: string }> {
   const parsed = body(input);
   const bountyId = requiredString(parsed.bountyId);
@@ -295,7 +334,7 @@ export async function confirmBounty(
   if (typeof parsed.accept !== "boolean") throw new PayoutError("invalid_input", 400);
   return db.transaction(async (tx) => {
     const locked = await tx.query<Record<string, unknown>>(
-      "SELECT id,status,bounty_cents,cap_cents,expires_at FROM bounties WHERE id=$1 AND poster_token=$2 FOR UPDATE",
+      "SELECT id,status,bounty_cents,cap_cents,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE id=$1 AND poster_token=$2 FOR UPDATE",
       [bountyId, posterToken],
     );
     const bounty = locked.rows[0];
@@ -325,6 +364,7 @@ export async function confirmBounty(
       return { status: "open" };
     }
     const stamped = await stamp(bountyId, step.ledger.payouts, opts.signPayout);
+    await moveLiveBank(bounty, stamped, opts.moveBank);
     await writePayouts(tx, bountyId, stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
     await logEvent(tx, at, bountyId, poster, "paid", {});

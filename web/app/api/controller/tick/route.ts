@@ -1,4 +1,5 @@
 import { tickBounty, type ControllerBounty, type ControllerHolder, type TickAction } from "../../../lib/controller";
+import { refundIfLive } from "../../../lib/nessie";
 
 export async function POST(request: Request): Promise<Response> {
   if (!process.env.INTERNAL_SECRET || request.headers.get("x-six-hops-secret") !== process.env.INTERNAL_SECRET) {
@@ -16,7 +17,7 @@ export async function POST(request: Request): Promise<Response> {
 
 async function tickOpen(pool: { query: (sql: string, values?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> }): Promise<TickAction[]> {
   const now = new Date();
-  const { rows } = await pool.query("SELECT id,status,hint,hidden_hint,bounty_cents,cap_cents,controller_step,low_b_since,expires_at FROM bounties WHERE status='open'");
+  const { rows } = await pool.query("SELECT id,status,hint,hidden_hint,bounty_cents,cap_cents,controller_step,low_b_since,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE status='open'");
   const actions: TickAction[] = [];
   for (const row of rows) {
     const holders = await pool.query(
@@ -47,6 +48,13 @@ async function tickOpen(pool: { query: (sql: string, values?: unknown[]) => Prom
     }));
     const result = tickBounty(bounty, mapped, now);
     if (!result.action) continue;
+    if (result.refundCents != null) {
+      await refundIfLive({
+        escrowId: row.nessie_escrow_acct == null ? null : String(row.nessie_escrow_acct),
+        checkingId: row.nessie_poster_acct == null ? null : String(row.nessie_poster_acct),
+        cents: result.refundCents,
+      });
+    }
     actions.push(result.action);
     await pool.query(
       "UPDATE bounties SET status=$2, hint=$3::jsonb, hidden_hint=$4::jsonb, bounty_cents=$5, controller_step=$6, low_b_since=$7 WHERE id=$1",
