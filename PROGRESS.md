@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:15 ET.
+Updated 2026-10-03 12:20 ET.
 
 ## On main
 
@@ -12,11 +12,13 @@ Updated 2026-10-03 12:15 ET.
 | `8a2ba64` | Devnet rent exemption measured at 650,240 lamports (`getMinimumBalanceForRentExemption(0)` on `api.devnet.solana.com`). PLAN.md 6.1 now uses that figure: about 9.8 cents at `DEMO_USD_PER_SOL=150`, so B ≥ 160 cents. `web/scripts/gonogo.cjs` reruns tests B and D. | S2-02 still open. |
 | `fe72e97` | `web/lib/payout.ts` ledger. A 4-deep chain at 1600 cents pays 100 + 100 + 100 + 1300. A second confirm returns `mock_<bountyId>` and adds no rows. | Superseded by the claim routes below. |
 
+| `b7fa142` | `POST /api/attack`. At h=4, ours gain is 0% and MIT gain is 50 / 75 / 87.5 / 93.75 for k=1..4. Proven by calling the route handler. | S2-04 done. |
+
 ## This branch
 
-`POST /api/attack` returns `AttackComparison`. At h=4 and budget 1600, ours gain is 0% and MIT gain is 50 / 75 / 87.5 / 93.75 for k=1..4. There is no Next server yet, so the proof calls the route `POST` handler directly (`web/app/api/attack/route.test.ts`), which is the body curl would print.
+`web/lib/controller.ts` and `POST /api/controller/tick`. A seeded stalled bounty (b = 0.5, low for 11 minutes) steps nudge, then widen (hidden city "Ithaca" enters the hint), then raise (600 cents to 800). An overdue open bounty refunds the full cap and logs `expired` and `refunded`. p75 is 600 seconds until SWE3's stats API exists. The tick route returns 503 until `web/lib/db.ts` exports `pool`, and 401 without `x-six-hops-secret`.
 
-S2-03, on main as of the previous merge: `POST /api/claim` and `POST /api/bounties/[id]/confirm` write payout rows that sum to `bounty_cents`, set status `paid`, and a retry keeps the same signature. Against a real database the routes need `web/lib/db.ts` to export `pool`. Until then they return 503.
+S2-03 is on main: claim and confirm write payout rows. Those routes also return 503 until `pool` exists.
 
 ## Plan changes
 
@@ -32,8 +34,8 @@ S2-03, on main as of the previous merge: `POST /api/claim` and `POST /api/bounti
 
 ## Claims
 
-SWE2 holds S2-01. S2-02 is open. S2-03 is done. S2-04 is done once this branch merges.
+SWE2 holds S2-01. S2-02 is open. S2-03 and S2-04 are done. S2-07 is done once this branch merges.
 
 ## Next
 
-S2-05 and S2-06 stay blocked on the devnet faucet and `NESSIE_KEY`. S2-07 needs SWE3's stats API.
+S2-05 and S2-06 stay blocked on the devnet faucet and `NESSIE_KEY`. S2-01 stays open until `npm run check` exists.
