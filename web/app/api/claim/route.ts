@@ -1,4 +1,4 @@
-import { claimBounty, PayoutError, type PayoutDatabase } from "../../../lib/payout";
+import { claimBounty, envSigner, PayoutError, type PayoutDatabase } from "../../../lib/payout";
 
 async function database(): Promise<PayoutDatabase> {
   try {
@@ -31,7 +31,7 @@ async function database(): Promise<PayoutDatabase> {
 export async function POST(request: Request): Promise<Response> {
   const body = await request.json().catch(() => null);
   try {
-    const result = await claimBounty(await database(), body);
+    const result = await claimBounty(await database(), body, { signPayout: envSigner() });
     return Response.json(result);
   } catch (error) {
     if (error instanceof PayoutError) return Response.json({ error: error.code }, { status: error.status });

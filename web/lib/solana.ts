@@ -89,3 +89,29 @@ export async function submitPayout(input: {
   const signature = await input.send(buildPayoutTransaction(input.payerAddress, plan));
   return { signature, explorerUrl: explorerUrl(signature), idempotent: false };
 }
+
+export async function signDevnetPayout(input: {
+  bountyId: string;
+  rows: { cents: number; solAddress?: string; holderId?: string }[];
+}): Promise<string> {
+  const secret = process.env.SOLANA_PAYER_SECRET;
+  if (!secret) throw new Error("payout_unavailable");
+  const { Keypair, Connection, sendAndConfirmTransaction } = web3();
+  const bs58 = require("bs58");
+  const decode = typeof bs58.decode === "function" ? bs58.decode : bs58.default.decode;
+  const payer = Keypair.fromSecretKey(decode(secret));
+  const shares = input.rows.filter((row) => row.solAddress).map((row) => ({ address: row.solAddress as string, cents: row.cents }));
+  const result = await submitPayout({
+    payerAddress: payer.publicKey.toBase58(),
+    bountyId: input.bountyId,
+    shares,
+    salts: input.rows.map((row) => row.holderId ?? row.solAddress ?? ""),
+    send: (tx) => sendAndConfirmTransaction(
+      new Connection(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com", "confirmed"),
+      tx,
+      [payer],
+      { commitment: "confirmed" },
+    ),
+  });
+  return result.signature;
+}

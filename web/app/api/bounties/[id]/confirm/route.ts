@@ -1,4 +1,4 @@
-import { confirmBounty, PayoutError, type PayoutDatabase } from "../../../../../lib/payout";
+import { confirmBounty, envSigner, PayoutError, type PayoutDatabase } from "../../../../../lib/payout";
 
 async function database(): Promise<PayoutDatabase> {
   try {
@@ -33,7 +33,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const { id } = await context.params;
   const input = body && typeof body === "object" ? { ...body, bountyId: id } : body;
   try {
-    const result = await confirmBounty(await database(), input);
+    const result = await confirmBounty(await database(), input, { signPayout: envSigner() });
     return Response.json(result);
   } catch (error) {
     if (error instanceof PayoutError) return Response.json({ error: error.code }, { status: error.status });
