@@ -1,0 +1,18 @@
+{
+  "name": "six-hops-agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "tsx src/index.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "spectrum-ts": "^12.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.6",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

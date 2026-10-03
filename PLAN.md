@@ -451,7 +451,7 @@ Base URL is `https://api.nessieisreal.com`; use HTTPS only, because plain HTTP r
 
 ### 7.4 Photon iMessage agent (SWE1)
 
-`agent/` is a Node/TS process on the DGX or a laptop. Use the HACKWITHPHOTON Pro plan, and set it up from the Spectrum docs (https://photon.codes/docs/spectrum-ts/getting-started). **VERIFY A:** install, keys, how replies, reactions and attachments arrive.
+`agent/` is a Node/TS process on the DGX or a laptop. Use the HACKWITHPHOTON Pro plan, and set it up from the Spectrum docs (https://photon.codes/docs/spectrum-ts/getting-started). **VERIFY A (2026-10-03, partial):** `spectrum-ts@12` installs; credentials are `SPECTRUM_PROJECT_ID` + `SPECTRUM_PROJECT_SECRET` (docs also accept `PROJECT_ID` / `PROJECT_SECRET`). Echo agent + `POST /send` stub live in `agent/`. Terminal provider runs without Photon keys. Live iMessage go/no-go (registered text + tapback under 5 s, rich link, contact-card shape, unregistered → Target not allowed) was **not** run — no Spectrum secrets in this session. Re-run with `PHOTON_ENABLED=true` before marking track ready.
 
 - **Registered numbers only:** register team phones and judges at the table; everyone else uses links.
 - **Inbound:**
