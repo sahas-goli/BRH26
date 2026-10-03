@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:10 ET.
+Updated 2026-10-03 12:15 ET.
 
 ## On main
 
@@ -14,7 +14,9 @@ Updated 2026-10-03 12:10 ET.
 
 ## This branch
 
-`POST /api/claim` and `POST /api/bounties/[id]/confirm` call `claimBounty` / `confirmBounty`. A mock 4-deep claim writes payout rows that sum to `bounty_cents` (1600), sets status `paid`, and a second confirm returns the same signature with the row count unchanged. Against a real database the routes need `web/lib/db.ts` to export `pool`. Until then they return 503.
+`POST /api/attack` returns `AttackComparison`. At h=4 and budget 1600, ours gain is 0% and MIT gain is 50 / 75 / 87.5 / 93.75 for k=1..4. There is no Next server yet, so the proof calls the route `POST` handler directly (`web/app/api/attack/route.test.ts`), which is the body curl would print.
+
+S2-03, on main as of the previous merge: `POST /api/claim` and `POST /api/bounties/[id]/confirm` write payout rows that sum to `bounty_cents`, set status `paid`, and a retry keeps the same signature. Against a real database the routes need `web/lib/db.ts` to export `pool`. Until then they return 503.
 
 ## Plan changes
 
@@ -30,8 +32,8 @@ Updated 2026-10-03 12:10 ET.
 
 ## Claims
 
-SWE2 holds S2-01. S2-02 is open. S2-03 is done once this branch merges.
+SWE2 holds S2-01. S2-02 is open. S2-03 is done. S2-04 is done once this branch merges.
 
 ## Next
 
-S2-04 attack endpoint. It can be built from `attackComparison` in `web/lib/split.ts`. S2-05 and S2-06 stay blocked on the faucet and `NESSIE_KEY`.
+S2-05 and S2-06 stay blocked on the devnet faucet and `NESSIE_KEY`. S2-07 needs SWE3's stats API.
