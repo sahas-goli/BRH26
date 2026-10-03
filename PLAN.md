@@ -29,17 +29,18 @@ All times are Saturday Oct 3 to Sunday Oct 4, Eastern.
 | Time | Milestone | Exit criteria |
 |---|---|---|
 | 11:30 | **M-1 Scaffold** | S3-01 merged: `web/` Next.js app, `types.ts`, `db.ts`, `.env.example`, `npm run check` passes. Everyone branches from this. |
-| 12:30 | **M0 Contracts + go/no-go** | Schema applied on Tiger; split tests pass; go/no-go A–E and G run and results posted in team chat. |
-| 15:00 | **M1 Mock end to end** | On the Vercel URL: post, forward, claim, poster confirm, mock payout, and `/live` shows the cascade from Tiger. |
-| 21:00 to 23:00 | **M2 Integration window** | Real devnet payout, Nessie escrow and release, Photon flows, Grok Voice. **Nobody sleeps in this window.** |
+| 12:30 | **M0 Contracts + go/no-go** | Schema applied on Tiger; split tests pass; go/no-go A to G run and results posted in team chat. |
+| 15:00 | **M1 Mock end to end** | On the Vercel URL: post, forward, claim, mock payout, and `/live` shows the cascade from Tiger. Organizer approval for the venue game secured. |
+| 17:00 | **Venue game launch** | 5 volunteer targets with badges; launch post in the BRH Discord. |
+| 21:00 to 23:00 | **M2 Integration window** | Real devnet payout, Nessie escrow and release, Photon flows, Grok Voice, gauge. **Nobody sleeps in this window.** |
 | 03:00 | Feature freeze | Bug fixes only. |
 | 05:00 | Code freeze | Only write-ups, deck, and video after this. |
 | 08:15 | Devpost submitted | Hard deadline 08:30. |
 | 09:00 | Table judging | 2 min pitch plus 2 min Q&A. |
 
 **Sleep shifts (minimum 3 h each).**
-- Shift A: 23:30 to 03:00.
-- Shift B: 03:00 to 06:00.
+- Shift A (SWE1, HW): 23:30 to 03:00.
+- Shift B (SWE2, SWE3): 03:00 to 06:00.
 - Optional 1 h naps before 17:00 are fine, as long as nobody holding an unmerged M1 task is asleep at 15:00.
 
 ---
@@ -51,7 +52,7 @@ flowchart LR
   subgraph Phones
     P[Poster browser] --> W
     H[Holder browser /h/token] --> W
-    T[Target /claim/token] --> W
+    T[Target /claim/token + badge code] --> W
     IM[iMessage users] <--> PH[Photon Spectrum cloud]
     V[Voice browser /talk/token] <--> XV[xAI Grok Voice realtime]
   end
@@ -64,13 +65,17 @@ flowchart LR
   W --> GM[Gemini: hint-card compiler]
   W -->|ephemeral token| V
   SIM[sim/ on DGX: 1M-event replay] -->|COPY| DB
+  BR[hardware/bridge.py] -->|GET /api/stats| W
+  BR -->|serial| GA[Arduino gauge]
+  BD[Arduino HOTP badges] -.code typed by target.-> T
 ```
 
-**Repo layout.** Software paths have one owner, SWE. Any software person may edit them and claim any SWE task. ALL tasks are for anyone. Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who claims or edits the work.
+**Repo layout.** Software paths have one owner, SWE. Any software person may edit them and claim any SWE task. HW paths stay with HW. Agents edit only their owner's paths. Headings later in this file that still say SWE1, SWE2, or SWE3 are the original split. They do not limit who claims or edits the work.
 
 | Path | Owner |
 |---|---|
 | `web/**`, `agent/**`, `db/**`, `sim/**` | SWE |
+| `hardware/**`, `web/lib/hotp.ts`, `web/lib/hotp.test.ts` | HW |
 | **Shared contracts:** `web/lib/types.ts`, `db/schema.sql`, `.env.example`, `web/package.json` + lockfile, section 4 of this file | change only via a CONTRACT PR (WORKFLOW.md section 5) |
 | `submission/<track>.md` | one owner per track (section 12) |
 | `tasks/**`, `scripts/task.sh`, `PLAN.md`, `WORKFLOW.md` | anyone, small edits |
@@ -146,7 +151,7 @@ CREATE TABLE bounties (
   cap_cents       INT  NOT NULL CHECK (cap_cents >= 1000),
   bounty_cents    INT  NOT NULL,               -- current offer; starts at 60% of cap
   status          TEXT NOT NULL DEFAULT 'open',
-  target_badge_id TEXT,                        -- unused column; left so apply does not rewrite the table
+  target_badge_id TEXT,                        -- venue game: claim needs this badge's HOTP code
   controller_step INT  NOT NULL DEFAULT 0,
   low_b_since     TIMESTAMPTZ,                 -- when b first dropped below 2 (controller)
   nessie_poster_acct TEXT, nessie_escrow_acct TEXT,
@@ -273,7 +278,7 @@ Every error returns `{ "error": "<code>" }`.
 
 | Method and path | Owner | Request | Response |
 |---|---|---|---|
-| `POST /api/bounties` | SWE | `{ text?: string, hint?: HintCard, hidden?: {attr,value}[], capCents: number, hours?: number, posterRail?: "bank" }` (`text` goes through Gemini when `GEMINI_ENABLED`; otherwise send `hint`) | `201 { bountyId, posterToken, posterLink: "/h/<rootToken>", publicUrl }`. Creates the bounty plus a depth-0 root holder for the poster, Nessie escrow, and the wanted-card job. |
+| `POST /api/bounties` | SWE | `{ text?: string, hint?: HintCard, hidden?: {attr,value}[], capCents: number, hours?: number, targetBadgeId?: string, posterRail?: "bank" }` (`text` goes through Gemini when `GEMINI_ENABLED`; otherwise send `hint`) | `201 { bountyId, posterToken, posterLink: "/h/<rootToken>", publicUrl }`. Creates the bounty plus a depth-0 root holder for the poster, Nessie escrow, and the wanted-card job. |
 | `GET /api/bounties/[id]` | SWE | | `PublicBounty` |
 | `GET /api/h/[token]` | SWE | | `HolderView`; sets `opened_at` and logs `opened` once |
 | `POST /api/forward` | SWE | `{ token, recipients: ForwardRecipient[] (1..3 minus forwards used), rail?: Rail, solAddress?: string }` | `200 ForwardResult`. `409 fanout_exceeded`, `409 too_deep` (child depth > 8), `410 closed`. Creates child holders, logs `received` and `forwarded` (with `latency_s`), and fires the edge memo (S2-04) without awaiting it. |
