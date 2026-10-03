@@ -2,7 +2,15 @@
 
 Pick one. All are judged against [Navigation](../resources/02-theme-navigation.md); track rules are in [tracks/](../resources/tracks/README.md).
 
-## New finalists (researched 2026-10-03)
+## Round 3 (2026-10-03, sponsor-max, one-day, Phantom Pool hub-and-spoke)
+
+[round-3.md](round-3.md): pick **Six Hops** (bounty for a person routed by Kleinberg greedy forwarding, sybil-proof Solana split; ~1.9 adjusted expected wins). Runner-up Hum (grid-hum timestamping), then Saywhere, Felt Horizon, Neither Home. Cut ideas listed at the end.
+
+## Round 2 (2026-10-03, after round 1 was judged not interesting enough)
+
+[round-2.md](round-2.md): Inner Map (read and steer an LLM's internal world map; recommended), Echo Mesh (phones map each other by sound), Corner Sight (see around corners with a webcam), Bat Time (hear echoes slowed down), Pull (pseudo-force haptic).
+
+## Round 1 finalists (researched 2026-10-03)
 
 The 21 brainstormed ideas were merged and cut down to 8. Each of the 8 got two originality searches (products; research and hackathons) and a skeptical verdict, and was then scored by a 3-judge panel: a BigRed judge, a sponsor panel, and a hackathon veteran. The panel scored the specs *before* the writers fixed the flaws it raised, so these numbers are rough priorities, not predictions.
 
