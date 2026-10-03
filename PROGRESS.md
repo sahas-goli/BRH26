@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:52 ET.
+Updated 2026-10-03 12:58 ET.
 
 ## On main
 
@@ -21,10 +21,11 @@ Updated 2026-10-03 12:52 ET.
 | `46c5b82` | When `NESSIE_MODE=live`, confirm pays bank-rail holders from escrow, moves the Solana share to treasury, and refunds `cap - bounty`. An overdue tick refunds the full escrow before it marks the bounty refunded. | S2-06 still open. Live Nessie not called. |
 | `4151c75` | A paid claim or confirm includes `explorerUrl` for the payout signature. | S2-05 still open. No confirmed devnet signature. |
 | `fd879cc` | Web scaffold is on main. `npm run check` passed (23 tests, including the split brute force) and `npm run build` passed. | S2-01 done. S3-01 still needs a Vercel preview. |
+| `64070f8` | When `PAYOUT_MODE=devnet`, a custodial hop with no address gets a server keypair before the payout transaction. A wallet hop with no address fails closed. | S2-05 still open. Faucet 429. No `SOLANA_PAYER_SECRET`. |
 
 ## This branch
 
-When `PAYOUT_MODE=devnet`, a custodial hop with no address gets a server keypair before the payout transaction is built. The pubkey is what the transfer pays. A wallet hop with no address fails closed. The devnet faucet still returned 429 at 12:50 ET, so no confirmed signature yet. S2-05 stays open.
+`createEscrow` funds the poster checking account and moves the cap into escrow. A second call for the same bounty id returns the same accounts. Live Nessie was not called. `NESSIE_KEY` is still unset, so S2-06 stays open.
 
 ## Plan changes
 

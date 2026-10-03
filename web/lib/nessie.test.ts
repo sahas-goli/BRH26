@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer, type Server } from "node:http";
 import { test } from "node:test";
-import { accountCents, openEscrow, payFromEscrow, refundEscrow, refundIfLive, releaseEscrow, type Nessie } from "./nessie";
+import { accountCents, createEscrow, openEscrow, payFromEscrow, refundEscrow, refundIfLive, releaseEscrow, type Nessie } from "./nessie";
 
 test("escrow, payout, and refund move both balances", async () => {
   const { baseUrl, close } = await fakeNessie();
@@ -52,6 +52,21 @@ test("pay releases bank and treasury, then expiry refunds the rest", async () =>
   } finally {
     if (previous === undefined) delete process.env.NESSIE_MODE;
     else process.env.NESSIE_MODE = previous;
+    await close();
+  }
+});
+
+test("post funds escrow once for a bounty id", async () => {
+  const { baseUrl, close } = await fakeNessie();
+  const client: Nessie = { baseUrl, key: "test-key" };
+  try {
+    const first = await createEscrow(client, { bountyId: "b_post", capCents: 1000 });
+    const second = await createEscrow(client, { bountyId: "b_post", capCents: 1000 });
+    assert.equal(second.posterAccount, first.posterAccount);
+    assert.equal(second.escrowAccount, first.escrowAccount);
+    assert.equal(await accountCents(client, first.posterAccount), 5000);
+    assert.equal(await accountCents(client, first.escrowAccount), 1000);
+  } finally {
     await close();
   }
 });

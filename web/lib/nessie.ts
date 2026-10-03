@@ -52,6 +52,24 @@ export async function openEscrow(client: Nessie, capCents: number): Promise<Escr
   return { customerId, checkingId, escrowId };
 }
 
+const posted = new Map<string, { posterAccount: string; escrowAccount: string }>();
+
+export async function createEscrow(
+  client: Nessie,
+  input: { bountyId: string; capCents: number; posterRail?: "bank" },
+): Promise<{ posterAccount: string; escrowAccount: string }> {
+  const existing = posted.get(input.bountyId);
+  if (existing) return existing;
+  const opened = await openEscrow(client, input.capCents);
+  const accounts = { posterAccount: opened.checkingId, escrowAccount: opened.escrowId };
+  posted.set(input.bountyId, accounts);
+  return accounts;
+}
+
+export function liveCreateEscrow(input: { bountyId: string; capCents: number; posterRail?: "bank" }): Promise<{ posterAccount: string; escrowAccount: string }> {
+  return createEscrow(liveClient(), input);
+}
+
 export async function releaseEscrow(
   client: Nessie,
   escrowId: string,
