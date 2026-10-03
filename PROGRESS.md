@@ -2,7 +2,7 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:35 ET.
+Updated 2026-10-03 12:27 ET.
 
 ## On main
 
@@ -15,10 +15,11 @@ Updated 2026-10-03 12:35 ET.
 | `9a37154` | Controller. A seeded stall steps nudge, widen, raise. An overdue bounty refunds the full cap. Tick route is 503 until `pool` exists. | S2-07 done. |
 | `c8f09bc` | `web/lib/solana.ts` builds one payout transaction: N transfers plus a `sixhops:pay` memo. | S2-05 still open. |
 | `a62857f` | `submitPayout` sends that transaction once. A retry returns the existing signature. | S2-05 still open. |
+| `4b3c8e2` | `web/lib/nessie.ts` opens an escrow (checking funded at cap + $50, then the cap moves into escrow), pays holders from escrow, and refunds the rest to checking. A local stand-in proved both balances move on each step. Live Nessie was not called. | S2-06 still open. `NESSIE_KEY` unset. |
 
 ## This branch
 
-`web/lib/nessie.ts` opens an escrow (checking funded at cap + $50, then the cap moves into escrow), pays holders from escrow, and refunds the rest to checking. A local stand-in proved both balances move on each step. Live Nessie was not called. `NESSIE_KEY` is still unset, so S2-06 stays open. S2-01's claim was released: the split is on main, and `npm run check` still waits on the scaffold.
+When `PAYOUT_MODE=devnet`, claim and confirm stamp one signature onto the payout rows before insert. Bank rails and refunds stay off that transaction. A second confirm returns the stored signature and does not sign again. The test injects the signature; no devnet send ran. `SOLANA_PAYER_SECRET` is still unset, so S2-05 stays open. Mock mode is unchanged.
 
 ## Plan changes
 
@@ -38,4 +39,4 @@ SWE2 holds S2-05 and S2-06. S2-01 and S2-02 are open. S2-03, S2-04, and S2-07 ar
 
 ## Next
 
-S2-05 still needs a funded devnet payer. S2-06 still needs `NESSIE_KEY` before `NESSIE_MODE=live`. S2-01 needs `npm run check`.
+S2-05 claim and confirm now call the signer when `PAYOUT_MODE=devnet`. A confirmed devnet signature still needs a funded payer. S2-06 still needs `NESSIE_KEY` before `NESSIE_MODE=live`. S2-01 needs `npm run check`.

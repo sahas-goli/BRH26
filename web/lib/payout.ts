@@ -7,6 +7,7 @@ export interface HolderRef {
   holderId: string;
   depth: number;
   rail: Rail;
+  solAddress?: string;
 }
 
 export interface PayoutRow {
@@ -15,6 +16,7 @@ export interface PayoutRow {
   cents: number;
   rail: Rail;
   txSig: string;
+  solAddress?: string;
 }
 
 export interface Ledger {
@@ -56,6 +58,7 @@ export function settleChain(
     cents: holder.depth === ordered.length ? split.finder : split.relay,
     rail: holder.rail,
     txSig,
+    solAddress: holder.solAddress,
   }));
   rows.push({
     holderId: posterHolderId,
@@ -145,13 +148,20 @@ async function chainFrom(tx: PayoutQuery, holderId: string): Promise<HolderRef[]
   let id: string | null = holderId;
   while (id) {
     const { rows } = await tx.query<Record<string, unknown>>(
-      "SELECT id,parent_id,depth,rail FROM holders WHERE id=$1",
+      "SELECT id,parent_id,depth,rail,sol_address FROM holders WHERE id=$1",
       [id],
     );
     const row = rows[0];
     if (!row) break;
     const depth = Number(row.depth);
-    if (depth >= 1) chain.push({ holderId: String(row.id), depth, rail: row.rail as Rail });
+    if (depth >= 1) {
+      chain.push({
+        holderId: String(row.id),
+        depth,
+        rail: row.rail as Rail,
+        solAddress: row.sol_address == null ? undefined : String(row.sol_address),
+      });
+    }
     id = row.parent_id == null ? null : String(row.parent_id);
     if (depth === 0) break;
   }
@@ -200,10 +210,29 @@ async function logEvent(tx: PayoutQuery, at: string, bountyId: string, holder: R
   );
 }
 
+export type SignPayout = (input: { bountyId: string; rows: PayoutRow[] }) => Promise<string>;
+
+async function stamp(bountyId: string, rows: PayoutRow[], sign?: SignPayout): Promise<PayoutRow[]> {
+  const solRows = rows.filter((row) => row.role !== "refund" && row.rail !== "bank");
+  if (process.env.PAYOUT_MODE !== "devnet" || solRows.length === 0) return rows;
+  if (!sign) throw new PayoutError("payout_unavailable", 503);
+  const signature = await sign({ bountyId, rows: solRows });
+  return rows.map((row) => ({ ...row, txSig: signature }));
+}
+
+export function envSigner(): SignPayout | undefined {
+  if (process.env.PAYOUT_MODE !== "devnet") return undefined;
+  return async (input) => {
+    if (!process.env.SOLANA_PAYER_SECRET) throw new PayoutError("payout_unavailable", 503);
+    const { signDevnetPayout } = await import("./solana");
+    return signDevnetPayout(input);
+  };
+}
+
 export async function claimBounty(
   db: PayoutDatabase,
   input: unknown,
-  opts: { verifyBadge?: (badgeId: string, code: string) => Promise<boolean>; now?: () => Date } = {},
+  opts: { verifyBadge?: (badgeId: string, code: string) => Promise<boolean>; now?: () => Date; signPayout?: SignPayout } = {},
 ): Promise<{ status: "found" | "paid"; payoutSig?: string }> {
   const parsed = body(input);
   const token = requiredString(parsed.token);
@@ -248,15 +277,17 @@ export async function claimBounty(
       await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["found", bountyId]);
       return { status: "found" };
     }
-    await writePayouts(tx, String(bountyId), step.ledger.payouts);
+    const stamped = await stamp(String(bountyId), step.ledger.payouts, opts.signPayout);
+    await writePayouts(tx, String(bountyId), stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
-    return { status: "paid", payoutSig: step.payoutSig };
+    return { status: "paid", payoutSig: stamped[0]?.txSig ?? step.payoutSig };
   });
 }
 
 export async function confirmBounty(
   db: PayoutDatabase,
   input: unknown,
+  opts: { signPayout?: SignPayout } = {},
 ): Promise<{ status: string; payoutSig?: string }> {
   const parsed = body(input);
   const bountyId = requiredString(parsed.bountyId);
@@ -293,9 +324,10 @@ export async function confirmBounty(
       await logEvent(tx, at, bountyId, poster, "confirmed", { rejected: true });
       return { status: "open" };
     }
-    await writePayouts(tx, bountyId, step.ledger.payouts);
+    const stamped = await stamp(bountyId, step.ledger.payouts, opts.signPayout);
+    await writePayouts(tx, bountyId, stamped);
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["paid", bountyId]);
     await logEvent(tx, at, bountyId, poster, "paid", {});
-    return { status: "paid", payoutSig: step.payoutSig };
+    return { status: "paid", payoutSig: stamped[0]?.txSig ?? step.payoutSig };
   });
 }

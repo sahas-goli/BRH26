@@ -100,6 +100,37 @@ test("mock claim writes payout rows for a 4-deep chain and a retry is idempotent
   assert.equal(db.state.payouts.length, 5);
 });
 
+test("devnet confirm uses one solana signature and a retry does not send again", async () => {
+  const previous = process.env.PAYOUT_MODE;
+  process.env.PAYOUT_MODE = "devnet";
+  try {
+    const db = memoryDb();
+    await claimBounty(db, { token: "finder-token", introMessage: "this is me" });
+    let calls = 0;
+    const paid = await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true }, {
+      signPayout: async ({ rows }) => {
+        calls += 1;
+        assert.equal(rows.length, 3);
+        return "devnetsig";
+      },
+    });
+    assert.equal(calls, 1);
+    assert.equal(paid.payoutSig, "devnetsig");
+    assert.equal(db.state.payouts.every((row) => row.tx_sig === "devnetsig"), true);
+    const again = await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true }, {
+      signPayout: async () => {
+        calls += 1;
+        return "other";
+      },
+    });
+    assert.equal(again.payoutSig, "devnetsig");
+    assert.equal(calls, 1);
+  } finally {
+    if (previous === undefined) delete process.env.PAYOUT_MODE;
+    else process.env.PAYOUT_MODE = previous;
+  }
+});
+
 function memoryDb() {
   const state: { bounties: Record<string, unknown>[]; holders: Record<string, unknown>[]; payouts: Record<string, unknown>[]; events: Record<string, unknown>[] } = {
     bounties: [{
@@ -128,7 +159,7 @@ function memoryDb() {
       rows = state.holders.filter((row) => row.token === values[0]);
     } else if (sql.includes("depth=0")) {
       rows = state.holders.filter((row) => row.bounty_id === values[0] && row.depth === 0);
-    } else if (sql.startsWith("SELECT id,parent_id,depth,rail FROM holders WHERE id")) {
+    } else if (sql.includes("FROM holders WHERE id=$1")) {
       rows = state.holders.filter((row) => row.id === values[0]);
     } else if (sql.includes("kind='claimed'")) {
       rows = state.events.filter((row) => row.bounty_id === values[0] && row.kind === "claimed").slice(-1);
