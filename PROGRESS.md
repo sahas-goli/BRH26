@@ -2,13 +2,13 @@
 
 Living status. The build plan stays in [PLAN.md](PLAN.md). Update this file when something merges, a go/no-go result comes in, or a task blocks.
 
-Updated 2026-10-03 12:40 ET.
+Updated 2026-10-03 12:48 ET.
 
 ## On main
 
 | Commit | What landed | Task |
 |---|---|---|
-| `50a3bb1` | `web/lib/split.ts`. Each relay gets `floor(B/16)`. A finder who adds fake hops collects the same total. Tests pass via `npx tsx --test web/lib/split.test.ts`. | S2-01 still open. Done-when needs `npm run check`, which does not exist until S3-01. |
+| `50a3bb1` | `web/lib/split.ts`. Each relay gets `floor(B/16)`. A finder who adds fake hops collects the same total. | S2-01. `npm run check` now runs these tests. |
 | `8a2ba64` | Devnet rent exemption measured at 650,240 lamports (`getMinimumBalanceForRentExemption(0)` on `api.devnet.solana.com`). PLAN.md 6.1 now uses that figure: about 9.8 cents at `DEMO_USD_PER_SOL=150`, so B ≥ 160 cents. `web/scripts/gonogo.cjs` reruns tests B and D. | S2-02 still open. |
 | `fe72e97` | `web/lib/payout.ts` ledger. A 4-deep chain at 1600 cents pays 100 + 100 + 100 + 1300. A second confirm returns `mock_<bountyId>` and adds no rows. | Superseded by the claim routes in `7d487e5`. |
 | `b7fa142` | `POST /api/attack`. Ours gain is 0%. MIT gain is 50 / 75 / 87.5 / 93.75 for k=1..4. | S2-04 done. |
@@ -22,7 +22,7 @@ Updated 2026-10-03 12:40 ET.
 
 ## This branch
 
-Paid claim and confirm responses include `explorerUrl` (`https://explorer.solana.com/tx/<sig>?cluster=devnet`). `/live` is still the S3-05 page, so the link is on the API. S2-05 stays open until a claim produces a confirmed devnet signature. `swe3/S3-01` has the scaffold and no pull request.
+The web scaffold from `swe3/S3-01` is on this branch: `package.json`, `db.ts` (`pool`), `types.ts`, stub routes, and Vercel config. `npm --prefix web run check` passed (23 tests, including the split brute force). `npm --prefix web run build` passed. Tick imports now resolve to `web/lib`. S2-01 is done. S3-01 stays open: a Vercel preview has not been confirmed. S2-05 still needs a confirmed devnet signature.
 
 ## Plan changes
 
@@ -31,15 +31,15 @@ Paid claim and confirm responses include `explorerUrl` (`https://explorer.solana
 
 ## Blocked
 
-- S2-01 and later web tasks that need the app runner: `swe3/S3-01` has `web/package.json` and `web/lib/db.ts` and no pull request. Those files are not on main, so `npm run check` still does not exist here. Claim and confirm return 503 until `pool` exists.
+- Claim and confirm return 503 until `DATABASE_URL` is set. `pool` is exported from `web/lib/db.ts`.
 - S2-02 test B, the 6-transfer half: devnet faucet returned 429 again at 12:32 ET. No `SOLANA_PAYER_SECRET`.
 - S2-02 test D: no `NESSIE_KEY`.
 - `swe1/S1-02` has bounty code on its branch and no pull request.
 
 ## Claims
 
-SWE2 holds S2-05 and S2-06. S2-01 and S2-02 are open. S2-03, S2-04, and S2-07 are done.
+SWE2 holds S2-05 and S2-06. S2-01, S2-03, S2-04, and S2-07 are done. S2-02 is open.
 
 ## Next
 
-S2-05 still needs a funded payer before a claim can land one confirmed devnet transaction. S2-06 still needs `NESSIE_KEY` before balances move on post, pay, and expiry. S2-01 needs `npm run check` after the scaffold lands. S2-02 needs the faucet and a Nessie key.
+S2-05 still needs a funded payer before a claim can land one confirmed devnet transaction. S2-06 still needs `NESSIE_KEY` before balances move on post, pay, and expiry. S2-02 needs the faucet and a Nessie key. S3-01 still needs a Vercel preview.

@@ -151,11 +151,11 @@ async function chainFrom(tx: PayoutQuery, holderId: string): Promise<HolderRef[]
   const chain: HolderRef[] = [];
   let id: string | null = holderId;
   while (id) {
-    const { rows } = await tx.query<Record<string, unknown>>(
+    const result: { rows: Record<string, unknown>[] } = await tx.query(
       "SELECT id,parent_id,depth,rail,sol_address,nessie_acct FROM holders WHERE id=$1",
       [id],
     );
-    const row = rows[0];
+    const row = result.rows[0];
     if (!row) break;
     const depth = Number(row.depth);
     if (depth >= 1) {
@@ -337,7 +337,8 @@ export async function confirmBounty(
   const parsed = body(input);
   const bountyId = requiredString(parsed.bountyId);
   const posterToken = requiredString(parsed.posterToken);
-  if (typeof parsed.accept !== "boolean") throw new PayoutError("invalid_input", 400);
+  const accept = parsed.accept;
+  if (typeof accept !== "boolean") throw new PayoutError("invalid_input", 400);
   return db.transaction(async (tx) => {
     const locked = await tx.query<Record<string, unknown>>(
       "SELECT id,status,bounty_cents,cap_cents,expires_at,nessie_poster_acct,nessie_escrow_acct FROM bounties WHERE id=$1 AND poster_token=$2 FOR UPDATE",
@@ -361,10 +362,10 @@ export async function confirmBounty(
     );
     const finderId = claimed.rows[0]?.holder_id ? String(claimed.rows[0].holder_id) : "";
     const chain = finderId ? await chainFrom(tx, finderId) : [];
-    const step = applyConfirm(ledgerFrom(bounty, poster, await loadPayouts(tx, bountyId)), chain, parsed.accept, bountyId);
+    const step = applyConfirm(ledgerFrom(bounty, poster, await loadPayouts(tx, bountyId)), chain, accept, bountyId);
     if (step.error) throw new PayoutError("not_claimed", 409);
     const at = new Date().toISOString();
-    if (!parsed.accept) {
+    if (!accept) {
       await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["open", bountyId]);
       await logEvent(tx, at, bountyId, poster, "confirmed", { rejected: true });
       return { status: "open" };
