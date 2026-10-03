@@ -3,12 +3,12 @@
   "by_attrition": [
     {
       "attrition": 0.2,
-      "success_rate": 0.0875,
+      "success_rate": 0.0,
       "trials": 80
     },
     {
       "attrition": 0.3,
-      "success_rate": 0.025,
+      "success_rate": 0.0,
       "trials": 80
     },
     {
@@ -35,12 +35,12 @@
     },
     {
       "fanout": 2,
-      "success_rate": 0.0125,
+      "success_rate": 0.0,
       "trials": 80
     },
     {
       "fanout": 3,
-      "success_rate": 0.0875,
+      "success_rate": 0.0,
       "trials": 80
     }
   ]
