@@ -98,6 +98,9 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
 
   useEffect(() => {
     let cancelled = false;
+    let timer: number | undefined;
+    let delayMs = 5000;
+
     async function poll() {
       try {
         const statsUrl = bountyId ? `/api/stats?bounty=${encodeURIComponent(bountyId)}` : "/api/stats";
@@ -113,19 +116,23 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
         setBountyId(nextStats.bountyId);
         setUsingDemo(false);
         setError(null);
+        delayMs = 5000;
       } catch (err) {
         if (cancelled) return;
         setStats(DEMO_STATS);
         setGraph(DEMO_GRAPH);
         setUsingDemo(true);
         setError(err instanceof Error ? err.message : "offline");
+        // Avoid hammering 503s in the console while DATABASE_URL is unset.
+        delayMs = 60_000;
       }
+      if (!cancelled) timer = window.setTimeout(() => void poll(), delayMs);
     }
+
     void poll();
-    const id = window.setInterval(() => void poll(), 5000);
     return () => {
       cancelled = true;
-      window.clearInterval(id);
+      if (timer != null) window.clearTimeout(timer);
     };
   }, [bountyId]);
 
