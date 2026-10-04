@@ -46,7 +46,7 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 - **Incentive tests**: split unit tests plus `/api/attack` showing MIT fake-hop gains vs our zero finder gain.
 - **Solana path measured** on devnet (multi-instruction payout + `sixhops:pay:…` memo; signatures in PLAN §7.2) with safe `PAYOUT_MODE=mock` for the overnight game.
 - **Full `/live` demo surface**: cascade, branching factor, controller steps, attack slider — usable without every sponsor live.
-- **Parallel engineering**: four people/agents via `scripts/task.sh` claim branches and rebase merges. Cursor evidence exists (built in Cursor; agent-mode chat among Sahas, Hayden, Audrey, and Selina; AL-10 notes in `cursor-transcripts/README.md`). There is no separate Cursor sponsor on the track list. SpaceX: Make it Legendary stays unticked: Grok voice and Imagine were not run live.
+- **Parallel engineering**: four people/agents via `scripts/task.sh` claim branches and rebase merges. Tick SpaceX: Make it Legendary on the Built with Cursor requirement alone: the project was built entirely in Cursor, including the agent-mode chat among Sahas, Hayden, Audrey, and Selina, and AL-10 notes are on main in `cursor-transcripts/README.md`. Grok voice and Imagine were not run live. There is no separate Cursor sponsor on the track list.
 
 ## What we learned
 
@@ -64,4 +64,4 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 
 ## Track write-ups (repo)
 
-See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Leave SpaceX: Make it Legendary unticked (Grok voice and Imagine were not run live). Cursor evidence exists (built in Cursor; agent-mode chat; AL-10 notes in `cursor-transcripts/README.md`). There is no separate Cursor sponsor on the track list.
+See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Tick SpaceX: Make it Legendary on the Built with Cursor requirement alone: the project was built entirely in Cursor, including the agent-mode chat among Sahas, Hayden, Audrey, and Selina, and AL-10 notes are on main in `cursor-transcripts/README.md`. Grok voice and Imagine were not run live. There is no separate Cursor sponsor on the track list.
