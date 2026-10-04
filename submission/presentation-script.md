@@ -2,7 +2,7 @@
 
 About three and a half minutes, spoken out loud at the table. Site: [https://sash.select](https://sash.select). No login. Phones work.
 
-Audrey does motivation and the payout. Hayden does the site, the personal links, and the devnet payout. Selina does Photon and the Tiger board. Sahas keeps the clock, the handoffs, the network backup, and the questions. He cues the phones in one beat. He walks whichever judge is in front of him to that track only. He does not give Audrey's motivation or the stack talk.
+Sahas opens, keeps the clock, and says why the search exists and how a deposit splits. He cues the phones in one beat, walks whichever judge is in front of him to that track only, closes, and takes questions. Hayden and Selina split the tech stack only. Hayden covers the Next.js site, the personal /h/ links, claim, accept, and the one Solana devnet payout (deposit wallet versus treasury). Selina covers Photon iMessage and the Tiger /live replay. They do not give the motivation or the payout-logic talk.
 
 Have these open before you start:
 
@@ -13,17 +13,17 @@ Have these open before you start:
 | Clock | Who | Job |
 | --- | --- | --- |
 | 0:00–0:12 | Sahas | Open and name the order |
-| 0:12–1:40 | Audrey | Why the search exists, then how a deposit splits |
+| 0:12–1:40 | Sahas | Why the search exists, then how a deposit splits |
 | 1:40–2:15 | Hayden | Site, personal links, claim, accept, devnet payout |
 | 2:15–2:50 | Selina | Photon, registration, Tiger replay |
 | 2:50–3:20 | Sahas | Cue the phone path |
-| 3:20–3:40 | Sahas | Close, then questions |
+| 3:20–3:40 | Sahas | Close, questions, then that judge's track |
 
 ## 0:00 — Sahas
 
-“Three and a half minutes. Audrey on why, and on how the deposit splits. Hayden on the site and the payout. Selina on Photon and the replay. I will cue the phones. The laptop stays on the replay.”
+“Three and a half minutes. I will say why the search exists, and how a deposit splits. Hayden on the site and the one devnet payout. Selina on Photon and the replay. I will cue the phones. The laptop stays on the replay.”
 
-## 0:12 — Audrey
+## 0:12 — Sahas
 
 “The person you need is usually two to four hops away, inside someone else's private contacts. Jon Kleinberg showed that local knowledge is enough to navigate a social network. A search engine never sees those trusted links. A message passed friend to friend usually dies, because forwarding takes effort and nothing makes it worth continuing.
 
@@ -57,7 +57,7 @@ That tap sends one devnet transaction. A search that started in Photon pays from
 
 Photon asks who you are looking for, then how many hours. It sends the deposit address in its own message. You send devnet SOL and reply sent. It replies with your private page. Reply with a name and it sends that person's personal link.
 
-Slash live is Tiger. This board is the replay r_0000: seven hundred sixty-four nodes, depth through eight. A phone search is a different bounty. The website still has a mock Nessie escrow path.”
+Slash live is Tiger. This board is the replay r_0000: seven hundred sixty-four nodes, depth through eight. A phone search is a different bounty.”
 
 ## 2:50 — Sahas
 
