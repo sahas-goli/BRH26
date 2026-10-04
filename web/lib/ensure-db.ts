@@ -3,7 +3,7 @@
  * Tiger configures synchronously on import; PGlite needs a lazy async open
  * so next dev / first API hit works even if instrumentation raced.
  */
-import { configureBounty } from "./bounty";
+import { acknowledgeEdgeMemo, configureBounty } from "./bounty";
 import { getDatabase, isPgliteUrl } from "./db";
 
 let ensuring: Promise<void> | undefined;
@@ -15,6 +15,7 @@ export async function ensureBountyDatabase(): Promise<void> {
     configureBounty({
       database,
       publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "http://localhost:3000",
+      commitEdgeMemo: acknowledgeEdgeMemo,
     });
   })();
   await ensuring;

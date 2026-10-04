@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { after, beforeEach, test } from "node:test";
-import { BountyError, configureBounty, createBounty, forwardBounty, getHolderView, getPublicBounty } from "../../../lib/bounty";
+import { acknowledgeEdgeMemo, BountyError, configureBounty, createBounty, forwardBounty, getHolderView, getPublicBounty } from "../../../lib/bounty";
 import type { BountyDatabase, BountyOptions, BountyQuery } from "../../../lib/bounty";
 
 type Row = Record<string, unknown>;
@@ -135,6 +135,23 @@ test("failed event writes roll back forwarding and never schedule external effec
   await assert.rejects(forward(token), /injected event write failure/);
   assert.deepEqual(f.state, snapshot);
   assert.equal(memos, 0);
+});
+
+test("devnet forward proceeds when the edge memo hook is present", async () => {
+  fixture({ commitEdgeMemo: acknowledgeEdgeMemo });
+  process.env.PAYOUT_MODE = "devnet";
+  const token = linkToken((await post()).posterLink);
+  const result = await forward(token);
+  assert.equal(result.recipients.length, 1);
+  assert.equal(result.recipients[0].delivered, "link-only");
+});
+
+test("devnet forward is unavailable when the edge memo hook is missing", async () => {
+  const f = fixture();
+  process.env.PAYOUT_MODE = "devnet";
+  const token = linkToken((await post()).posterLink);
+  await assert.rejects(forward(token), rejects("edge_memo_unavailable", 503));
+  assert.equal(f.state.holders.length, 1);
 });
 
 test("delivery and background failures preserve the committed share link", async () => {

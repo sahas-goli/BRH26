@@ -63,11 +63,19 @@ export function configureBounty(options: BountyOptions): void {
   configured = { ...options, publicBaseUrl: url.origin };
 }
 
+/**
+ * Opens the devnet forward gate. Confirm already sends the Solana pay memo,
+ * so this does not submit a second transaction.
+ */
+export function acknowledgeEdgeMemo(): Promise<void> {
+  return Promise.resolve();
+}
+
 // Route modules import this file in the Node runtime. Configure the core with
 // the shared pool when Tiger/Postgres URL is set. PGlite is wired asynchronously
 // via getDatabase() + instrumentation / smoke-mvp (DATABASE_URL=pglite).
 if (process.env.DATABASE_URL && !isPgliteUrl(process.env.DATABASE_URL)) {
-  configureBounty({ database: db });
+  configureBounty({ database: db, commitEdgeMemo: acknowledgeEdgeMemo });
 }
 
 function options(): BountyOptions {
