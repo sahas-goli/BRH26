@@ -192,7 +192,7 @@ export default function PostPage() {
             <form onSubmit={submit} className={styles.card} aria-busy={pending}>
               <h2>Describe who you need</h2>
               <p className={styles.muted}>
-                Free text is compiled into a hint card when Gemini is enabled. If that fails, use the fields below.
+                Free text is compiled into a hint card. If that fails, use the fields below.
               </p>
               <label className={styles.field}>
                 Free-text request

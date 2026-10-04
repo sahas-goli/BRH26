@@ -12,7 +12,8 @@ async function main(): Promise<void> {
   process.env.PAYOUT_MODE = process.env.PAYOUT_MODE || "mock";
   process.env.NESSIE_MODE = process.env.NESSIE_MODE || "mock";
   process.env.GROK_ENABLED = "false";
-  process.env.GEMINI_ENABLED = "false";
+  delete process.env.GEMINI_ENABLED;
+  delete process.env.GEMINI_API_KEY;
   process.env.PHOTON_ENABLED = "false";
 
   const database = await openPgliteDatabase();

@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { db, isPgliteUrl } from "./db";
+import { hintFromDescription } from "./hintcard";
 import { newCustodialAccount, validSolanaAddress } from "./solana";
 import { FANOUT, H, INITIAL_SHARE } from "./types";
 import type { HintCard, HolderView, PublicBounty, ForwardResult, Rail } from "./types";
@@ -85,9 +86,7 @@ function options(): BountyOptions {
   const base = configured;
   return {
     ...base,
-    compileHint: base.compileHint ?? (enabled("GEMINI_ENABLED")
-      ? (text) => import("./hintcard").then((m) => m.compileHintCard(text))
-      : undefined),
+    compileHint: base.compileHint ?? ((text) => import("./hintcard").then((m) => m.compileHintCard(text))),
     generateWantedCard: base.generateWantedCard ?? (enabled("GROK_ENABLED")
       ? (input) => import("./imagine").then((m) => m.storeWantedCard(base.database, input))
       : undefined),
@@ -119,6 +118,9 @@ function hintCard(value: unknown): HintCard {
     throw new BountyError("invalid_hint", 400);
   }
   return hint as HintCard;
+}
+function descriptionHint(text: string): HintCard {
+  return hintCard(hintFromDescription(string(text, 4000)));
 }
 function hiddenHints(value: unknown): HiddenHint[] {
   if (value === undefined) return [];
@@ -216,11 +218,12 @@ export async function createBounty(input: unknown): Promise<{
   liveRequired(enabled("GROK_ENABLED"), o.generateWantedCard, "wanted_card_unavailable");
   let hint: HintCard;
   let hidden: HiddenHint[];
-  if (body.text !== undefined && enabled("GEMINI_ENABLED")) {
+  const description = typeof body.text === "string" && body.text.trim() ? body.text : undefined;
+  if (description !== undefined && process.env.XAI_API_KEY?.trim()) {
     liveRequired(true, o.compileHint, "hint_compiler_unavailable");
     let compiled: { hint: HintCard; hidden?: HiddenHint[] };
     try {
-      compiled = await o.compileHint!(string(body.text, 4000));
+      compiled = await o.compileHint!(string(description, 4000));
     } catch {
       throw new BountyError("hint_compiler_unavailable", 503);
     }
@@ -231,6 +234,9 @@ export async function createBounty(input: unknown): Promise<{
       if (error instanceof BountyError) throw error;
       throw new BountyError("hint_compiler_unavailable", 503);
     }
+  } else if (description !== undefined && body.hint === undefined) {
+    hint = descriptionHint(description);
+    hidden = hiddenHints(body.hidden);
   } else {
     hint = hintCard(body.hint);
     hidden = hiddenHints(body.hidden);
