@@ -1,73 +1,59 @@
 # Six Hops — table presentation script
 
-About three and a half minutes, spoken out loud at the table. Site: [https://sash.select](https://sash.select). No login. Phones work.
+**2:00 without judges.** Spoken out loud at the table when the judges do not do the demo. The judge walk-along stays after the close and is not on this clock. Site: [https://sash.select](https://sash.select). No login. Phones work.
 
-Sahas opens, keeps the clock, and says why the search exists and how a deposit splits. He cues the phones in one beat, walks whichever judge is in front of him to that track only, closes, and takes questions. Hayden and Selina split the tech stack only. Hayden covers the Next.js site, the personal /h/ links, claim, accept, and the one Solana devnet payout (deposit wallet versus treasury). Selina covers Photon iMessage and the Tiger /live replay. They do not give the motivation or the payout-logic talk.
+Audrey does not speak. Sahas opens, says why the search exists, says how a deposit splits, and closes. He walks a track only if that judge asks. Hayden does the site and one devnet payout. Selina does Photon and /live.
 
 Have these open before you start:
 
-- Laptop on [https://sash.select/live](https://sash.select/live). That board is the replay `r_0000` (764 nodes, depth through 8) plus the attack slider. A search started on the phone is a different bounty id.
-- Two phones on the home page. One of them can open [sash.select/text](https://sash.select/text) when the Photon judge is up.
-- One quiet tab for the payout that already landed: [Explorer, devnet, bounty b_gCijcO6z](https://explorer.solana.com/tx/29b8QgRSUcSdpmnwiLGKQXHkKLPEemcVPf5ygX8LvnmP9t9EDpmfd8qoxohCkPNw44baqwYafRDRZaMDfZZdDZsK?cluster=devnet). Half a SOL, two hops: 467 cents to the passer, 7,018 cents to the match, one transaction from that search's deposit wallet.
+- Laptop on [https://sash.select/live](https://sash.select/live). That board is the replay `r_0000` (764 nodes, depth through 8) plus the attack slider. A search started on the phone is a different bounty id. Leave the laptop there for the whole talk.
+- Two phones on the home page, for the walk-along after the two minutes. One of them can open [sash.select/text](https://sash.select/text) when the Photon judge is up.
+- One quiet tab for the payout that already landed: [Explorer, devnet, bounty b_gCijcO6z](https://explorer.solana.com/tx/29b8QgRSUcSdpmnwiLGKQXHkKLPEemcVPf5ygX8LvnmP9t9EDpmfd8qoxohCkPNw44baqwYafRDRZaMDfZZdDZsK?cluster=devnet). Half a SOL, two hops: 467 cents to the passer, 7,018 cents to the match, one transaction from that search's deposit wallet. Do not show it unless the fresh payout is slow.
 
 | Clock | Who | Job |
 | --- | --- | --- |
-| 0:00–0:12 | Sahas | Open and name the order |
-| 0:12–1:40 | Sahas | Why the search exists, then how a deposit splits |
-| 1:40–2:15 | Hayden | Site, personal links, claim, accept, devnet payout |
-| 2:15–2:50 | Selina | Photon, registration, Tiger replay |
-| 2:50–3:20 | Sahas | Cue the phone path |
-| 3:20–3:40 | Sahas | Close, questions, then that judge's track |
+| 0:00–1:10 | Sahas | Open, why, deposit split |
+| 1:10–1:35 | Hayden | Site, personal link, accept, one devnet transaction |
+| 1:35–1:55 | Selina | Photon text and the Tiger replay on /live |
+| 1:55–2:00 | Sahas | Close |
+
+No judge taps inside this clock.
 
 ## 0:00 — Sahas
 
-“Three and a half minutes. I will say why the search exists, and how a deposit splits. Hayden on the site and the one devnet payout. Selina on Photon and the replay. I will cue the phones. The laptop stays on the replay.”
+“Two minutes. Why this exists, and how a deposit splits. Hayden has the site and one payout. Selina has Photon and the replay.”
 
-## 0:12 — Sahas
+## 0:10 — Sahas
 
-“The person you need is usually two to four hops away, inside someone else's private contacts. Jon Kleinberg showed that local knowledge is enough to navigate a social network. A search engine never sees those trusted links. A message passed friend to friend usually dies, because forwarding takes effort and nothing makes it worth continuing.
+“The person you need is usually two to four hops away, inside someone else's contacts. A search engine never sees those links. A message passed friend to friend usually dies.
 
-Six Hops is a bounty for someone you cannot look up. You describe them with attributes only: a city, a field, a skill. A friend passes one personal link to someone closer. The person who matches decides to introduce themselves. We never take a copy of anyone's contacts. The poster never sees who forwarded.
+Six Hops is a bounty for someone you cannot look up. You describe them with a city, a field, a skill. A friend passes one personal link. The match decides to introduce themselves. We never copy anyone's contacts.”
 
-The deposit is the whole reward. The poster takes none of it. Each person who passed the link gets one sixteenth of that deposit, rounded down. That share stays flat. The match gets the rest. A chain longer than eight pays nobody.
+## 0:40 — Sahas
 
-On a sixteen dollar deposit the shares are whole dollars. One hop, the match gets sixteen. Three hops, two passers get a dollar and the match gets fourteen. Six hops, five passers get a dollar and the match gets eleven. Eight hops, the match gets nine.
+“The deposit is the whole reward. The poster takes none. Each passer gets one sixteenth, rounded down. The match gets the rest. Longer than eight pays nobody.
 
-A fake extra hop does not raise the match's take. The same sixteen dollars is still the whole reward. The MIT split would pay that person fifty, seventy-five, eighty-seven and a half, and ninety-three and three quarters percent more for one through four fakes. Ours pays the same total as the honest chain.
+On sixteen dollars, each passer gets one dollar. One hop, the match gets sixteen. Three hops, the match gets fourteen. Eight hops, the match gets nine. A fake hop does not raise the match. It is still sixteen dollars.”
 
-Pass it to three friends each time, and six rounds ask one thousand ninety-two people, still for those same sixteen dollars. Someone who only sees the card expects about a cent and a half. Someone on the route that worked expects a dollar, or eleven if they are the match.”
+## 1:10 — Hayden
 
-## 1:40 — Sahas
+“The public site is sash.select. No login. Each person gets a personal link under slash h. On that page they pass the search on, or they tap This is me and claim. They can paste a Solana address. The poster opens their page and taps Accept and pay. That tap sends one devnet transaction.”
 
-“Hayden, the site.”
+## 1:35 — Selina
 
-## 1:45 — Hayden
+“Photon is text on the laptop. Register at sash.select/text, then text new search. It sends the deposit address in its own message. Slash live is Tiger. This board is the replay r_0000: seven hundred sixty-four people, depth eight.”
 
-“The public site is sash.select. Next.js, on Vercel. No login. Each person gets a personal link under slash h. On that page they pass the search on, or they tap This is me and claim. They can paste their own Solana address. The poster opens their private page and taps Accept and pay.
+## 1:55 — Sahas
 
-That tap sends one devnet transaction. A search that started in Photon pays from that search's own deposit wallet. A search created on the website takes a dollar cap, pays sixty percent of that cap, and pays from the shared treasury.”
+“That is the product. The poster accepts before anything is paid.”
 
-## 2:15 — Sahas
+If judges are walking along, continue with the judge steps and do not count that toward the 2 minutes.
 
-“Selina, Photon and the board.”
-
-## 2:20 — Selina
-
-“Photon is the iMessage agent. It runs on the laptop. Pro shared lines only accept registered numbers, so you register at sash.select/text, then text new search.
-
-Photon asks who you are looking for, then how many hours. It sends the deposit address in its own message. You send devnet SOL and reply sent. It replies with your private page. Reply with a name and it sends that person's personal link.
-
-Slash live is Tiger. This board is the replay r_0000: seven hundred sixty-four nodes, depth through eight. A phone search is a different bounty.”
-
-## 2:50 — Sahas
+## Judge steps, after the clock
 
 “Phones. Text new search to Photon. Send one tenth of a SOL on devnet, then reply sent. Pass one personal link. The match taps This is me. The poster taps Accept and pay. The Explorer card is one transaction from that search's deposit wallet.”
 
-Stop when the accept click lands, or when the quiet Explorer tab is the proof. Sahas takes the clock back.
-
-## 3:20 — Sahas
-
-“That is the product. One deposit, a personal link, the match taps in, and the poster accepts before anything is paid. Questions, or tell me which track you judge and I will walk you to it.”
+Stop when the accept click lands, or when the quiet Explorer tab is the proof. This walk is not part of the two minutes.
 
 ### If the network fails
 
