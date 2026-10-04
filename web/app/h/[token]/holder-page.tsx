@@ -8,6 +8,10 @@ import styles from "./hop.module.css";
 
 const labels: Record<string, string> = { city: "City", organizationType: "Organization", field: "Field", skill: "Skill", language: "Language", experience: "Experience" };
 const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+function safeExplorer(value?: string): string {
+  try { const url = new URL(value ?? ""); if (url.protocol === "https:" && url.hostname === "explorer.solana.com" && !url.username && !url.password) return url.href; } catch { /* omit invalid links */ }
+  return "";
+}
 
 export default function HolderPage() {
   const { token } = useParams<{ token: string }>();
@@ -26,10 +30,18 @@ export default function HolderPage() {
   const [posterToken, setPosterToken] = useState("");
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [confirmNote, setConfirmNote] = useState("");
+  const [explorer, setExplorer] = useState("");
+  const revealPayout = useRef(false);
+
+  useEffect(() => {
+    if (!revealPayout.current || view?.bounty.status !== "paid") return;
+    revealPayout.current = false;
+    document.getElementById("payout")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [view]);
 
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true); setError(""); setConfirmNote("");
+    setLoading(true); setError("");
     fetch(`/api/h/${encodeURIComponent(token)}`, { cache: "no-store", referrerPolicy: "no-referrer", signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error(response.status === 404 ? "This personal link was not found. Ask the sender for their link again." : "The bounty is unavailable right now. Please try again.");
@@ -42,6 +54,12 @@ export default function HolderPage() {
           try {
             setPosterToken(sessionStorage.getItem(`sixhops:poster:${data.bounty.id}`) ?? "");
           } catch { setPosterToken(""); }
+        }
+        if (data.bounty.status === "paid") {
+          fetch(`/api/graph/${encodeURIComponent(data.bounty.id)}`, { cache: "no-store", signal: controller.signal })
+            .then((response) => response.ok ? response.json() as Promise<{ explorerUrl?: string }> : {})
+            .then((graph) => { const url = safeExplorer((graph as { explorerUrl?: string }).explorerUrl); if (url) setExplorer(url); })
+            .catch(() => { /* the paid card still renders without the link */ });
         }
       })
       .catch((e: unknown) => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Unable to load this bounty."); })
@@ -72,11 +90,8 @@ export default function HolderPage() {
         };
         throw new Error(errors[data.error ?? ""] ?? "Confirmation failed. Check the poster token and try again.");
       }
-      setConfirmNote(
-        accept
-          ? (data.explorerUrl ? `Paid. Explorer: ${data.explorerUrl}` : `Claim accepted (${data.status ?? "paid"}).`)
-          : "Claim rejected. The bounty is open again for another target.",
-      );
+      if (accept) { setExplorer(safeExplorer(data.explorerUrl)); revealPayout.current = true; }
+      setConfirmNote(accept ? "" : "Claim rejected. The bounty is open again for another target.");
       setAttempt((a) => a + 1);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Confirmation failed.");
@@ -110,7 +125,7 @@ export default function HolderPage() {
   }
 
   return <main className={styles.page}>
-    <a href="/" referrerPolicy="no-referrer">Six Hops</a>
+    <a className={styles.brand} href="/" referrerPolicy="no-referrer">SIX HOPS</a>
     <h1>Who do you know?</h1>
     {loading && <p role="status">Loading your hint card…</p>}
     {error && <div role="alert" className={styles.error}>{error}<br /><button disabled={busy} onClick={() => setAttempt((a) => a + 1)}>Refresh bounty</button></div>}
@@ -148,11 +163,22 @@ export default function HolderPage() {
           <button type="button" disabled={confirmBusy} onClick={() => void confirmClaim(false)} className={styles.secondary}>
             Reject claim
           </button>
-          {confirmNote && <p role="status">{confirmNote}</p>}
         </section>
       )}
-      <h2>{view.forwardsLeft} forwards remaining</h2>
-      <p>Choose someone closer to these clues. Share each personal link only with its intended recipient.</p>
+      {confirmNote && <p role="status">{confirmNote}</p>}
+      {view.bounty.status === "paid" && (
+        <section id="payout" className={`${styles.card} ${styles.paid}`} aria-label="Payout" aria-live="polite">
+          <p className={styles.eyebrow}>Found and paid</p>
+          <h2>{money(view.bounty.bountyCents)} sent to the route that worked.</h2>
+          <p>{view.depth === 0 ? "You accepted the introduction, and the chain was paid in one Solana devnet transaction." : "The poster accepted the introduction, and everyone on the successful route was paid in one Solana devnet transaction."}</p>
+          {explorer && <a className={styles.cta} href={explorer} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">View the payout on Solana Explorer ↗</a>}
+        </section>
+      )}
+      {view.bounty.status === "found" && view.depth > 0 && <p className={styles.muted}>Someone has claimed this search. The poster is reading their introduction.</p>}
+      {view.canForward && <>
+        <h2>{view.forwardsLeft} forwards remaining</h2>
+        <p>Choose someone closer to these clues. Share each personal link only with its intended recipient.</p>
+      </>}
       {view.canForward ? <form onSubmit={forward}>
         <fieldset disabled={busy}><legend>Your recipients</legend>
           {recipients.map((recipient, index) => <div key={index}>
@@ -175,7 +201,7 @@ export default function HolderPage() {
           </>}
         </fieldset>
         <button disabled={busy} type="submit">{busy ? "Creating personal links…" : "Pass it on"}</button>
-      </form> : <p>This link cannot forward further. The bounty may be closed, at its last hop, or out of forwards.</p>}
+      </form> : view.bounty.status === "open" && <p>This link cannot forward further. It is at its last hop or out of forwards.</p>}
       {sent.length > 0 && <section className={styles.card} aria-label="Created recipient links"><h2>Your personal links</h2><p role="status">{sent.length} recipient links created.</p>{sent.map((r) => <div key={r.link}><h3>{r.label}</h3><p>{r.delivered === "imessage" ? "Delivered by iMessage" : "Link ready — share it with this recipient"}</p><input aria-label={`Personal link for ${r.label}`} readOnly value={r.link} onFocus={(e) => e.currentTarget.select()} /><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(r.link); setCopyStatus(`Copied the link for ${r.label}.`); } catch { setCopyStatus("Select the link above and copy it manually."); } }}>Copy link</button></div>)}<p role="status">{copyStatus}</p></section>}
       <nav className={styles.actions} aria-label="Other ways to participate"><a href={`/talk/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">Talk instead</a>{view.depth > 0 && view.bounty.status === "open" && <a href={`/claim/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">This is me</a>}</nav>
     </>}

@@ -38,7 +38,7 @@ export default function ClaimPage() {
 
   const explorer = safeExplorer(result?.explorerUrl);
   return <main className={styles.page}>
-    <a href="/" referrerPolicy="no-referrer">Six Hops</a>
+    <a className={styles.brand} href="/" referrerPolicy="no-referrer">SIX HOPS</a>
     {result ? <section className={styles.card} aria-live="polite">
       <h1>{result.status === "paid" ? "Your chain has been paid." : "Your introduction is sent."}</h1>
       <p>{result.status === "paid" ? "The bounty is marked paid. Demo rewards use test funds." : "The bounty is marked found. Payment is pending the poster’s confirmation of your introduction."}</p>
