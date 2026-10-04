@@ -1,0 +1,58 @@
+.example-root {
+  overflow: auto;
+}
+
+.example-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 0;
+  grid-template-rows: auto auto;
+  align-content: start;
+}
+
+.example-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.example-caption {
+  margin: 10px 0 0;
+  color: var(--paper);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.example-root .live-cascade-svg {
+  flex: none;
+  width: min(100%, 420px);
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
+  aspect-ratio: 400 / 460;
+}
+
+.example-root .hop-label {
+  fill: var(--paper);
+  font-family: var(--sans);
+  font-size: 18px;
+}
+
+.example-root .hop-pay {
+  fill: var(--fog);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.example-root .hop-pay.match {
+  fill: var(--lime);
+}
+
+@media (max-width: 960px) {
+  .example-root .live-cascade-svg {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+}

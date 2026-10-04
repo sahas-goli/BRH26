@@ -9,7 +9,7 @@ const DEPTH_COLORS = ["#6ec8ff", "#8fd3ff", "#b6f24a", "#d4ff6a", "#f0b429", "#f
 type SimNode = GraphPayload["nodes"][number] & d3.SimulationNodeDatum;
 type SimLink = { source: string | SimNode; target: string | SimNode; memoSig?: string; at: string };
 
-export function Cascade({ graph }: { graph: GraphPayload | null }) {
+function ForceCascade({ graph }: { graph: GraphPayload | null }) {
   const ref = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
@@ -105,4 +105,67 @@ export function Cascade({ graph }: { graph: GraphPayload | null }) {
   }, [graph]);
 
   return <svg ref={ref} className="live-cascade-svg" role="img" aria-label="Bounty cascade graph" />;
+}
+
+function payLabel(cents: number | undefined, isTarget: boolean): string {
+  if (cents == null) return "unpaid";
+  const dollars = `$${cents / 100}`;
+  return isTarget ? `${dollars} · match` : dollars;
+}
+
+function ColumnCascade({ graph }: { graph: GraphPayload | null }) {
+  const nodes = [...(graph?.nodes ?? [])].sort((a, b) => a.depth - b.depth);
+  const width = 400;
+  const height = 460;
+  const x = 118;
+  const top = 52;
+  const bottom = height - 52;
+  const step = nodes.length > 1 ? (bottom - top) / (nodes.length - 1) : 0;
+  const placed = nodes.map((node, index) => ({ ...node, cx: x, cy: top + step * index }));
+  const byId = new Map(placed.map((node) => [node.id, node]));
+  const summary = placed.map((node) => `${node.label ?? node.id}, ${payLabel(node.paidCents, node.isTarget)}`).join(". ");
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="live-cascade-svg" role="img" aria-label={summary || "Hop chain"}>
+      {(graph?.edges ?? []).map((edge) => {
+        const from = byId.get(edge.from);
+        const to = byId.get(edge.to);
+        if (!from || !to) return null;
+        return <line key={`${edge.from}-${edge.to}`} className="link" x1={from.cx} y1={from.cy} x2={to.cx} y2={to.cy} />;
+      })}
+      {placed.map((node) => {
+        const paid = node.paidCents != null;
+        const radius = node.isTarget ? 10 : paid ? 8 : 6;
+        const className = ["node", paid ? "paid" : "", node.isTarget ? "target" : ""].filter(Boolean).join(" ");
+        return (
+          <g key={node.id}>
+            <circle
+              className={className}
+              cx={node.cx}
+              cy={node.cy}
+              r={radius}
+              fill={DEPTH_COLORS[Math.min(node.depth, DEPTH_COLORS.length - 1)]}
+            />
+            <text className="hop-label" x={node.cx + 28} y={node.cy - 4}>
+              {node.label ?? node.id}
+            </text>
+            <text className={node.isTarget ? "hop-pay match" : "hop-pay"} x={node.cx + 28} y={node.cy + 18}>
+              {payLabel(node.paidCents, node.isTarget)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+export function Cascade({
+  graph,
+  layout = "force",
+}: {
+  graph: GraphPayload | null;
+  layout?: "force" | "column";
+}) {
+  if (layout === "column") return <ColumnCascade graph={graph} />;
+  return <ForceCascade graph={graph} />;
 }
