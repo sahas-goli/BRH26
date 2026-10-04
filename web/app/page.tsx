@@ -38,7 +38,7 @@ export default function HomePage() {
     <h1 className={styles.title}>Find your person.<br />One friend at a time.</h1>
     <p className={styles.intro}>Looking for a particular kind of experience? Put out a hint card. Friends pass it closer, and the successful chain shares the reward.</p>
     <ol className={styles.steps}><li>Describe their skills and experience, without names or addresses.</li><li>Each person passes the card to up to three people, for at most eight hops.</li><li>The person opts in. The successful chain gets paid.</li></ol>
-    <div className={styles.actions}><a className={styles.button} href="/post">Start a search</a></div>
+    <div className={styles.actions}><a className={styles.button} href="/post">Start a search</a><a className={`${styles.button} ${styles.secondary}`} href="/text">Post by iMessage</a></div>
     <section className={styles.card} aria-labelledby="featured-title" aria-live="polite">
       <p className={styles.eyebrow}>Featured search</p><h2 id="featured-title">A connection in the making</h2>
       {loading ? <p>Loading the featured search…</p> : featured ? <>
