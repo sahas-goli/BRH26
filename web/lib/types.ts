@@ -31,7 +31,11 @@ export interface HolderView {       // GET /api/h/[token]
   pendingClaim?: { introMessage: string };
 }
 export interface ForwardRecipient { label: string; handle?: string } // handle = iMessage phone/email, optional
-export interface ForwardResult { recipients: { label: string; link: string; delivered: 'imessage' | 'link-only' }[] }
+export interface ForwardResult {
+  recipients: { label: string; link: string; delivered: 'imessage' | 'link-only' }[];
+  /** Public Solana address this holder's share is paid to. Never a secret. */
+  payoutAddress?: string;
+}
 
 export interface Share { holderId: string; depth: number; role: 'relay' | 'finder'; cents: number; rail: Rail }
 export interface SplitResult { chainLength: number; budgetCents: number; shares: Share[]; refundCents: number }

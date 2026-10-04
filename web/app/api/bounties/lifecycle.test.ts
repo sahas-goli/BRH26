@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { after, beforeEach, test } from "node:test";
 import { acknowledgeEdgeMemo, BountyError, configureBounty, createBounty, forwardBounty, getHolderView, getPublicBounty } from "../../../lib/bounty";
+import { validSolanaAddress } from "../../../lib/solana";
 import type { BountyDatabase, BountyOptions, BountyQuery } from "../../../lib/bounty";
 
 type Row = Record<string, unknown>;
@@ -44,6 +45,12 @@ function fixture(extra: Partial<BountyOptions> = {}) {
         row.forwards = Number(row.forwards) + Number(values[0]);
         row.rail = values[1];
         if (values[2]) row.sol_address = values[3];
+      } else if (sql.startsWith("UPDATE holders SET sol_address")) {
+        const row = state.holders.find((row) => row.id === values[2]);
+        if (row && (row.sol_address == null || row.sol_address === "")) {
+          row.sol_address = values[0];
+          row.custodial_secret = values[1];
+        }
       } else {
         throw new Error(`Unhandled test query: ${sql}`);
       }
@@ -144,6 +151,47 @@ test("devnet forward proceeds when the edge memo hook is present", async () => {
   const result = await forward(token);
   assert.equal(result.recipients.length, 1);
   assert.equal(result.recipients[0].delivered, "link-only");
+});
+
+test("devnet custodial forward persists a payout address and a second forward keeps it", async () => {
+  const f = fixture({ commitEdgeMemo: acknowledgeEdgeMemo });
+  process.env.PAYOUT_MODE = "devnet";
+  const root = linkToken((await post()).posterLink);
+  const hop = await forward(root);
+  assert.equal("payoutAddress" in hop, false);
+  const token = linkToken(hop.recipients[0].link);
+  const created = await forward(token);
+  const address = created.payoutAddress ?? "";
+  assert.equal(validSolanaAddress(address), true);
+  assert.equal(address.length >= 32 && address.length <= 44, true);
+  assert.deepEqual(Object.keys(created).sort(), ["payoutAddress", "recipients"]);
+  const holder = f.state.holders.find((row) => row.token === token);
+  assert.ok(holder);
+  assert.equal(holder.sol_address, address);
+  const secret = holder.custodial_secret;
+  assert.equal(typeof secret === "string" && secret.length > 0, true);
+  assert.equal(JSON.stringify(created).includes(String(secret)), false);
+  const again = await forward(token);
+  assert.equal(again.payoutAddress, address);
+  assert.equal(holder.sol_address, address);
+  assert.equal(holder.custodial_secret === secret, true);
+  assert.equal(JSON.stringify(again).includes(String(secret)), false);
+});
+
+test("wallet forward returns the pasted address and does not store a custodial secret", async () => {
+  const f = fixture({ commitEdgeMemo: acknowledgeEdgeMemo });
+  process.env.PAYOUT_MODE = "devnet";
+  const pasted = "1".repeat(32);
+  const root = linkToken((await post()).posterLink);
+  const token = linkToken((await forward(root)).recipients[0].link);
+  const result = await forwardBounty({ token, recipients: [{ label: "friend" }], rail: "wallet", solAddress: pasted });
+  assert.equal(result.payoutAddress, pasted);
+  const holder = f.state.holders.find((row) => row.token === token);
+  assert.equal(holder?.sol_address, pasted);
+  assert.equal(holder?.custodial_secret == null, true);
+  const again = await forward(token);
+  assert.equal(again.payoutAddress, pasted);
+  assert.equal(holder?.sol_address, pasted);
 });
 
 test("devnet forward is unavailable when the edge memo hook is missing", async () => {
