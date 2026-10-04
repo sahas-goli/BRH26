@@ -126,6 +126,13 @@ async function checkDeposit(session: Session): Promise<string> {
   );
 }
 
+/** Copy a stranger sees with a personal link. Must survive sanitizeOutbound. */
+export function personalLinkReply(label: string, link: string): string {
+  return sanitizeOutbound(
+    `Personal link for ${label}:\nThis is a search for a kind of person; the card is on the link, so tap This is me if it is you, otherwise pass it to someone closer. The route that works gets paid in test SOL.\n${link}\nShare only with them.`,
+  );
+}
+
 async function forwardByLabel(session: Session, label: string): Promise<string> {
   if (!session.token) return sanitizeOutbound("Missing link — send your /h/… URL first.");
   const result = await forwardTo(session.token, label);
@@ -139,7 +146,7 @@ async function forwardByLabel(session: Session, label: string): Promise<string> 
     }
     return sanitizeOutbound("I couldn't create that forward. Try again in a moment.");
   }
-  return sanitizeOutbound(`Personal link for ${label}:\n${result.link}\nShare only with them.`);
+  return personalLinkReply(label, result.link);
 }
 
 export function handleReaction(handle: string): string {
