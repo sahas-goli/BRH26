@@ -160,7 +160,7 @@ function memoryDb() {
   const state: { bounties: Record<string, unknown>[]; holders: Record<string, unknown>[]; payouts: Record<string, unknown>[]; events: Record<string, unknown>[] } = {
     bounties: [{
       id: "b_demo", poster_token: "poster-secret", status: "open", bounty_cents: 1600, cap_cents: 2000,
-      expires_at: "2026-10-04T00:00:00Z",
+      expires_at: "2026-12-31T23:59:59Z",
     }],
     holders: [
       { id: "h_poster", bounty_id: "b_demo", token: "poster-token", parent_id: null, depth: 0, rail: "bank" },
