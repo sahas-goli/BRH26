@@ -2,7 +2,7 @@
 
 ## Short description
 
-Mobile-first post → hop → claim flows, plus a full-bleed `/live` room screen: d3-force cascade by depth, branching-factor display, controller steps, attack slider, and Grok Imagine (or template) wanted cards as link previews.
+Mobile-first post → hop → claim flows, plus a full-bleed `/live` room screen: d3-force cascade by depth, branching-factor display, controller steps, attack slider. Grok Imagine draws one simple neutral vector of the person after the bounty form on `/post` is submitted; forwarded links get Grok Imagine (or template) wanted cards as previews.
 
 ## Why Design specifically
 
@@ -20,7 +20,6 @@ Mobile-first post → hop → claim flows, plus a full-bleed `/live` room screen
 | Hop / claim / post | `web/app/h/[token]/`, `web/app/claim/[token]/`, `web/app/post/` |
 | OG wanted card | `web/app/api/og/[id]/route.ts`, `web/lib/imagine.ts` |
 | Attack comparison API | `web/app/api/attack/` |
-| Voice alternate | `web/app/talk/[token]/` |
 
 ## What judges see
 
