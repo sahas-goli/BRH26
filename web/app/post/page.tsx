@@ -40,6 +40,7 @@ export default function PostPage() {
     };
     if (text) payload.text = text;
     if (Object.keys(hint).length) payload.hint = hint;
+    if (String(data.get("account") ?? "bank") === "bank") payload.posterRail = "bank";
     busy.current = true;
     setPending(true);
     setError("");
@@ -178,8 +179,15 @@ export default function PostPage() {
                   <input name="hours" type="number" min="1" max="8760" step="1" defaultValue="24" required disabled={pending} />
                 </label>
               </div>
+              <label className={styles.field}>
+                Account
+                <select name="account" defaultValue="bank" disabled={pending}>
+                  <option value="bank">Nessie checking</option>
+                  <option value="custodial">Solana payout</option>
+                </select>
+              </label>
               <p className={styles.muted}>
-                The initial offer is 60% of your cap; the remaining 40% is held in reserve. This demo uses test or simulated money.
+                The initial offer is 60% of your cap; the remaining 40% stays in Nessie checking. Escrow is holding the reward until you accept.
               </p>
               {error && <p className={styles.error} role="alert">{error}</p>}
               <div className={styles.actions}>

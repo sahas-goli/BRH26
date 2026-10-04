@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FEATURED_PANEL_CENTS, nessiePanel } from "../../lib/nessie-panel";
 import type { AttackComparison, GraphPayload, PublicBounty, Stats } from "../../lib/types";
 import { Cascade } from "./cascade";
 
@@ -9,13 +10,6 @@ type Sweep = {
   note?: string;
   by_attrition: SweepPoint[];
   by_fanout: SweepPoint[];
-};
-
-type MockBalances = {
-  mode: "mock" | "unavailable";
-  checkingCents: number;
-  escrowCents: number;
-  status: string;
 };
 
 const DEMO_STATS: Stats = {
@@ -139,19 +133,6 @@ function money(cents: number): string {
   return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-function mockBalancesFrom(bounty: PublicBounty | null, status: string | undefined): MockBalances {
-  if (!bounty) return { mode: "unavailable", checkingCents: 0, escrowCents: 0, status: status ?? "—" };
-  const st = bounty.status;
-  if (st === "paid" || st === "refunded") {
-    return { mode: "mock", checkingCents: 5000 + (bounty.capCents - bounty.bountyCents), escrowCents: 0, status: st };
-  }
-  if (st === "found") {
-    return { mode: "mock", checkingCents: 5000, escrowCents: bounty.capCents, status: st };
-  }
-  // open / expired before refund path
-  return { mode: "mock", checkingCents: 5000, escrowCents: bounty.capCents, status: st };
-}
-
 export function LiveBoard({ initialBountyId }: { initialBountyId: string | null }) {
   const [bountyId, setBountyId] = useState(initialBountyId ?? "b_demo");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -261,7 +242,14 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
   const angle = needleAngle(stats?.b ?? null);
   const series = stats?.series ?? [];
   const controllerLabels = ["healthy", "nudge", "widen", "raise"] as const;
-  const balances = mockBalancesFrom(publicBounty, stats?.status);
+  const balances = nessiePanel(
+    publicBounty
+      ? { capCents: publicBounty.capCents, bountyCents: publicBounty.bountyCents, status: publicBounty.status }
+      : stats || usingDemo
+        ? { ...FEATURED_PANEL_CENTS, status: stats?.status ?? "open" }
+        : null,
+    stats?.status,
+  );
 
   const attritionPoints = useMemo(
     () => (sweep?.by_attrition ?? []).map((p) => ({ x: p.attrition ?? 0, y: p.success_rate })),
@@ -375,18 +363,14 @@ export function LiveBoard({ initialBountyId }: { initialBountyId: string | null 
 
           <section className="live-panel">
             <h2>Balances (Nessie)</h2>
-            <p className="live-muted">
-              {balances.mode === "mock"
-                ? "Mock escrow view (NESSIE_MODE≠live). Live balances need VERIFY D."
-                : "Balances unavailable until a featured bounty loads."}
-            </p>
+            <p className="live-muted">{balances.note}</p>
             <div className="live-stats-row" style={{ marginTop: 10 }}>
               <div>
-                <strong>{balances.mode === "mock" ? money(balances.checkingCents) : "—"}</strong>
-                checking
+                <strong>{balances.available ? money(balances.checkingCents) : "—"}</strong>
+                Nessie checking
               </div>
               <div>
-                <strong>{balances.mode === "mock" ? money(balances.escrowCents) : "—"}</strong>
+                <strong>{balances.available ? money(balances.escrowCents) : "—"}</strong>
                 escrow
               </div>
               <div>
