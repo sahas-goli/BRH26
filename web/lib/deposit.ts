@@ -67,6 +67,7 @@ export async function fundDepositBounty(
   );
   const row = rows[0];
   if (!row || !row.sol_address) throw new BountyError("not_found", 404);
+  if (row.status === "cancelled") throw new BountyError("closed", 410);
   if (row.status !== "funding") return { status: "open", bountyCents: Number(row.bounty_cents), minimumSol: minimumDepositSol() };
   const cents = depositCents(await balanceOf(String(row.sol_address)));
   if (cents < MIN_BOUNTY_CENTS) return { status: "funding", bountyCents: cents, minimumSol: minimumDepositSol() };

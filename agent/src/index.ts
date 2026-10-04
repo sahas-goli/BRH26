@@ -9,7 +9,7 @@ import { Spectrum } from "spectrum-ts";
 import { imessage } from "spectrum-ts/providers/imessage";
 import { terminal } from "spectrum-ts/providers/terminal";
 import { handleInboundText, handleReaction } from "./flows.js";
-import { deliverToHandle, rememberSpace } from "./session.js";
+import { deliverToHandle, rememberSpace, resetSessions } from "./session.js";
 import { lifecycleText, startTickLoop } from "./tick.js";
 
 const PORT = Number(process.env.AGENT_PORT ?? 8787);
@@ -69,9 +69,17 @@ function startSendServer(): void {
       json(res, 200, { ok: true, delivery: status });
       return;
     }
+    if (req.method === "POST" && (req.url === "/reset" || req.url === "/reset/")) {
+      if (!INTERNAL || req.headers["x-six-hops-secret"] !== INTERNAL) {
+        json(res, 401, { error: "unauthorized" });
+        return;
+      }
+      json(res, 200, { ok: true, cleared: resetSessions() });
+      return;
+    }
     json(res, 404, { error: "not_found" });
   });
-  server.listen(PORT, () => console.log(`[agent] /send /health on :${PORT}`));
+  server.listen(PORT, () => console.log(`[agent] /send /reset /health on :${PORT}`));
 }
 
 async function main(): Promise<void> {

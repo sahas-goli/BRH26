@@ -181,6 +181,7 @@ export default function HolderPage() {
         </section>
       )}
       {view.bounty.status === "found" && view.depth > 0 && <p className={styles.muted}>Someone has claimed this search. The poster is reading their introduction.</p>}
+      {view.bounty.status === "cancelled" && <p className={styles.muted}>This search was stopped by the organizers.</p>}
       {view.canForward && <>
         <h2>{view.forwardsLeft} forwards remaining</h2>
         <p>Choose someone closer to these clues. Share each personal link only with its intended recipient.</p>
