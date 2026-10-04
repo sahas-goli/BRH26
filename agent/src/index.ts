@@ -109,7 +109,8 @@ async function main(): Promise<void> {
       }
       if (message.content.type === "text" && "text" in message.content && typeof message.content.text === "string") {
         const reply = await handleInboundText(handle, message.content.text);
-        await space.send(reply);
+        const parts = Array.isArray(reply) ? reply : [reply];
+        for (const part of parts) await space.send(part);
         continue;
       }
       // Contact card / attachment: ask for a typed name (VERIFY A shape logged).

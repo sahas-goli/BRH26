@@ -7,7 +7,7 @@ const START = new Set(["new search", "start", "start a search", "new", "post", "
 const SENT = new Set(["sent", "done", "sent it", "paid", "funded"]);
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
-export async function handleInboundText(handle: string, text: string): Promise<string> {
+export async function handleInboundText(handle: string, text: string): Promise<string | string[]> {
   const session = getSession(handle);
   const lower = text.trim().toLowerCase();
 
@@ -33,7 +33,9 @@ export async function handleInboundText(handle: string, text: string): Promise<s
   if (session.stage === "awaiting_hours") return startDeposit(session, text);
   if (session.stage === "awaiting_funds" && SENT.has(lower)) return checkDeposit(session);
   if (session.stage === "awaiting_funds") {
-    return sanitizeOutbound(`Send the SOL to ${session.draft?.depositAddress ?? "the address above"}, then reply sent.`);
+    const address = session.draft?.depositAddress?.trim();
+    if (!address) return sanitizeOutbound("Send the SOL to the address above, then reply sent.");
+    return depositBubbles("Send the SOL to the address in the next message, then reply sent.", address);
   }
 
   const intent = parseIntent(text);
@@ -78,7 +80,11 @@ export async function handleInboundText(handle: string, text: string): Promise<s
   return sanitizeOutbound("Text new search to post one, or send a Six Hops /h/… link to pass one on.");
 }
 
-async function startDeposit(session: Session, text: string): Promise<string> {
+function depositBubbles(instruction: string, address: string): string[] {
+  return [sanitizeOutbound(instruction), address];
+}
+
+async function startDeposit(session: Session, text: string): Promise<string | string[]> {
   const hours = Number(text.trim().replace(/\s*(hours?|hrs?|h)$/i, ""));
   if (!Number.isFinite(hours) || hours < 1 || hours > 168) {
     return sanitizeOutbound("Reply with a number of hours from 1 to 168.");
@@ -93,8 +99,9 @@ async function startDeposit(session: Session, text: string): Promise<string> {
     rootToken: created.posterLink.split("/").at(-1),
     depositAddress: created.depositAddress,
   });
-  return sanitizeOutbound(
-    `Send at least ${created.minimumSol} devnet SOL to this search's wallet. Everything you send becomes the reward.\n${created.depositAddress}\nReply sent once it's on its way.`,
+  return depositBubbles(
+    `Send at least ${created.minimumSol} devnet SOL to the address in the next message. Everything you send becomes the reward. Reply sent once it's on its way.`,
+    created.depositAddress.trim(),
   );
 }
 
