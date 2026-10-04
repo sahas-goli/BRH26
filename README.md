@@ -149,7 +149,7 @@ From [submission/track-ticks.md](submission/track-ticks.md):
 - **Design.** The design is the mobile post, hop, and claim flow, plus the `/live` cascade, branching-factor display, and attack slider.
 - **People's Choice.** PLAN.md section 13 lists it.
 - **Capital One: Nessie.** The `/live` panel shows checking and escrow. The figures are demo balances for that bank rail. The depth-0 poster is not paid.
-- **SpaceX: Make it Legendary.** The project was built entirely in Cursor, using agent mode and cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina ran sandbox agents.
+- **SpaceX: Make it Legendary.** The project was built entirely in Cursor, using agent mode and cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina ran sandbox agents. Grok Imagine draws one simple neutral vector of the person after the bounty form on `/post` is submitted, and name-free wanted-poster previews on forwarded links.
 - **Photon: iMessage agents.** A registered holder gets a 1:1 iMessage with their personal link and hint card. A tapback or yes plus a first name creates the next hop. A stall gets a nudge to pass it to someone closer. After the poster confirms, they get a paid message with the Explorer link. Anyone not registered uses the copied link.
 - **MLH: Solana.** A devnet claim and confirm produced multi-instruction transactions with pay memos.
 - **MLH: Tiger Data.** Tiger holds 1,000,000 replay `events` rows, and the continuous aggregate beats the raw scan on `r_0000`.

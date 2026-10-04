@@ -68,7 +68,7 @@ A last passer who adds one hop they control collects the same total. An earlier 
 - **Next.js + TypeScript:** public pages for `/`, `/post`, `/h/[token]`, `/claim/[token]`, and `/live`; API routes for bounties, forwarding, claims, confirmation, graph, stats, controller, and attack simulation.
 - **Tiger/Postgres:** bounty, holder, payout, and event data; event analytics and continuous aggregates support the live cascade and controller measurements.
 - **Solana devnet:** per-edge memo commitments and an atomic multi-recipient payout implementation.
-- **Sponsor integrations behind honest flags:** Nessie escrow/transfer records, Photon iMessage agent flows, Gemini hint-card sanitization, and xAI Grok voice / wanted-card generation. The table demo labels any unavailable live rail as mock rather than claiming settlement.
+- **Sponsor integrations behind honest flags:** Nessie escrow/transfer records, Photon iMessage agent flows, Gemini hint-card sanitization, and xAI Grok Imagine (neutral vector on `/post` submit plus wanted-card generation). The table demo labels any unavailable live rail as mock rather than claiming settlement.
 - **Simulation:** a replay and sweep data support the scale and branching-factor demonstration.
 
 **Speaker notes:** “This is a working web product plus the systems behind it. We use mocks when a sponsor rail has not passed its go/no-go, but the same product flow and event records remain demonstrable.”
