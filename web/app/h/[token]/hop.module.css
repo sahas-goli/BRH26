@@ -22,6 +22,9 @@
 .image { width: 100%; height: auto; border-radius: 12px; }
 .amount { font-size: 2.3rem; font-weight: 750; margin: 0; }
 .actions { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 24px; }
+.claim { margin: 0 0 8px; }
+.page a.claimButton { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 100%; min-height: 48px; padding: 15px 22px; border: 0; border-radius: 12px; background: #184d3b; color: #fff; font: inherit; font-weight: 700; text-decoration: none; text-align: center; line-height: 1.2; }
+.claim .muted { margin: 10px 0 0; }
 .paid { background: #184d3b; border-color: #184d3b; color: #f5f3ec; }
 .paid .eyebrow { color: #b6d8a8; }
 .page .cta { display: inline-block; margin-top: 8px; padding: 14px 20px; border-radius: 12px; background: #f5f3ec; color: #184d3b; font-weight: 700; text-decoration: none; }

@@ -145,6 +145,12 @@ export default function HolderPage() {
         {view.parentLabel && <p>Your sender labeled your link “{view.parentLabel}”.</p>}
         <p className={styles.muted}>Deadline: <time dateTime={view.bounty.expiresAt}>{new Date(view.bounty.expiresAt).toLocaleString()}</time>. Demo rewards use test funds.</p>
       </section>
+      {view.depth > 0 && view.bounty.status === "open" && (
+        <div className={styles.claim}>
+          <a className={styles.claimButton} href={`/claim/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">This is me</a>
+          <p className={styles.muted}>Only if the card describes you. Otherwise pass it on.</p>
+        </div>
+      )}
       {view.depth === 0 && view.bounty.status === "found" && (
         <section className={styles.card} aria-label="Pending claim confirmation">
           <h2>Someone claims to be the match</h2>
@@ -210,7 +216,7 @@ export default function HolderPage() {
         <button disabled={busy} type="submit">{busy ? "Creating personal links…" : "Pass it on"}</button>
       </form> : view.bounty.status === "open" && <p>This link cannot forward further. It is at its last hop or out of forwards.</p>}
       {sent.length > 0 && <section className={styles.card} aria-label="Created recipient links"><h2>Your personal links</h2><p role="status">{sent.length} recipient links created.</p>{sent.map((r) => <div key={r.link}><h3>{r.label}</h3><p>{r.delivered === "imessage" ? "Delivered by iMessage" : "Link ready — share it with this recipient"}</p><input aria-label={`Personal link for ${r.label}`} readOnly value={r.link} onFocus={(e) => e.currentTarget.select()} /><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(r.link); setCopyStatus(`Copied the link for ${r.label}.`); } catch { setCopyStatus("Select the link above and copy it manually."); } }}>Copy link</button></div>)}<p role="status">{copyStatus}</p></section>}
-      <nav className={styles.actions} aria-label="Other ways to participate"><a href={`/talk/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">Talk instead</a>{view.depth > 0 && view.bounty.status === "open" && <a href={`/claim/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">This is me</a>}</nav>
+      <nav className={styles.actions} aria-label="Other ways to participate"><a href={`/talk/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">Talk instead</a></nav>
     </>}
   </main>;
 }
