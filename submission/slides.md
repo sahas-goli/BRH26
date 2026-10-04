@@ -35,33 +35,31 @@ This is a 2-minute deck outline for the BigRed//Hacks table. Capture fresh scree
 
 ## Slide 4 — What a six-hop chain pays
 
-Use a $16 reward so the shares stay in whole dollars. Each person who passed the link gets $1. The person who matches gets the rest. The poster gets nothing. The $16 never grows.
+Use a $16 reward (1,600 cents). The poster gets nothing. The $16 never grows. One paid person, the match, gets all $16. From two people on, the match's share stays at $9. Every passer except the last gets $1. The last passer gets what is left.
 
-| Hops to the match | People who passed it | Each of them | The match |
-| --- | --- | --- | --- |
-| 1 | 0 | — | $16 |
-| 3 | 2 | $1 | $14 |
-| 6 | 5 | $1 | $11 |
-| 8 | 7 | $1 | $9 |
+| Chain | Paid |
+| --- | --- |
+| Riley is the match | Riley $16 |
+| Riley passed to Sam, and Sam is the match | Riley $7, Sam $9 |
+| Riley passed to Sam, Sam passed to Alex, and Alex is the match | Riley $1, Sam $6, Alex $9 |
+| A full chain of 8 | six early passers $1, the last passer $1, the match $9 |
 
-Six degrees is the middle row: five forwards at $1, and $11 to the match.
+If every person passes the card to three friends, six rounds ask 1,092 people. The same $16 is the entire payout, so someone who only sees the card expects about a cent and a half. A chain longer than eight pays nobody.
 
-If every person passes the card to three friends, six rounds ask 1,092 people. The same $16 is the entire payout, so someone who only sees the card expects about a cent and a half. Someone on the route that worked expects $1, or $11 if they are the match. A chain longer than eight pays nobody.
+A last passer who adds one hop they control collects the same total. An earlier passer who adds one hop they control gains $1, taken from the last passer, and can lose the payout if the chain never finds the person. The match who adds one hop they control keeps $9 on the new phone and also collects the new last-passer share. The MIT split would pay that person 50% more for one fake recruiter, 75% for two, 88% for three, and 94% for four.
 
-One invented extra hop does not raise the match’s take. The MIT split would pay that person 50% more for one fake recruiter, 75% for two, 88% for three, and 94% for four.
+**Speaker notes:** “Sixteen dollars. Riley alone gets sixteen. Riley to Sam: seven and nine. Riley to Sam to Alex: one, six, and nine. Eight people: six early passers get a dollar, the last passer gets a dollar, and the match gets nine. Ask a thousand people and the expected payment per ask is about a penny and a half, because only the winning route is paid.”
 
-**Speaker notes:** “Sixteen dollars, six hops. Five people get a dollar for passing it. The match gets eleven. Ask a thousand people and the expected payment per ask is about a penny and a half, because only the winning route is paid. Padding the chain with fake friends does not increase that eleven dollars.”
-
-**BigRed criterion:** **technical** — the payout is a fixed split, not a growing pot; **creativity** — local routing is paid, fake length is not.
+**BigRed criterion:** **technical** — the payout is a fixed split, not a growing pot; **creativity** — local routing is paid from that fixed reward.
 
 ## Slide 5 — Make the chain worth completing, without rewarding fake hops
 
 - One fixed poster-funded bounty is split across the winning chain after target opt-in and poster confirmation.
 - The `/live` demo presents cascade depth, branching factor, and an attack slider.
-- The attack comparison shows the MIT-style rule can reward a finder for inserting fake recruiters (+50%, +75%, +88%, +94% for one through four fakes), while Six Hops’ split gives the finder +0 and keeps the poster total fixed.
+- The attack comparison shows the MIT-style rule can reward a finder for inserting fake recruiters (+50%, +75%, +88%, +94% for one through four fakes). Six Hops keeps the poster total fixed. The match who adds one hop keeps the match payout and also collects the new last-passer share. A last passer who adds one hop collects the same total.
 - **Screenshot:** `/live` with the cascade, branching display, and attack comparison.
 
-**Speaker notes — 1:15–1:40:** “A teammate plays the target, sends an introduction, and the poster confirms. The payout path is a single devnet multi-payee transaction when available. The key result is incentive safety: inserting fake relays does not increase the finder’s payout.”
+**Speaker notes — 1:15–1:40:** “A teammate plays the target, sends an introduction, and the poster confirms. The payout path is a single devnet multi-payee transaction when available. The match who adds one hop keeps the match payout on the new phone and also collects the new last-passer share. A last passer who adds one hop collects the same total.”
 
 **BigRed criterion:** **technical** — the split, depth cap, and attack simulation turn a social-routing idea into a testable incentive system; **creativity** — combines search navigation with anti-sybil payout design.
 

@@ -31,7 +31,7 @@ test("a 4-deep mock claim pays the chain once", () => {
   assert.equal(shares.reduce((sum, row) => sum + row.cents, 0), 1600);
   assert.deepEqual(
     shares.map((row) => row.cents),
-    [100, 100, 100, 1300],
+    [100, 100, 500, 900],
   );
   const refund = paid.ledger.payouts.find((row) => row.role === "refund");
   assert.equal(refund?.cents, 400);
@@ -54,6 +54,30 @@ test("reject reopens a found bounty", () => {
   const reopened = applyConfirm(found.ledger, chain, false, "b_demo");
   assert.equal(reopened.ledger.status, "open");
   assert.equal(reopened.ledger.payouts.length, 0);
+});
+
+test("settleChain pays the last passer the remainder and earlier passers the floor", () => {
+  const two = [
+    { holderId: "h_a", depth: 1, rail: "custodial" as const },
+    { holderId: "h_b", depth: 2, rail: "wallet" as const },
+  ];
+  const three = [
+    { holderId: "h_a", depth: 1, rail: "custodial" as const },
+    { holderId: "h_b", depth: 2, rail: "wallet" as const },
+    { holderId: "h_c", depth: 3, rail: "bank" as const },
+  ];
+  const paidTwo = settleChain("b_two", two, 1600, 1600, "h_poster", "bank", []);
+  const paidThree = settleChain("b_three", three, 1600, 1600, "h_poster", "bank", []);
+  assert.ok(paidTwo);
+  assert.ok(paidThree);
+  assert.deepEqual(
+    paidTwo.rows.filter((row) => row.role !== "refund").map((row) => row.cents),
+    [700, 900],
+  );
+  assert.deepEqual(
+    paidThree.rows.filter((row) => row.role !== "refund").map((row) => row.cents),
+    [100, 600, 900],
+  );
 });
 
 test("settleChain returns null past depth 8", () => {
@@ -136,8 +160,8 @@ test("live confirm pays the bank rail from escrow and a retry does not pay again
     await confirmBounty(db, { bountyId: "b_demo", posterToken: "poster-secret", accept: true }, {
       moveBank: async (input) => {
         moves += 1;
-        assert.deepEqual(input.bank, [{ payeeId: "finder-bank", cents: 1300 }]);
-        assert.equal(input.treasuryCents, 300);
+        assert.deepEqual(input.bank, [{ payeeId: "finder-bank", cents: 900 }]);
+        assert.equal(input.treasuryCents, 700);
         assert.equal(input.refundCents, 400);
         assert.equal(input.escrowId, "escrow");
         assert.equal(input.checkingId, "checking");

@@ -1,6 +1,6 @@
 # Six Hops
 
-Six Hops is a friend-to-friend search for someone you cannot look up. You describe them with attributes only (a city, a field, a skill). A friend passes one personal link to someone closer. The person who matches introduces themselves. The poster funds one reward and takes no share. Each person who passed the link is paid a flat share, and the match is paid the rest. A holder can forward to at most 3 people. A chain longer than 8 pays nobody. The public site is [https://sash.select](https://sash.select). Plan: [PLAN.md](PLAN.md). Workflow: [WORKFLOW.md](WORKFLOW.md).
+Six Hops is a friend-to-friend search for someone you cannot look up. You describe them with attributes only (a city, a field, a skill). A friend passes one personal link to someone closer. The person who matches introduces themselves. The poster funds one reward and takes no share. On a chain of one, the match is paid all of it. On a longer chain the match keeps a reserved floor, earlier passers are paid one sixteenth, and the last passer is paid what remains. A holder can forward to at most 3 people. A chain longer than 8 pays nobody. The public site is [https://sash.select](https://sash.select). Plan: [PLAN.md](PLAN.md). Workflow: [WORKFLOW.md](WORKFLOW.md).
 
 ## Judge flow
 
@@ -35,17 +35,24 @@ While the search is open or found, the poster card says escrow is holding the re
 
 ## Payout split
 
-The payable budget is `B` cents. `H` is 8. Each passer gets `floor(B / 16)`. The match gets `B` minus that share times the number of passers, so the shares sum to `B`. The poster takes no share. `splitCents` in `web/lib/split.ts` returns nothing when the chain is shorter than 1 or longer than 8, and a chain that long pays nobody.
+The payable budget is `B` cents. `H` is 8. The poster takes no share. `splitCents` in `web/lib/split.ts` returns nothing when the chain is shorter than 1 or longer than 8, and a chain that long pays nobody. The shares always sum to `B`.
 
-The passer share stays flat. Adding a fake hop does not raise the match's take: the extra passer share comes out of the match's remainder, and if the finder also holds those fake hops the total is the same honest amount. The comparison on `/live` puts that next to the MIT geometric rule, which pays the finder more for each invented hop.
+A chain of one paid person is only the match, and that person gets all of `B`. From two paid people on, the match's share is reserved at `B - 7 * floor(B / 16)`. That floor does not shrink as the chain gets longer. Every passer except the last one gets `floor(B / 16)`. The last passer, the person who handed the link to the match, gets whatever is left.
 
-On a $16 budget the passer share is $1. One hop pays the match $16. Three hops pay two passers $1 and the match $14. Six hops pay five passers $1 and the match $11. Eight hops pay the match $9.
+On a $16 reward (1,600 cents) the reserved match floor is $9 and each earlier passer gets $1.
+
+- Riley is the match: Riley gets $16.
+- Riley passed to Sam, and Sam is the match: Riley gets $7 and Sam gets $9.
+- Riley passed to Sam, Sam passed to Alex, and Alex is the match: Riley gets $1, Sam gets $6, and Alex gets $9.
+- A full chain of 8: six early passers get $1, the last passer gets $1, and the match gets $9.
+
+A last passer who adds one hop they control collects the same total as before. An earlier passer who adds one hop they control gains one `floor(B / 16)`, taken from the last passer, and risks the chain not finding the person in time. The match who adds one hop they control keeps the match payout on the new phone and also collects the new last-passer share. The comparison on `/live` puts that next to the MIT geometric rule, which pays the finder more for each invented hop.
 
 A Photon search creates a new devnet deposit wallet and stores it on the depth-0 holder. The bounty waits in `funding` until SOL arrives. `depositCents` in `web/lib/deposit.ts` keeps a 0.001 SOL reserve (`DEPOSIT_RESERVE_LAMPORTS`) so the wallet can pay the fee, then prices the rest at $150 per SOL. That full amount is the reward: `cap_cents` and `bounty_cents` are set to the same value. When the poster accepts, one devnet transaction is signed by that deposit wallet.
 
-0.5 SOL is 500,000,000 lamports. After the reserve, that is 7,485 cents. On a 2-hop chain the passer gets 467 cents and the match gets 7,018 cents. That payout landed on bounty `b_gCijcO6z`.
+0.5 SOL is 500,000,000 lamports. After the reserve, that is 7,485 cents. On a 2-hop chain the last passer gets 3,269 cents and the match gets 4,216 cents. Bounty `b_gCijcO6z` already paid an earlier equal split from the same deposit size: 467 cents to the passer and 7,018 cents to the match.
 
-A search created on the website still takes a dollar cap. `INITIAL_SHARE` in `web/lib/types.ts` is 0.6, so the payable budget starts at 60% of the cap and the rest is reserve. That search has no deposit wallet, so the devnet payout is signed by the shared treasury (`SOLANA_PAYER_SECRET`). The split is the same `floor(B / 16)` rule, applied to that 60% budget. The poster still takes no share.
+A search created on the website still takes a dollar cap. `INITIAL_SHARE` in `web/lib/types.ts` is 0.6, so the payable budget starts at 60% of the cap and the rest is reserve. That search has no deposit wallet, so the devnet payout is signed by the shared treasury (`SOLANA_PAYER_SECRET`). The split is the same last-passer rule, applied to that 60% budget. The poster still takes no share.
 
 ## After Pass it on
 

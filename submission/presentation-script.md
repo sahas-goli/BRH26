@@ -8,7 +8,7 @@ Have these open before you start:
 
 - Laptop on [https://sash.select/live](https://sash.select/live). That board is the replay `r_0000` (764 nodes, depth through 8) plus the attack slider. A search started on the phone is a different bounty id. Leave the laptop there for the whole talk.
 - Two phones on the home page, for the walk-along after the two minutes. One of them can open [sash.select/text](https://sash.select/text) when the Photon judge is up.
-- One quiet tab for the payout that already landed: [Explorer, devnet, bounty b_gCijcO6z](https://explorer.solana.com/tx/29b8QgRSUcSdpmnwiLGKQXHkKLPEemcVPf5ygX8LvnmP9t9EDpmfd8qoxohCkPNw44baqwYafRDRZaMDfZZdDZsK?cluster=devnet). Half a SOL, two hops: 467 cents to the passer, 7,018 cents to the match, one transaction from that search's deposit wallet. Do not show it unless the fresh payout is slow.
+- One quiet tab for the payout that already landed: [Explorer, devnet, bounty b_gCijcO6z](https://explorer.solana.com/tx/29b8QgRSUcSdpmnwiLGKQXHkKLPEemcVPf5ygX8LvnmP9t9EDpmfd8qoxohCkPNw44baqwYafRDRZaMDfZZdDZsK?cluster=devnet). Half a SOL, two hops, already paid under the earlier equal split: 467 cents to the passer, 7,018 cents to the match, one transaction from that search's deposit wallet. Do not show it unless the fresh payout is slow.
 
 | Clock | Who | Job |
 | --- | --- | --- |
@@ -31,22 +31,22 @@ Six Hops is a bounty for someone you cannot look up. You describe them with a ci
 
 ## 0:40 — Sahas
 
-Show the slide “What each hop pays” while you say the lines below. The words stay the same.
+Show the slide “What each hop pays” while you say the lines below.
 
-“The deposit is the whole reward. The poster takes none. Each passer gets one sixteenth, rounded down. The match gets the rest. Longer than eight pays nobody.
+“The deposit is the whole reward. The poster takes none. If the match is the only paid person, they get all of it. From two people on, the match's share is reserved and does not shrink. Every earlier passer gets one sixteenth, rounded down. The person who handed the link to the match gets what is left. Longer than eight pays nobody.
 
-On sixteen dollars, each passer gets one dollar. One hop, the match gets sixteen. Three hops, the match gets fourteen. Eight hops, the match gets nine. A fake hop does not raise the match. It is still sixteen dollars.”
+On sixteen dollars, Riley is the match and gets sixteen. Riley passed to Sam, and Sam is the match: Riley gets seven, Sam gets nine. Riley passed to Sam, Sam passed to Alex, and Alex is the match: Riley gets one, Sam gets six, Alex gets nine. A full chain of eight pays six early passers a dollar, the last passer a dollar, and the match nine. A last passer who adds one hop they control collects the same total. An earlier passer who does that gains a dollar, taken from the last passer, and can lose the payout if the chain never finds the person. The match who adds one hop keeps nine dollars on the new phone and also collects the new last-passer share.”
 
-On that slide, a $16 deposit. Each person who has passed the link gets $1 (floor of 16/16). The match gets the rest. The poster is unpaid.
+On that slide, a $16 reward. The poster is unpaid.
 
-| Step | Passers | Each passer | Match |
-| --- | --- | --- | --- |
-| Match is the first person | 0 | — | $16 |
-| One person passed it | 1 | $1 | $15 |
-| Two people passed it | 2 | $1 | $14 |
-| Five people passed it (six hops) | 5 | $1 | $11 |
+| Chain | Paid |
+| --- | --- |
+| Riley is the match | Riley $16 |
+| Riley passed to Sam, and Sam is the match | Riley $7, Sam $9 |
+| Riley passed to Sam, Sam passed to Alex, and Alex is the match | Riley $1, Sam $6, Alex $9 |
+| A full chain of 8 | six early passers $1, the last passer $1, the match $9 |
 
-On the slide: a new hop moves one dollar from the match to the new passer. It does not raise the match's take.
+A last passer who adds one hop they control collects the same total. An earlier passer who adds one hop they control gains $1, taken from the last passer. The match who adds one hop keeps $9 on the new phone and also collects the new last-passer share.
 
 ## 1:10 — Hayden
 
@@ -76,7 +76,7 @@ Say only the line that matches what broke.
 
 “Photon is quiet. Start a search on the website. The reward then comes from the shared treasury, and it pays sixty percent of the dollar cap.”
 
-“sash.select will not load. The payout we already have is on this Explorer page: bounty b_gCijcO6z, two hops, four dollars and sixty-seven cents to the passer, seventy dollars and eighteen cents to the match, from half a SOL on devnet.”
+“sash.select will not load. The payout we already have is on this Explorer page: bounty b_gCijcO6z, two hops under the earlier equal split, four dollars and sixty-seven cents to the passer, seventy dollars and eighteen cents to the match, from half a SOL on devnet.”
 
 “The fresh search stalled, and slash live is still up. This graph is the replay r_0000, seven hundred sixty-four nodes, depth through eight. The phone search is a separate bounty id.”
 
@@ -94,13 +94,13 @@ Tracks that are not in the appendix stay off the table unless that judge asks. T
 
 **BigRed (navigation).** The product is the navigation. A search for someone you cannot look up moves one friend at a time, and each person uses only what they already know to choose the next link. Kleinberg's point is the core action: local knowledge is enough, and Six Hops never copies the social graph it travels through.
 
-**Software.** Six Hops is a typed web product you can run from a Photon text or a website post, to a personal link, to This is me, to the poster's accept. Fan-out stops at three. Depth stops at eight. The payable budget is split in integer cents: each passer gets the budget divided by sixteen, rounded down, and the match gets the rest.
+**Software.** Six Hops is a typed web product you can run from a Photon text or a website post, to a personal link, to This is me, to the poster's accept. Fan-out stops at three. Depth stops at eight. The payable budget is split in integer cents. One paid person gets all of it. On a longer chain the match keeps a reserved floor, earlier passers get the budget divided by sixteen rounded down, and the last passer gets what is left. On sixteen dollars that is Riley at sixteen; Riley seven and Sam nine; Riley one, Sam six, and Alex nine; and on a full chain of eight, six early passers at one dollar, the last passer at one dollar, and the match at nine.
 
 **Design.** The phone path is one obvious next tap: start a search, pass one personal link, or tap This is me. The board at slash live is the cascade, the branching-factor display, and the attack slider, laid out so a judge can see depth and the fake-hop comparison without a login.
 
 **People's Choice.** Anyone at the table can open sash.select on their own phone, register at slash text, and hand one personal link to a friend. The whole loop is the share: no account, and the match decides to raise their hand.
 
-**Solana.** Accept and pay sends one devnet transaction, with a pay memo. A Photon search pays from that search's deposit wallet. A website search pays sixty percent of its dollar cap from the shared treasury. Bounty b_gCijcO6z already paid a two-hop chain from half a SOL: 467 cents to the passer and 7,018 cents to the match. The transaction is [on Explorer](https://explorer.solana.com/tx/29b8QgRSUcSdpmnwiLGKQXHkKLPEemcVPf5ygX8LvnmP9t9EDpmfd8qoxohCkPNw44baqwYafRDRZaMDfZZdDZsK?cluster=devnet).
+**Solana.** Accept and pay sends one devnet transaction, with a pay memo. A Photon search pays from that search's deposit wallet. A website search pays sixty percent of its dollar cap from the shared treasury. Bounty b_gCijcO6z already paid a two-hop chain from half a SOL under the earlier equal split: 467 cents to the passer and 7,018 cents to the match. The transaction is [on Explorer](https://explorer.solana.com/tx/29b8QgRSUcSdpmnwiLGKQXHkKLPEemcVPf5ygX8LvnmP9t9EDpmfd8qoxohCkPNw44baqwYafRDRZaMDfZZdDZsK?cluster=devnet).
 
 **Tiger Data.** Tiger holds one million replay event rows. On the proof search r_0000, the continuous aggregate answers the per-minute series in about a third of a millisecond, against about eighty-seven milliseconds for the raw scan of the same buckets. Slash live draws that cascade: 764 nodes, depth through 8.
 
