@@ -1,5 +1,5 @@
 import { splitCents } from "./split";
-import { explorerUrl } from "./solana";
+import { explorerUrl, validSolanaAddress } from "./solana";
 
 export type Rail = "custodial" | "wallet" | "bank";
 export type BountyStatus = "open" | "found" | "paid" | "expired" | "refunded";
@@ -211,13 +211,14 @@ async function logEvent(tx: PayoutQuery, at: string, bountyId: string, holder: R
   );
 }
 
-export type SignPayout = (input: { bountyId: string; rows: PayoutRow[] }) => Promise<string>;
+// payerSecret is the bounty's deposit wallet; without it the treasury pays.
+export type SignPayout = (input: { bountyId: string; rows: PayoutRow[]; payerSecret?: string }) => Promise<string>;
 
-async function stamp(bountyId: string, rows: PayoutRow[], sign?: SignPayout): Promise<PayoutRow[]> {
+async function stamp(bountyId: string, rows: PayoutRow[], sign?: SignPayout, payerSecret?: string): Promise<PayoutRow[]> {
   const solRows = rows.filter((row) => row.role !== "refund" && row.rail !== "bank");
   if (process.env.PAYOUT_MODE !== "devnet" || solRows.length === 0) return rows;
   if (!sign) throw new PayoutError("payout_unavailable", 503);
-  const signature = await sign({ bountyId, rows: solRows });
+  const signature = await sign({ bountyId, rows: solRows, ...(payerSecret ? { payerSecret } : {}) });
   return rows.map((row) => ({ ...row, txSig: signature }));
 }
 
@@ -258,7 +259,7 @@ export function envBank(): MoveBank | undefined {
 export function envSigner(): SignPayout | undefined {
   if (process.env.PAYOUT_MODE !== "devnet") return undefined;
   return async (input) => {
-    if (!process.env.SOLANA_PAYER_SECRET) throw new PayoutError("payout_unavailable", 503);
+    if (!input.payerSecret && !process.env.SOLANA_PAYER_SECRET) throw new PayoutError("payout_unavailable", 503);
     const { signDevnetPayout } = await import("./solana");
     return signDevnetPayout(input);
   };
@@ -281,7 +282,8 @@ async function finishDevnet(
   pay: PayContext,
   opts: { signPayout?: SignPayout; moveBank?: MoveBank },
 ): Promise<{ status: "paid"; payoutSig?: string; explorerUrl?: string }> {
-  const stamped = await stamp(pay.bountyId, pay.rows, opts.signPayout);
+  const depositSecret = pay.poster.custodial_secret == null ? undefined : String(pay.poster.custodial_secret);
+  const stamped = await stamp(pay.bountyId, pay.rows, opts.signPayout, depositSecret);
   await moveLiveBank(pay.bounty, stamped, opts.moveBank);
   const signature = stamped[0]?.txSig ?? "";
   await db.transaction(async (tx) => {
@@ -300,6 +302,8 @@ export async function claimBounty(
   const parsed = body(input);
   const token = requiredString(parsed.token);
   const introMessage = requiredString(parsed.introMessage);
+  const solAddress = parsed.solAddress === undefined || parsed.solAddress === "" ? undefined : requiredString(parsed.solAddress);
+  if (solAddress && !validSolanaAddress(solAddress)) throw new PayoutError("invalid_wallet", 400);
   const outcome = await db.transaction(async (tx) => {
     const lookup = await tx.query<Record<string, unknown>>("SELECT bounty_id FROM holders WHERE token=$1", [token]);
     const bountyId = lookup.rows[0]?.bounty_id;
@@ -328,6 +332,9 @@ export async function claimBounty(
     if (!poster) throw new PayoutError("not_found", 404);
     const step = applyClaim(ledgerFrom(bounty, poster, []));
     if (step.error) throw new PayoutError(step.error, 409);
+    if (solAddress) {
+      await tx.query("UPDATE holders SET rail='wallet', sol_address=$1, custodial_secret=NULL WHERE id=$2", [solAddress, holder.id]);
+    }
     await logEvent(tx, at.toISOString(), String(bountyId), holder, "claimed", { introMessage });
     await tx.query("UPDATE bounties SET status=$1 WHERE id=$2", ["found", bountyId]);
     return { result: { status: "found" as const } };
@@ -358,7 +365,7 @@ export async function confirmBounty(
       if (existing) return { result: paidBody(existing) };
     }
     const posters = await tx.query<Record<string, unknown>>(
-      "SELECT id,parent_id,depth,rail FROM holders WHERE bounty_id=$1 AND depth=0",
+      "SELECT id,parent_id,depth,rail,custodial_secret FROM holders WHERE bounty_id=$1 AND depth=0",
       [bountyId],
     );
     const poster = posters.rows[0];

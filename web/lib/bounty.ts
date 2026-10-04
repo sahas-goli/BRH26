@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { db, isPgliteUrl } from "./db";
+import { validSolanaAddress } from "./solana";
 import { FANOUT, H, INITIAL_SHARE } from "./types";
 import type { HintCard, HolderView, PublicBounty, ForwardResult, Rail } from "./types";
 
@@ -396,17 +397,4 @@ export async function forwardBounty(input: unknown): Promise<ForwardResult> {
     return { label: child.label, link: child.link, delivered: sent ? "imessage" as const : "link-only" as const };
   }));
   return { recipients: delivered };
-}
-
-function validSolanaAddress(value: string): boolean {
-  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  let n = BigInt(0);
-  for (const char of value) {
-    const digit = alphabet.indexOf(char);
-    if (digit < 0) return false;
-    n = n * BigInt(58) + BigInt(digit);
-  }
-  let bytes = 0;
-  while (n > BigInt(0)) { bytes++; n >>= BigInt(8); }
-  return bytes + (value.match(/^1*/)?.[0].length ?? 0) === 32;
 }
