@@ -56,6 +56,9 @@ export default function AboutPage() {
               ))}
             </tbody>
           </table>
+          <p className={styles.muted}>
+            <a href="/example">See Poster, Riley, Sam, and Alex.</a>
+          </p>
         </section>
         <p className={styles.intro}>
           A new hop moves money from the last passer to the new last passer. The match&apos;s reserved share stays put once anyone has passed the link.
