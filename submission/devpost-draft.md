@@ -46,7 +46,7 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 - **Incentive tests**: split unit tests plus `/api/attack` showing MIT fake-hop gains vs our zero finder gain.
 - **Solana path measured** on devnet (multi-instruction payout + `sixhops:pay:…` memo; signatures in PLAN §7.2) with safe `PAYOUT_MODE=mock` for the overnight game.
 - **Full `/live` demo surface**: cascade, branching factor, controller steps, attack slider — usable without every sponsor live.
-- **Parallel engineering**: four people/agents via `scripts/task.sh` claim branches and rebase merges; Cursor `Co-authored-by` trailers for SpaceX evidence.
+- **Parallel engineering**: four people/agents via `scripts/task.sh` claim branches and rebase merges; the project was built entirely in Cursor (agent-mode chat among Sahas, Hayden, Audrey, and Selina; AL-10 notes in `cursor-transcripts/README.md`). SpaceX: Make it Legendary stays unticked: Grok voice and Imagine were not run live.
 
 ## What we learned
 
@@ -58,10 +58,10 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 
 1. Wire Tiger (`DATABASE_URL`) → schema/caggs → Vercel preview MVP; load replay benches.
 2. Claim **milgram.study** (GoDaddy Registry), set `PUBLIC_BASE_URL`.
-3. Live Photon go/no-go (registered forward + nudge + paid) and Grok mint + Imagine once keys land.
+3. Live Photon go/no-go (registered forward + nudge + paid). Do not enable Grok or call xAI; Grok voice and Imagine were not run live.
 4. Re-run Nessie when a transfer shape that moves balances is confirmed.
 5. People’s Choice push after the Devpost hard deadline.
 
 ## Track write-ups (repo)
 
-See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered.
+See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Leave SpaceX: Make it Legendary unticked (Grok voice and Imagine were not run live). Tick Built with Cursor, requirement 1 in `resources/tracks/spacex-make-it-legendary.md`: built entirely in Cursor, with AL-10 notes on main in `cursor-transcripts/README.md` (role transcript files are still not exported; the 60-second screen recording is still AL-04).
