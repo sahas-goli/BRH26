@@ -9,6 +9,7 @@ import styles from "./hop.module.css";
 
 const labels: Record<string, string> = { city: "City", organizationType: "Organization", field: "Field", skill: "Skill", language: "Language", experience: "Experience" };
 const money = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+function isFunding(status: string): boolean { return status === "funding"; }
 function safeExplorer(value?: string): string {
   try { const url = new URL(value ?? ""); if (url.protocol === "https:" && url.hostname === "explorer.solana.com" && !url.username && !url.password) return url.href; } catch { /* omit invalid links */ }
   return "";
@@ -36,6 +37,7 @@ export default function HolderPage() {
   const [attempt, setAttempt] = useState(0);
   const [posterToken, setPosterToken] = useState("");
   const [confirmBusy, setConfirmBusy] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
   const [confirmNote, setConfirmNote] = useState("");
   const [explorer, setExplorer] = useState("");
   const revealPayout = useRef(false);
@@ -79,6 +81,40 @@ export default function HolderPage() {
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [token, attempt]);
+
+  async function fundFromDemo() {
+    if (!view || demoBusy) return;
+    const code = posterToken.trim();
+    if (!code) {
+      setError("Open the private page link from the search chat, then try again.");
+      return;
+    }
+    setDemoBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/deposits/${encodeURIComponent(view.bounty.id)}/demo-fund`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({ posterToken: code }),
+      });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) {
+        const errors: Record<string, string> = {
+          not_found: "This search could not be funded from this page.",
+          payer_unavailable: "The demo wallet is unavailable on this server.",
+          transfer_unavailable: "The demo wallet could not send the deposit. Try again in a moment.",
+          closed: "This search is closed.",
+        };
+        throw new Error(errors[data.error ?? ""] ?? "Funding failed. Try again in a moment.");
+      }
+      setAttempt((n) => n + 1);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Funding failed.");
+    } finally {
+      setDemoBusy(false);
+    }
+  }
 
   async function confirmClaim(accept: boolean) {
     if (!view || confirmBusy) return;
@@ -165,6 +201,12 @@ export default function HolderPage() {
           <p className={styles.muted}>Escrow is holding the reward until you accept.</p>
         )}
       </section>
+      {view.depth === 0 && isFunding(view.bounty.status) && (
+        <section className={styles.card} aria-label="Demo wallet">
+          <p className={styles.muted}>Funds the minimum from the demo wallet on this server.</p>
+          <button type="button" disabled={demoBusy} onClick={() => void fundFromDemo()}>Use demo wallet</button>
+        </section>
+      )}
       {view.depth === 0 && <PosterNetwork token={token} />}
       {view.depth > 0 && view.bounty.status === "open" && (
         <div className={styles.claim}>

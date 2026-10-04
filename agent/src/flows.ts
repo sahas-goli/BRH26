@@ -34,8 +34,9 @@ export async function handleInboundText(handle: string, text: string): Promise<s
   if (session.stage === "awaiting_funds" && SENT.has(lower)) return checkDeposit(session);
   if (session.stage === "awaiting_funds") {
     const address = session.draft?.depositAddress?.trim();
-    if (!address) return sanitizeOutbound("Send the SOL to the address above, then reply sent.");
-    return depositBubbles("Send the SOL to the address in the next message, then reply sent.", address);
+    const page = fundingPage(session.draft);
+    if (!address || !page) return sanitizeOutbound("Send the SOL to the address above, then reply sent.");
+    return depositFundingMessages(page, address, session.draft?.minimumSol);
   }
 
   const intent = parseIntent(text);
@@ -80,8 +81,20 @@ export async function handleInboundText(handle: string, text: string): Promise<s
   return sanitizeOutbound("Text new search to post one, or send a Six Hops /h/… link to pass one on.");
 }
 
-function depositBubbles(instruction: string, address: string): string[] {
-  return [sanitizeOutbound(instruction), address];
+export const DEMO_FUND_SENTENCE = "Open that page and tap Use demo wallet to fund the minimum, or send SOL and reply sent.";
+
+export function depositFundingMessages(page: string, address: string, minimumSol?: number): string[] {
+  const lead = typeof minimumSol === "number" && Number.isFinite(minimumSol)
+    ? `Send at least ${minimumSol} devnet SOL to the address in the next message. Everything you send becomes the reward. `
+    : "";
+  const prose = `${lead}${DEMO_FUND_SENTENCE}`;
+  const safe = sanitizeOutbound(prose);
+  return [safe === prose && page ? `${prose}\n${page}` : safe, address.trim()];
+}
+
+function fundingPage(draft: { rootToken?: string; posterToken?: string } | undefined): string {
+  if (!draft?.rootToken || !draft.posterToken) return "";
+  return `${PUBLIC()}/h/${draft.rootToken}#k=${draft.posterToken}`;
 }
 
 async function startDeposit(session: Session, text: string): Promise<string | string[]> {
@@ -93,15 +106,18 @@ async function startDeposit(session: Session, text: string): Promise<string | st
   if ("error" in created) {
     return sanitizeOutbound("I couldn't set up that search. Reply with the number of hours to try again.");
   }
+  const rootToken = created.posterLink.split("/").at(-1);
   setStage(session.handle, "awaiting_funds", {
     bountyId: created.bountyId,
     posterToken: created.posterToken,
-    rootToken: created.posterLink.split("/").at(-1),
+    rootToken,
     depositAddress: created.depositAddress,
+    minimumSol: created.minimumSol,
   });
-  return depositBubbles(
-    `Send at least ${created.minimumSol} devnet SOL to the address in the next message. Everything you send becomes the reward. Reply sent once it's on its way.`,
+  return depositFundingMessages(
+    fundingPage({ rootToken, posterToken: created.posterToken }),
     created.depositAddress.trim(),
+    created.minimumSol,
   );
 }
 
@@ -118,7 +134,7 @@ async function checkDeposit(session: Session): Promise<string> {
       ? `I see ${money(funded.bountyCents)} so far. Send at least ${funded.minimumSol} SOL in total, then reply sent again.`
       : "Nothing has landed yet. Devnet can take a few seconds, so reply sent again in a moment.");
   }
-  const page = `${PUBLIC()}/h/${draft.rootToken}#k=${draft.posterToken}`;
+  const page = fundingPage(draft);
   session.draft = undefined;
   setToken(session.handle, draft.rootToken);
   return sanitizeOutbound(
