@@ -32,6 +32,44 @@ export function wantedPrompt(hint: HintCard): string {
   return lines.join("\n");
 }
 
+export function portraitPrompt(description: string): string {
+  const cue = description.trim().slice(0, 500);
+  return [
+    "Illustrated flat-color portrait, not a photograph.",
+    "No name, no real likeness of any specific person.",
+    `Kind of person described: ${cue || "someone interesting"}`,
+  ].join("\n");
+}
+
+export async function fetchPortraitPng(description: string): Promise<Buffer> {
+  const key = process.env.XAI_API_KEY?.trim();
+  if (!key) throw new Error("missing_xai_key");
+  const response = await fetch("https://api.x.ai/v1/images/generations", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "grok-imagine-image",
+      prompt: portraitPrompt(description),
+      response_format: "b64_json",
+      n: 1,
+    }),
+  });
+  if (!response.ok) throw new Error("imagine_http");
+  const body = await response.json() as {
+    data?: { b64_json?: string; url?: string }[];
+  };
+  const b64 = body.data?.[0]?.b64_json;
+  if (b64) return Buffer.from(b64, "base64");
+  const url = body.data?.[0]?.url;
+  if (!url) throw new Error("imagine_empty");
+  const image = await fetch(url);
+  if (!image.ok) throw new Error("imagine_download");
+  return Buffer.from(await image.arrayBuffer());
+}
+
 export async function fetchWantedCardPng(hint: HintCard): Promise<Buffer> {
   const key = process.env.XAI_API_KEY?.trim();
   if (!key) throw new Error("missing_xai_key");
