@@ -31,9 +31,22 @@ Six Hops is a bounty for someone you cannot look up. You describe them with a ci
 
 ## 0:40 — Sahas
 
+Show the slide “What each hop pays” while you say the lines below. The words stay the same.
+
 “The deposit is the whole reward. The poster takes none. Each passer gets one sixteenth, rounded down. The match gets the rest. Longer than eight pays nobody.
 
 On sixteen dollars, each passer gets one dollar. One hop, the match gets sixteen. Three hops, the match gets fourteen. Eight hops, the match gets nine. A fake hop does not raise the match. It is still sixteen dollars.”
+
+On that slide, a $16 deposit. Each person who has passed the link gets $1 (floor of 16/16). The match gets the rest. The poster is unpaid.
+
+| Step | Passers | Each passer | Match |
+| --- | --- | --- | --- |
+| Match is the first person | 0 | — | $16 |
+| One person passed it | 1 | $1 | $15 |
+| Two people passed it | 2 | $1 | $14 |
+| Five people passed it (six hops) | 5 | $1 | $11 |
+
+On the slide: a new hop moves one dollar from the match to the new passer. It does not raise the match's take.
 
 ## 1:10 — Hayden
 
