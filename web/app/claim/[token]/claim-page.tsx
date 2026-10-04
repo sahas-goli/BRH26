@@ -13,6 +13,7 @@ function safeExplorer(value?: string): string | undefined {
 export default function ClaimPage() {
   const { token } = useParams<{ token: string }>();
   const [intro, setIntro] = useState("");
+  const [wallet, setWallet] = useState("");
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const [error, setError] = useState("");
@@ -24,10 +25,10 @@ export default function ClaimPage() {
     if (!intro.trim()) { setError("Please write a short introduction."); return; }
     inFlight.current = true; setBusy(true); setError("");
     try {
-      const response = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, referrerPolicy: "no-referrer", body: JSON.stringify({ token, introMessage: intro.trim() }) });
+      const response = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, referrerPolicy: "no-referrer", body: JSON.stringify({ token, introMessage: intro.trim(), ...(wallet.trim() ? { solAddress: wallet.trim() } : {}) }) });
       const data = await response.json();
       if (!response.ok) {
-        const messages: Record<string, string> = { already_claimed: "This bounty already has a claim. Return to your hint card to check its status.", closed: "This bounty is no longer open for claims.", not_found: "This personal link was not found." };
+        const messages: Record<string, string> = { already_claimed: "This bounty already has a claim. Return to your hint card to check its status.", closed: "This bounty is no longer open for claims.", not_found: "This personal link was not found.", invalid_wallet: "That Solana address is not valid. Check it, or leave it empty to use a demo wallet." };
         throw new Error(messages[data.error] ?? "Your claim was not confirmed. Return to your hint card to check its status before retrying.");
       }
       if (data.status !== "found" && data.status !== "paid") throw new Error("The claim returned an unexpected result. Check the bounty status before retrying.");
@@ -52,6 +53,9 @@ export default function ClaimPage() {
           <label htmlFor="intro">A short introduction</label>
           <textarea id="intro" required maxLength={2000} value={intro} onChange={(e) => setIntro(e.target.value)} placeholder="How do you match the clues, and what would you like the poster to know?" />
           <p className={styles.muted}>The poster confirms your introduction before payment.</p>
+          <label htmlFor="claim-wallet">Your Solana wallet address (optional)</label>
+          <input id="claim-wallet" maxLength={44} pattern="[1-9A-HJ-NP-Za-km-z]{32,44}" autoComplete="off" spellCheck={false} value={wallet} onChange={(e) => setWallet(e.target.value)} placeholder="Leave empty to use a demo wallet" />
+          <p className={styles.muted}>Public address only. Your share is sent here on devnet.</p>
         </fieldset>
         {error && <p role="alert" className={styles.error}>{error}</p>}
         <button type="submit" disabled={busy}>{busy ? "Submitting introduction…" : "Opt in and send introduction"}</button>

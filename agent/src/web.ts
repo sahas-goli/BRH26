@@ -54,6 +54,33 @@ export async function forwardTo(
   return { link };
 }
 
+async function internalPost<T>(path: string, body: unknown): Promise<T | { error: string }> {
+  try {
+    const response = await fetch(`${base()}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-six-hops-secret": secret() },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json() as T & { error?: string };
+    if (!response.ok) return { error: data.error ?? "unavailable" };
+    return data;
+  } catch {
+    return { error: "unavailable" };
+  }
+}
+
+export function createDeposit(text: string, hours: number) {
+  return internalPost<{ bountyId: string; posterToken: string; posterLink: string; depositAddress: string; minimumSol: number }>(
+    "/api/deposits", { text, hours },
+  );
+}
+
+export function fundDeposit(bountyId: string) {
+  return internalPost<{ status: "open" | "funding"; bountyCents: number; minimumSol: number }>(
+    `/api/deposits/${encodeURIComponent(bountyId)}/fund`, {},
+  );
+}
+
 export interface TickNudge {
   handle: string;
   text: string;

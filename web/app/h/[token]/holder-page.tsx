@@ -52,7 +52,13 @@ export default function HolderPage() {
         setRecipients((rows) => rows.slice(0, Math.max(1, Math.min(3, data.forwardsLeft))));
         if (data.depth === 0) {
           try {
-            setPosterToken(sessionStorage.getItem(`sixhops:poster:${data.bounty.id}`) ?? "");
+            const key = `sixhops:poster:${data.bounty.id}`;
+            const fromLink = new URLSearchParams(window.location.hash.slice(1)).get("k");
+            if (fromLink) {
+              sessionStorage.setItem(key, fromLink);
+              history.replaceState(null, "", window.location.pathname);
+            }
+            setPosterToken(fromLink ?? sessionStorage.getItem(key) ?? "");
           } catch { setPosterToken(""); }
         }
         if (data.bounty.status === "paid") {
@@ -191,15 +197,15 @@ export default function HolderPage() {
           {recipients.length < Math.min(3, view.forwardsLeft) && <button type="button" onClick={() => setRecipients((rows) => [...rows, { label: "", handle: "" }])}>Add recipient</button>}
         </fieldset>
         <p className={styles.muted}>iMessage delivery is for registered numbers. You will receive a shareable link when delivery is unavailable.</p>
-        <fieldset disabled={busy}><legend>Your reward destination</legend>
+        {view.depth > 0 && <fieldset disabled={busy}><legend>Your reward destination</legend>
           <p>Current option: {view.rail === "wallet" ? "your saved Solana wallet" : view.rail === "bank" ? "demo bank account" : "demo wallet managed for you"}.</p>
-          <button type="button" aria-expanded={editDestination} onClick={() => { setEditDestination((editing) => !editing); setRail(view.rail); setWallet(""); }}>{editDestination ? "Keep saved destination" : "Change reward destination"}</button>
+          <button type="button" aria-expanded={editDestination} onClick={() => { setEditDestination((editing) => !editing); setRail(editDestination ? view.rail : "wallet"); setWallet(""); }}>{editDestination ? "Keep saved destination" : "Use my own Solana wallet"}</button>
           {editDestination && <>
           <label htmlFor="rail">Payment option</label>
           <select id="rail" value={rail} onChange={(e) => setRail(e.target.value as Rail)}><option value="custodial">Demo wallet managed for me</option><option value="wallet">My Solana wallet</option><option value="bank">Demo bank account</option></select>
           {rail === "wallet" && <><label htmlFor="wallet">Solana public address</label><input id="wallet" required minLength={32} maxLength={44} pattern="[1-9A-HJ-NP-Za-km-z]{32,44}" autoComplete="off" spellCheck={false} value={wallet} onChange={(e) => setWallet(e.target.value)} /><p className={styles.muted}>Enter a public address only.</p></>}
           </>}
-        </fieldset>
+        </fieldset>}
         <button disabled={busy} type="submit">{busy ? "Creating personal links…" : "Pass it on"}</button>
       </form> : view.bounty.status === "open" && <p>This link cannot forward further. It is at its last hop or out of forwards.</p>}
       {sent.length > 0 && <section className={styles.card} aria-label="Created recipient links"><h2>Your personal links</h2><p role="status">{sent.length} recipient links created.</p>{sent.map((r) => <div key={r.link}><h3>{r.label}</h3><p>{r.delivered === "imessage" ? "Delivered by iMessage" : "Link ready — share it with this recipient"}</p><input aria-label={`Personal link for ${r.label}`} readOnly value={r.link} onFocus={(e) => e.currentTarget.select()} /><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(r.link); setCopyStatus(`Copied the link for ${r.label}.`); } catch { setCopyStatus("Select the link above and copy it manually."); } }}>Copy link</button></div>)}<p role="status">{copyStatus}</p></section>}

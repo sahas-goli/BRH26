@@ -20,6 +20,19 @@ export function centsToLamports(cents: number, usdPerSol = 150): number {
   return Math.round((cents * 1_000_000_000) / (usdPerSol * 100));
 }
 
+export function validSolanaAddress(value: string): boolean {
+  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  let n = BigInt(0);
+  for (const char of value) {
+    const digit = alphabet.indexOf(char);
+    if (digit < 0) return false;
+    n = n * BigInt(58) + BigInt(digit);
+  }
+  let bytes = 0;
+  while (n > BigInt(0)) { bytes++; n >>= BigInt(8); }
+  return bytes + (value.match(/^1*/)?.[0].length ?? 0) === 32;
+}
+
 export function explorerUrl(signature: string): string {
   return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
 }
@@ -93,8 +106,9 @@ export async function submitPayout(input: {
 export async function signDevnetPayout(input: {
   bountyId: string;
   rows: { cents: number; solAddress?: string; holderId?: string }[];
+  payerSecret?: string;
 }): Promise<string> {
-  const secret = process.env.SOLANA_PAYER_SECRET;
+  const secret = input.payerSecret ?? process.env.SOLANA_PAYER_SECRET;
   if (!secret) throw new Error("payout_unavailable");
   const { Keypair, Connection, sendAndConfirmTransaction } = web3();
   const bs58 = require("bs58");

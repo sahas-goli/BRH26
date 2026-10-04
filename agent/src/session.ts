@@ -1,12 +1,29 @@
 /** Per-handle conversation state (in-memory; fine for demo process). */
 
-export type Stage = "idle" | "has_token" | "awaiting_name";
+export type Stage = "idle" | "has_token" | "awaiting_name" | "awaiting_hint" | "awaiting_hours" | "awaiting_funds";
+
+export interface Draft {
+  text?: string;
+  bountyId?: string;
+  posterToken?: string;
+  rootToken?: string;
+  depositAddress?: string;
+}
 
 export interface Session {
   handle: string;
   token: string | null;
   stage: Stage;
+  draft?: Draft;
   updatedAt: number;
+}
+
+export function setStage(handle: string, stage: Stage, draft?: Draft): Session {
+  const session = getSession(handle);
+  session.stage = stage;
+  if (draft) session.draft = { ...session.draft, ...draft };
+  session.updatedAt = Date.now();
+  return session;
 }
 
 const sessions = new Map<string, Session>();
