@@ -143,6 +143,13 @@ export default function HolderPage() {
   return <main className={styles.page}>
     <a className={styles.brand} href="/" referrerPolicy="no-referrer">SIX HOPS</a>
     <h1>Who do you know?</h1>
+    {!loading && view && view.depth > 0 && <>
+      <p>Someone is looking for a person who matches the card. If it is you, tap This is me; if you know someone closer, pass the link on.</p>
+      <p>Payment is test SOL for the route that works.</p>
+    </>}
+    {!loading && view && view.depth === 0 && (
+      <p>This page is your private search. The map shows who has the link, without names.</p>
+    )}
     {loading && <p role="status">Loading your hint card…</p>}
     {error && <div role="alert" className={styles.error}>{error}<br /><button disabled={busy} onClick={() => setAttempt((a) => a + 1)}>Refresh bounty</button></div>}
     {!loading && view && <>

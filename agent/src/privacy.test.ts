@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { personalLinkReply } from "./flows.js";
 import { extractHolderToken, formatHintCard, parseIntent, sanitizeOutbound } from "./privacy.js";
 
 test("extractHolderToken finds 22-char tokens", () => {
@@ -24,4 +25,17 @@ test("formatHintCard never mentions chain members or tokens", () => {
 
 test("sanitizeOutbound blocks leaky replies", () => {
   assert.match(sanitizeOutbound("the parent in the chain is Bob"), /hint card|personal links/i);
+});
+
+test("forward reply explains the link and survives sanitizeOutbound", () => {
+  const link = `https://sash.select/h/${"C".repeat(22)}`;
+  const text = personalLinkReply("Alex", link);
+  const lines = text.split("\n");
+  assert.deepEqual(lines, [
+    "Personal link for Alex:",
+    "This is a search for a kind of person; the card is on the link, so tap This is me if it is you, otherwise pass it to someone closer. The route that works gets paid in test SOL.",
+    link,
+    "Share only with them.",
+  ]);
+  assert.doesNotMatch(text, /\b(parent|chain|target|poster|other holders?|depth|salt|token)\b/i);
 });
