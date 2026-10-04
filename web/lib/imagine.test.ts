@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { wantedPrompt } from "./imagine";
+import { bountyPortraitPrompt, wantedPrompt } from "./imagine";
+
+test("bountyPortraitPrompt stays neutral and name-free", () => {
+  const prompt = bountyPortraitPrompt("launch engineer near the coast", { hours: 24, capCents: 2000 });
+  assert.match(prompt, /Simple flat vector illustration/);
+  assert.match(prompt, /No caricature, no stereotype/);
+  assert.match(prompt, /launch engineer near the coast/);
+  assert.match(prompt, /24 hours/);
+  assert.match(prompt, /\$20 USD/);
+});
 
 test("wantedPrompt includes attribute cues without inventing identity", () => {
   const prompt = wantedPrompt({
