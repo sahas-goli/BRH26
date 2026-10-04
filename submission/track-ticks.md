@@ -2,7 +2,7 @@
 
 Paste sheet for Sahas. Do not open Devpost. Do not submit the project. Do not register or buy a domain. Do not post `submission/peoples-choice-share.md`.
 
-One row per track in `resources/tracks/README.md`. PLAN.md section 13 names BigRed, Software, Design, People's Choice, Solana, Tiger Data, Photon, Nessie, SpaceX, GoDaddy, and Gemini; every one of those names is already in that list. There is no separate Cursor sponsor on the track list. Built with Cursor is requirement 1 of SpaceX: Make it Legendary (`resources/tracks/spacex-make-it-legendary.md`). Tick that track because the project was built entirely in Cursor, including the agent-mode chat among Sahas, Hayden, Audrey, and Selina. AL-10 notes are on main in `cursor-transcripts/README.md`.
+One row per track in `resources/tracks/README.md`. PLAN.md section 13 names BigRed, Software, Design, People's Choice, Solana, Tiger Data, Photon, Nessie, SpaceX, GoDaddy, and Gemini; every one of those names is already in that list. There is no separate Cursor sponsor on the track list. Built with Cursor is requirement 1 of SpaceX: Make it Legendary (`resources/tracks/spacex-make-it-legendary.md`). Tick that track because the project was built entirely in Cursor, using the full capabilities of Cursor agent mode and Cursor cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina were running sandbox agents.
 
 Public site: https://brh26-brh-26.vercel.app
 
@@ -15,7 +15,7 @@ Public site: https://brh26-brh-26.vercel.app
 | Beginner | ask the team | `resources/tracks/beginner.md` says every team member must be at their first hackathon. |
 | People's Choice | tick | `PLAN.md` section 13 lists People's Choice to tick, and `submission/peoples-choice-share.md` stays unsent until after 08:30. |
 | Capital One: Nessie | ask the team | Sahas should tick Nessie only with the mock sentence already in `submission/nessie.md` ("Under mock: lifecycle still completes; money panel labeled mock / unavailable"), because that file says VERIFY D transfers do not move balances and S2-06 stays open. |
-| SpaceX: Make it Legendary | tick | Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, including the agent-mode chat among Sahas, Hayden, Audrey, and Selina. AL-10 notes are on main in `cursor-transcripts/README.md`. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track. |
+| SpaceX: Make it Legendary | tick | Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, using the full capabilities of Cursor agent mode and Cursor cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina were running sandbox agents. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track. |
 | Photon: iMessage agents | ask the team | `submission/photon.md` says the live registered forward, nudge, and paid path was not completed this weekend without Spectrum secrets. |
 | MLH: ElevenLabs | leave unticked | `PLAN.md` section 9 marks ElevenLabs not entered, with no honest fit. |
 | MLH: Gemini API | ask the team | `submission/gemini.md` says `GEMINI_ENABLED=false` is the default and, if the key is missing, the poster fills the hint fields and continues. |
