@@ -153,6 +153,9 @@ export default function HolderPage() {
         <p>{view.depth === 0 ? "You are the poster. The root holder does not receive a reward." : `You are hop ${view.depth} of at most ${H}.`}</p>
         {view.parentLabel && <p>Your sender labeled your link “{view.parentLabel}”.</p>}
         <p className={styles.muted}>Deadline: <time dateTime={view.bounty.expiresAt}>{new Date(view.bounty.expiresAt).toLocaleString()}</time>. Demo rewards use test funds.</p>
+        {view.depth === 0 && (view.bounty.status === "open" || view.bounty.status === "found") && (
+          <p className={styles.muted}>Escrow is holding the reward until you accept.</p>
+        )}
       </section>
       {view.depth > 0 && view.bounty.status === "open" && (
         <div className={styles.claim}>
@@ -214,11 +217,11 @@ export default function HolderPage() {
         </fieldset>
         <p className={styles.muted}>iMessage delivery is for registered numbers. You will receive a shareable link when delivery is unavailable.</p>
         {view.depth > 0 && <fieldset disabled={busy}><legend>Your reward destination</legend>
-          <p>Current option: {view.rail === "wallet" ? "your saved Solana wallet" : view.rail === "bank" ? "demo bank account" : "demo wallet managed for you"}.</p>
+          <p>Current option: {view.rail === "wallet" ? "your saved Solana wallet" : view.rail === "bank" ? "Nessie checking" : "demo wallet managed for you"}.</p>
           <button type="button" aria-expanded={editDestination} onClick={() => { setEditDestination((editing) => !editing); setRail(editDestination ? view.rail : "wallet"); setWallet(""); }}>{editDestination ? "Keep saved destination" : "Use my own Solana wallet"}</button>
           {editDestination && <>
           <label htmlFor="rail">Payment option</label>
-          <select id="rail" value={rail} onChange={(e) => setRail(e.target.value as Rail)}><option value="custodial">Demo wallet managed for me</option><option value="wallet">My Solana wallet</option><option value="bank">Demo bank account</option></select>
+          <select id="rail" value={rail} onChange={(e) => setRail(e.target.value as Rail)}><option value="custodial">Demo wallet managed for me</option><option value="wallet">My Solana wallet</option><option value="bank">Nessie checking</option></select>
           {rail === "wallet" && <><label htmlFor="wallet">Solana public address</label><input id="wallet" required minLength={32} maxLength={44} pattern="[1-9A-HJ-NP-Za-km-z]{32,44}" autoComplete="off" spellCheck={false} value={wallet} onChange={(e) => setWallet(e.target.value)} /><p className={styles.muted}>Enter a public address only.</p></>}
           </>}
         </fieldset>}
