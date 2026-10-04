@@ -6,7 +6,7 @@ This is a 2-minute deck outline for the BigRed//Hacks table. Capture fresh scree
 
 - **Team:** team names: fill at the table.
 - **One-line premise:** a bounty for someone you cannot search for travels through people who may know the next person.
-- **Visual:** the Six Hops home page at [brh26-brh-26.vercel.app](https://brh26-brh-26.vercel.app/), with the “find your person” headline visible.
+- **Visual:** the Six Hops home page at [sash.select](https://sash.select/), with the “find your person” headline visible.
 
 **Speaker notes — 0:00–0:20:** “The person you need is usually two to four hops away in someone’s private contacts. Jon Kleinberg showed local knowledge can navigate social networks. We made the chain pay correctly.”
 
@@ -33,7 +33,28 @@ This is a 2-minute deck outline for the BigRed//Hacks table. Capture fresh scree
 
 **BigRed criterion:** **design** — a mobile-first, one-screen hop flow makes the next action clear; **theme adherence** — every forward is a navigation decision using local knowledge.
 
-## Slide 4 — Make the chain worth completing, without rewarding fake hops
+## Slide 4 — What a six-hop chain pays
+
+Use a $16 reward so the shares stay in whole dollars. Each person who passed the link gets $1. The person who matches gets the rest. The poster gets nothing. The $16 never grows.
+
+| Hops to the match | People who passed it | Each of them | The match |
+| --- | --- | --- | --- |
+| 1 | 0 | — | $16 |
+| 3 | 2 | $1 | $14 |
+| 6 | 5 | $1 | $11 |
+| 8 | 7 | $1 | $9 |
+
+Six degrees is the middle row: five forwards at $1, and $11 to the match.
+
+If every person passes the card to three friends, six rounds ask 1,092 people. The same $16 is the entire payout, so someone who only sees the card expects about a cent and a half. Someone on the route that worked expects $1, or $11 if they are the match. A chain longer than eight pays nobody.
+
+One invented extra hop does not raise the match’s take. The MIT split would pay that person 50% more for one fake recruiter, 75% for two, 88% for three, and 94% for four.
+
+**Speaker notes:** “Sixteen dollars, six hops. Five people get a dollar for passing it. The match gets eleven. Ask a thousand people and the expected payment per ask is about a penny and a half, because only the winning route is paid. Padding the chain with fake friends does not increase that eleven dollars.”
+
+**BigRed criterion:** **technical** — the payout is a fixed split, not a growing pot; **creativity** — local routing is paid, fake length is not.
+
+## Slide 5 — Make the chain worth completing, without rewarding fake hops
 
 - One fixed poster-funded bounty is split across the winning chain after target opt-in and poster confirmation.
 - The `/live` demo presents cascade depth, branching factor, and an attack slider.
@@ -44,7 +65,7 @@ This is a 2-minute deck outline for the BigRed//Hacks table. Capture fresh scree
 
 **BigRed criterion:** **technical** — the split, depth cap, and attack simulation turn a social-routing idea into a testable incentive system; **creativity** — combines search navigation with anti-sybil payout design.
 
-## Slide 5 — What is actually in the repo
+## Slide 6 — What is actually in the repo
 
 - **Next.js + TypeScript:** public pages for `/`, `/post`, `/h/[token]`, `/claim/[token]`, and `/live`; API routes for bounties, forwarding, claims, confirmation, graph, stats, controller, and attack simulation.
 - **Tiger/Postgres:** bounty, holder, payout, and event data; event analytics and continuous aggregates support the live cascade and controller measurements.
@@ -56,7 +77,7 @@ This is a 2-minute deck outline for the BigRed//Hacks table. Capture fresh scree
 
 **BigRed criterion:** **technical** — real application routes, database analytics, payout logic, tests, and replay; **design** — the system degrades to a usable link flow when an optional integration is unavailable.
 
-## Slide 6 — Demo close: why it matters and what comes next
+## Slide 7 — Demo close: why it matters and what comes next
 
 - **Impact now:** a requester can ask a trusted network for help without exposing a target’s identity or importing anyone’s address book.
 - **Near-term next steps:** complete live sponsor-rail verification, register table phones for the iMessage path, and collect real cascade metrics alongside the labeled synthetic replay.
@@ -67,7 +88,7 @@ This is a 2-minute deck outline for the BigRed//Hacks table. Capture fresh scree
 
 **BigRed criterion:** **overall impact** — useful access to hard-to-reach people without a central social graph; **theme adherence** — every outcome is a transparent route through human knowledge.
 
-## Slide 7 — Q&A / table backup
+## Slide 8 — Q&A / table backup
 
 - **“Is this a pyramid scheme?”** Nobody pays to join; one poster funds a fixed total, depth is capped at eight, and money flows only after the target opts in and the poster confirms.
 - **“Does this expose contacts?”** No: the product uses attribute-only hint cards and personal links; it does not expose chain members or contact handles to the poster.
