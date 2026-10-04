@@ -45,7 +45,7 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 - **Incentive tests**: split unit tests plus `/api/attack` showing MIT fake-hop gains vs our zero finder gain.
 - **Solana path measured** on devnet (multi-instruction payout + `sixhops:pay:…` memo; signatures in PLAN §7.2) with safe `PAYOUT_MODE=mock` for the overnight game.
 - **Full `/live` demo surface**: cascade, branching factor, controller steps, attack slider — usable without every sponsor live.
-- **Parallel engineering**: four people/agents via `scripts/task.sh` claim branches and rebase merges. Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, including the agent-mode chat among Sahas, Hayden, Audrey, and Selina. AL-10 notes are on main in `cursor-transcripts/README.md`. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track.
+- **Parallel engineering**: four people/agents via `scripts/task.sh` claim branches and rebase merges. Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, using the full capabilities of Cursor agent mode and Cursor cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina were running sandbox agents. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track.
 
 ## What we learned
 
@@ -63,4 +63,4 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 
 ## Track write-ups (repo)
 
-See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, including the agent-mode chat among Sahas, Hayden, Audrey, and Selina. AL-10 notes are on main in `cursor-transcripts/README.md`. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track.
+See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, using the full capabilities of Cursor agent mode and Cursor cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina were running sandbox agents. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track.
