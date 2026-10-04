@@ -8,6 +8,7 @@ export interface Draft {
   posterToken?: string;
   rootToken?: string;
   depositAddress?: string;
+  minimumSol?: number;
 }
 
 export interface Session {

@@ -130,6 +130,36 @@ export async function signDevnetPayout(input: {
   return result.signature;
 }
 
+export async function sendDemoDeposit(toAddress: string, lamports: number): Promise<void> {
+  const secret = process.env.SOLANA_PAYER_SECRET?.trim();
+  if (!secret) throw new Error("payer_unavailable");
+  if (!Number.isSafeInteger(lamports) || lamports < 1) throw new Error("transfer_unavailable");
+  const { Keypair, Connection, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } = web3();
+  const bs58 = require("bs58");
+  const decode = typeof bs58.decode === "function" ? bs58.decode : bs58.default.decode;
+  let payer;
+  try {
+    payer = Keypair.fromSecretKey(decode(secret));
+  } catch {
+    throw new Error("payer_unavailable");
+  }
+  const tx = new Transaction().add(SystemProgram.transfer({
+    fromPubkey: payer.publicKey,
+    toPubkey: new PublicKey(toAddress),
+    lamports,
+  }));
+  try {
+    await sendAndConfirmTransaction(
+      new Connection(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com", "confirmed"),
+      tx,
+      [payer],
+      { commitment: "confirmed" },
+    );
+  } catch {
+    throw new Error("transfer_unavailable");
+  }
+}
+
 export function newCustodialAccount(): { address: string; secret: string } {
   const { Keypair } = web3();
   const bs58 = require("bs58");

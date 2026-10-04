@@ -16,6 +16,11 @@ export function minimumDepositSol(usdPerSol = USD_PER_SOL): number {
   return Math.ceil(lamports / 1_000_000) / 1000;
 }
 
+/** Whole lamports equal to minimumDepositSol(), enough for fundDepositBounty to open. */
+export function minimumDepositLamports(usdPerSol = USD_PER_SOL): number {
+  return Math.round(minimumDepositSol(usdPerSol) * 1_000_000_000);
+}
+
 function fallbackHint(text: string): { experience: string } {
   const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length <= 80) return { experience: clean };
@@ -76,6 +81,31 @@ export async function fundDepositBounty(
     [cents, bountyId],
   );
   return { status: "open", bountyCents: cents, minimumSol: minimumDepositSol() };
+}
+
+export async function demoFundDeposit(
+  db: PayoutDatabase,
+  bountyId: string,
+  posterToken: string,
+  sendMinimum: (address: string, lamports: number) => Promise<void>,
+  balanceOf: (address: string) => Promise<number>,
+): Promise<{ status: "open" | "funding"; bountyCents: number; minimumSol: number }> {
+  const { rows } = await db.query<Record<string, unknown>>(
+    "SELECT b.status, b.bounty_cents, b.poster_token, h.sol_address FROM bounties b JOIN holders h ON h.bounty_id=b.id AND h.depth=0 WHERE b.id=$1 AND b.poster_token=$2",
+    [bountyId, posterToken],
+  );
+  const row = rows[0];
+  if (!row || String(row.poster_token) !== posterToken) throw new BountyError("not_found", 404);
+  if (row.status === "cancelled") throw new BountyError("closed", 410);
+  if (row.status !== "funding") {
+    return { status: "open", bountyCents: Number(row.bounty_cents), minimumSol: minimumDepositSol() };
+  }
+  const address = typeof row.sol_address === "string" ? row.sol_address : "";
+  if (!address) throw new BountyError("not_found", 404);
+  if (depositCents(await balanceOf(address)) < MIN_BOUNTY_CENTS) {
+    await sendMinimum(address, minimumDepositLamports());
+  }
+  return fundDepositBounty(db, bountyId, balanceOf);
 }
 
 export async function devnetBalance(address: string): Promise<number> {
