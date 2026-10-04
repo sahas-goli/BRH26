@@ -3,7 +3,7 @@ import { after, before, test } from "node:test";
 import { BountyError, configureBounty, createBounty, forwardBounty } from "../../../lib/bounty";
 import type { BountyDatabase, BountyQuery } from "../../../lib/bounty";
 
-const flagNames = ["NESSIE_MODE", "GROK_ENABLED", "GEMINI_ENABLED", "PHOTON_ENABLED", "PAYOUT_MODE"] as const;
+const flagNames = ["NESSIE_MODE", "GROK_ENABLED", "GEMINI_ENABLED", "PHOTON_ENABLED", "PAYOUT_MODE", "XAI_API_KEY", "GEMINI_API_KEY"] as const;
 const original = new Map(flagNames.map((key) => [key, process.env[key]]));
 before(() => { for (const key of flagNames) delete process.env[key]; });
 after(() => {
@@ -71,6 +71,77 @@ test("hint validation rejects malformed attributes and hidden values without wri
   }
   await assert.rejects(createBounty({ ...valid, hidden: [{ attr: "field", value: "x".repeat(81) }] }), error("invalid_input"));
   assert.deepEqual(calls, []);
+});
+
+test("description-only create stores a hint card without the compiler or image job", async () => {
+  process.env.GEMINI_ENABLED = "true";
+  delete process.env.GEMINI_API_KEY;
+  delete process.env.XAI_API_KEY;
+  const calls: { sql: string; values: unknown[] }[] = [];
+  let compiled = 0;
+  let imagined = 0;
+  const tx: BountyQuery = {
+    async query<T extends Record<string, unknown>>(sql: string, values: unknown[] = []) {
+      calls.push({ sql, values });
+      return { rows: [] as T[] };
+    },
+  };
+  configureBounty({
+    database: { ...tx, transaction: (work) => work(tx) },
+    publicBaseUrl: "https://sixhops.test",
+    now: () => new Date("2026-10-03T16:00:00Z"),
+    compileHint: async () => { compiled += 1; throw new Error("compiler"); },
+    generateWantedCard: async () => { imagined += 1; },
+  });
+  const result = await createBounty({ capCents: 2000, hours: 24, text: "re hair blue cap" });
+  assert.equal(compiled, 0);
+  assert.equal(imagined, 0);
+  assert.match(result.bountyId, /^b_[A-Za-z0-9]{8}$/);
+  const insert = calls.find((call) => call.sql.startsWith("INSERT INTO bounties"))!;
+  assert.deepEqual(JSON.parse(insert.values[2] as string), { experience: "re hair blue cap" });
+  const long = await createBounty({ capCents: 2000, hours: 24, text: `${"word ".repeat(30)}tail` });
+  assert.equal(long.bountyId.startsWith("b_"), true);
+  const longInsert = calls.filter((call) => call.sql.startsWith("INSERT INTO bounties")).at(-1)!;
+  const stored = JSON.parse(longInsert.values[2] as string) as { experience: string };
+  assert.equal(stored.experience.length > 0 && stored.experience.length <= 80, true);
+  assert.equal(stored.experience.includes("tail"), false);
+});
+
+test("a present xai key compiles free text and a gemini flag does not", async () => {
+  process.env.XAI_API_KEY = "test-key";
+  process.env.GEMINI_ENABLED = "true";
+  try {
+    const calls: { sql: string; values: unknown[] }[] = [];
+    const tx: BountyQuery = {
+      async query<T extends Record<string, unknown>>(sql: string, values: unknown[] = []) {
+        calls.push({ sql, values });
+        return { rows: [] as T[] };
+      },
+    };
+    configureBounty({
+      database: { ...tx, transaction: (work) => work(tx) },
+      publicBaseUrl: "https://sixhops.test",
+      now: () => new Date("2026-10-03T16:00:00Z"),
+      compileHint: async (text) => ({ hint: { skill: text }, hidden: [{ attr: "city", value: "Austin" }] }),
+    });
+    await createBounty({ capCents: 2000, hours: 24, text: "re hair blue cap" });
+    const insert = calls.find((call) => call.sql.startsWith("INSERT INTO bounties"))!;
+    assert.deepEqual(JSON.parse(insert.values[2] as string), { skill: "re hair blue cap" });
+    assert.deepEqual(JSON.parse(insert.values[3] as string), [{ attr: "city", value: "Austin" }]);
+    configureBounty({
+      database: { ...tx, transaction: (work) => work(tx) },
+      publicBaseUrl: "https://sixhops.test",
+      now: () => new Date("2026-10-03T16:00:00Z"),
+      compileHint: async () => { throw new Error("grok_http"); },
+    });
+    await assert.rejects(
+      createBounty({ capCents: 2000, hours: 24, text: "re hair blue cap" }),
+      error("hint_compiler_unavailable", 503),
+    );
+  } finally {
+    delete process.env.XAI_API_KEY;
+    delete process.env.GEMINI_ENABLED;
+  }
 });
 
 test("only allowed hint attributes are stored, and valid hidden attributes stay separate", async () => {
