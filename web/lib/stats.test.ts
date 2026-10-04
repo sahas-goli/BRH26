@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  anonymizeGraph,
   assembleGraph,
   assembleStats,
   resolveStatsBountyId,
@@ -110,6 +111,31 @@ test("assembleGraph hides salts until paid and marks the target", () => {
     h0: "aa",
   });
   assert.equal(paid.revealedSalts?.h_side, undefined);
+});
+
+test("anonymizeGraph drops names, salts, and real holder ids", () => {
+  const named = assembleGraph({
+    status: "paid",
+    holders: [
+      { id: "h0", parent_id: null, depth: 0, label: null, salt: "aa", received_at: "2026-10-04T00:00:00Z" },
+      { id: "h1", parent_id: "h0", depth: 1, label: "Selina", salt: "bb", received_at: "2026-10-04T00:01:00Z" },
+      { id: "h2", parent_id: "h1", depth: 2, label: "Audrey", salt: "cc", received_at: "2026-10-04T00:02:00Z" },
+    ],
+    payouts: [{ holder_id: "h2", cents: 900, role: "finder", tx_sig: "sig_pay" }],
+    claimedHolderId: "h2",
+    edgeMemos: [{ holder_id: "h1", parent_id: "h0", memoSig: "memo1", at: "2026-10-04T00:01:00Z" }],
+  });
+  const anon = anonymizeGraph(named);
+  const blob = JSON.stringify(anon);
+  assert.equal(blob.includes("Selina"), false);
+  assert.equal(blob.includes("Audrey"), false);
+  assert.equal(blob.includes("memo1"), false);
+  assert.equal(blob.includes("h1"), false);
+  assert.equal(anon.nodes.find((node) => node.depth === 0)?.label, "You");
+  assert.equal(anon.nodes.find((node) => node.depth === 1)?.label, "Someone");
+  assert.equal(anon.nodes.find((node) => node.isTarget)?.depth, 2);
+  assert.equal(anon.edges.length, 2);
+  assert.equal(anon.revealedSalts, undefined);
 });
 
 test("resolveStatsBountyId prefers the query, then FEATURED_BOUNTY", () => {
