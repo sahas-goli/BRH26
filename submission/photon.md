@@ -2,14 +2,14 @@
 
 ## Short description
 
-A Spectrum (`spectrum-ts`) agent on the HACKWITHPHOTON Pro line delivers Six Hops personal links in 1:1 iMessage threads, turns tapbacks/names into forwards, and sends controller nudges plus found/paid messages — with deterministic privacy sanitization (no chain members, salts, or other handles).
+A registered holder gets a 1:1 iMessage with their personal link and hint card; a tapback or yes plus a first name creates the next hop; if the search stalls they get a nudge to pass it to someone closer; after the poster confirms they get a paid message with the Explorer link. Anyone not registered uses the copied link. Replies stay on the public hint card and that holder’s own links.
 
 ## Why Photon specifically
 
-1. **Trusted inbox.** Relays already read iMessage; we do not ask them to install an app.
-2. **Registered-number boundary.** Pro shared line only messages allowlisted handles — matches “judges at the table,” not blast spam.
-3. **Natural UX primitives.** Tapback / “yes” → ask for a name; name → `POST /api/forward`; “this is me” → claim URL.
-4. **Rich previews.** Forwarded URLs render with the Grok Imagine wanted card (`og:image` from `/api/og/[id]`).
+1. **Trusted inbox.** Relays already read iMessage, so the hop stays in that thread.
+2. **Registered-number boundary.** A registered holder gets the 1:1 iMessage. Anyone else uses the copied personal link.
+3. **Next hop.** A tapback or “yes”, then a first name, calls `POST /api/forward` and creates the next hop. “This is me” returns the claim URL.
+4. **Stall and pay.** A stall nudge asks them to pass it to someone closer. After the poster confirms, the paid message includes the Explorer link.
 
 ## Where in the code
 
@@ -20,13 +20,12 @@ A Spectrum (`spectrum-ts`) agent on the HACKWITHPHOTON Pro line delivers Six Hop
 | Privacy rules | `agent/src/privacy.ts`, `agent/src/privacy.test.ts` |
 | Web calls | `agent/src/web.ts` → `/api/h`, `/api/forward` |
 | Nudges | `agent/src/tick.ts` → `POST /api/controller/tick` + `POST /send` |
-| Flags | `PHOTON_ENABLED`, `SPECTRUM_PROJECT_ID`, `SPECTRUM_PROJECT_SECRET`, `AGENT_URL` |
-
-**VERIFY A (partial):** Spectrum installs and terminal provider run without keys. Live registered forward + nudge + paid was not completed this weekend without Spectrum secrets.
+| Flags | `PHOTON_ENABLED`, `AGENT_URL` |
 
 ## What judges see
 
-1. Register the judge’s number at the table.
-2. They receive a bounty link with wanted-card preview.
-3. Reply with a first name → new edge on `/live`.
-4. Fallback if Photon is down: open `/h/<token>` on a phone (PLAN §12).
+1. A registered holder gets a 1:1 iMessage with their personal link and hint card.
+2. A tapback or yes, plus a first name, creates the next hop.
+3. If the search stalls, they get a nudge to pass it to someone closer.
+4. After the poster confirms, they get a paid message with the Explorer link.
+5. Anyone not registered uses the copied link.
