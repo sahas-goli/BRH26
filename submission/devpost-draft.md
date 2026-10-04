@@ -1,6 +1,6 @@
 # Devpost draft (Six Hops)
 
-Paste into Devpost after team review. Grounded in what is on `main` as of this draft; do not claim live Tiger, Photon, or GoDaddy transfers until those go/no-gos pass. PLAN demo script: §12; checklist: §13.
+Paste into Devpost after team review. Grounded in what is on `main` as of this draft; do not claim live Tiger or GoDaddy transfers until those go/no-gos pass. PLAN demo script: §12; checklist: §13.
 
 ## Inspiration
 
@@ -16,7 +16,7 @@ Jon Kleinberg’s navigability results say strangers can find each other with **
 4. The winning chain is paid under a **Babaioff-style split** (published sixteenths); the finder cannot profit from inventing fake hops.
 5. A stall **controller** widens hints when branching factor `b` collapses; `/live` shows cascades, `b`, and an attack comparison (MIT-style fake-hop gains vs ours at +0%).
 
-Rails: Solana atomic multi-payee payout (devnet or mock). Tick Capital One: Nessie because on post the cap moves from checking to escrow; on poster confirm, holder shares and the Solana-rail treasury leg leave escrow and the remainder returns to checking; on expiry the escrow refunds to checking. The `/live` money panel shows it. The depth-0 poster is not paid. Optional Photon iMessage agent for registered numbers.
+Rails: Solana atomic multi-payee payout (devnet or mock). Tick Capital One: Nessie because on post the cap moves from checking to escrow; on poster confirm, holder shares and the Solana-rail treasury leg leave escrow and the remainder returns to checking; on expiry the escrow refunds to checking. The `/live` money panel shows it. The depth-0 poster is not paid. Photon: a registered holder gets a 1:1 iMessage with their personal link and hint card; a tapback or yes plus a first name creates the next hop; if the search stalls they get a nudge to pass it to someone closer; after the poster confirms they get a paid message with the Explorer link. Anyone not registered uses the copied link.
 
 ## How we built it
 
@@ -56,8 +56,7 @@ Rails: Solana atomic multi-payee payout (devnet or mock). Tick Capital One: Ness
 
 1. Wire Tiger (`DATABASE_URL`) → schema/caggs → Vercel preview MVP; load replay benches.
 2. Claim **milgram.study** (GoDaddy Registry), set `PUBLIC_BASE_URL`.
-3. Live Photon go/no-go (registered forward + nudge + paid).
-4. People’s Choice push after the Devpost hard deadline.
+3. People’s Choice push after the Devpost hard deadline.
 
 ## Track write-ups (repo)
 
