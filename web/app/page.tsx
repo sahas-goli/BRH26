@@ -6,6 +6,7 @@ import styles from "./post/pages.module.css";
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<PublicBounty | null>(null);
+  const [replay, setReplay] = useState<{ holders: number; maxDepth: number } | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const controller = new AbortController();
@@ -18,6 +19,7 @@ export default function HomePage() {
           const data = await stats.json();
           if (typeof data.bountyId !== "string") return;
           bountyId = data.bountyId;
+          if (typeof data.holders === "number" && data.holders > 0) setReplay({ holders: data.holders, maxDepth: Number(data.maxDepth) || 0 });
         }
         const response = await fetch(`/api/bounties/${encodeURIComponent(bountyId!)}`, { signal: controller.signal, cache: "no-store" });
         if (response.ok) {
@@ -44,6 +46,10 @@ export default function HomePage() {
         <ul className={styles.steps}>{Object.entries(featured.hint).map(([key, value]) => <li key={key}>{value}</li>)}</ul>
         <p className={styles.muted}>Status: {featured.status}. Join through a personal link from a friend.</p>
         <a href={`/live?bounty=${encodeURIComponent(featured.id)}`}>Follow this search ↗</a>
+      </> : replay ? <>
+        <p className={styles.amount}>{replay.holders.toLocaleString("en-US")} people, {replay.maxDepth} hops deep</p>
+        <p className={styles.muted}>A replayed search cascade stored in Tiger. Watch every pass branch out, hop by hop.</p>
+        <a href="/live">Watch the replay ↗</a>
       </> : <p className={styles.muted}>No featured search is available right now. Start one of your own.</p>}
     </section>
     <p className={styles.muted}>Hackathon demo: rewards use test or simulated money. Nobody pays to join a chain.</p>
