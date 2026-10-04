@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { db, isPgliteUrl } from "./db";
-import { validSolanaAddress } from "./solana";
+import { newCustodialAccount, validSolanaAddress } from "./solana";
 import { FANOUT, H, INITIAL_SHARE } from "./types";
 import type { HintCard, HolderView, PublicBounty, ForwardResult, Rail } from "./types";
 
@@ -160,8 +160,12 @@ type BountyRow = Record<string, unknown> & {
 type HolderRow = Record<string, unknown> & {
   id: string; bounty_id: string; parent_id: string | null; depth: number;
   label: string | null; rail: Rail; forwards: number; salt: string;
+  sol_address?: string | null;
   received_at: string | Date; opened_at: string | Date | null;
 };
+function storedSolAddress(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
 function publicBounty(row: BountyRow, o: BountyOptions): PublicBounty {
   return {
     id: row.id, hint: hintCard(row.hint), bountyCents: row.bounty_cents, capCents: row.cap_cents,
@@ -363,7 +367,7 @@ export async function forwardBounty(input: unknown): Promise<ForwardResult> {
     const { rows: lookup } = await tx.query<{ bounty_id: string }>("SELECT bounty_id FROM holders WHERE token=$1", [holderToken]);
     if (!lookup[0]) throw new BountyError("not_found", 404);
     const { rows: bounties } = await tx.query<BountyRow>("SELECT id,hint,bounty_cents,cap_cents,status,expires_at FROM bounties WHERE id=$1 FOR UPDATE", [lookup[0].bounty_id]);
-    const { rows: holders } = await tx.query<HolderRow>("SELECT id,bounty_id,parent_id,depth,label,rail,forwards,salt,received_at,opened_at FROM holders WHERE token=$1 FOR UPDATE", [holderToken]);
+    const { rows: holders } = await tx.query<HolderRow>("SELECT id,bounty_id,parent_id,depth,label,rail,forwards,salt,sol_address,received_at,opened_at FROM holders WHERE token=$1 FOR UPDATE", [holderToken]);
     const bounty = bounties[0];
     const parent = holders[0];
     if (!bounty || !parent) throw new BountyError("not_found", 404);
@@ -372,8 +376,24 @@ export async function forwardBounty(input: unknown): Promise<ForwardResult> {
     if (parent.depth >= H) throw new BountyError("too_deep", 409);
     if (parent.forwards + recipients.length > FANOUT) throw new BountyError("fanout_exceeded", 409);
     const rail = (body.rail ?? parent.rail) as Rail;
+    const hadAddress = storedSolAddress(parent.sol_address);
+    // Re-selecting the demo wallet must keep an address already stored. Bank clears it.
+    const assignedAddress = body.rail === "wallet" ? solAddress ?? null : body.rail === "custodial" ? hadAddress ?? null : null;
     await tx.query("UPDATE holders SET forwards=forwards+$1,rail=$2,sol_address=CASE WHEN $3::boolean THEN $4 ELSE sol_address END WHERE id=$5",
-      [recipients.length, rail, body.rail !== undefined, body.rail === "wallet" ? solAddress : null, parent.id]);
+      [recipients.length, rail, body.rail !== undefined, assignedAddress, parent.id]);
+    let payoutAddress: string | undefined;
+    if (parent.depth > 0 && rail === "wallet") {
+      payoutAddress = body.rail === "wallet" ? solAddress : hadAddress;
+    } else if (parent.depth > 0 && rail === "custodial" && hadAddress) {
+      payoutAddress = hadAddress;
+    } else if (parent.depth > 0 && rail === "custodial" && process.env.PAYOUT_MODE === "devnet") {
+      const created = newCustodialAccount();
+      await tx.query(
+        "UPDATE holders SET sol_address=$1, custodial_secret=$2 WHERE id=$3 AND sol_address IS NULL",
+        [created.address, created.secret, parent.id],
+      );
+      payoutAddress = created.address;
+    }
     const children = [];
     for (const recipient of recipients) {
       const child = { id: id("h_"), parent_id: parent.id, depth: parent.depth + 1, token: token(), salt: randomBytes(16).toString("hex") };
@@ -385,7 +405,7 @@ export async function forwardBounty(input: unknown): Promise<ForwardResult> {
         bountyId: bounty.id, parentId: parent.id, childId: child.id, parentSalt: parent.salt, childSalt: child.salt, at: at.toISOString(),
       } });
     }
-    return { hint: bounty.hint, children };
+    return { hint: bounty.hint, children, payoutAddress };
   });
   const delivered = await Promise.all(result.children.map(async (child) => {
     if (o.commitEdgeMemo) background(o, "edge_memo", () => o.commitEdgeMemo!(child.edge));
@@ -396,5 +416,5 @@ export async function forwardBounty(input: unknown): Promise<ForwardResult> {
     }
     return { label: child.label, link: child.link, delivered: sent ? "imessage" as const : "link-only" as const };
   }));
-  return { recipients: delivered };
+  return result.payoutAddress ? { recipients: delivered, payoutAddress: result.payoutAddress } : { recipients: delivered };
 }

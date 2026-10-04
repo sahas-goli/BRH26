@@ -12,6 +12,10 @@ function safeExplorer(value?: string): string {
   try { const url = new URL(value ?? ""); if (url.protocol === "https:" && url.hostname === "explorer.solana.com" && !url.username && !url.password) return url.href; } catch { /* omit invalid links */ }
   return "";
 }
+function payoutExplorer(address: string): string {
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) return "";
+  return safeExplorer(`https://explorer.solana.com/address/${address}?cluster=devnet`);
+}
 
 export default function HolderPage() {
   const { token } = useParams<{ token: string }>();
@@ -25,6 +29,8 @@ export default function HolderPage() {
   const [editDestination, setEditDestination] = useState(false);
   const [recipients, setRecipients] = useState<ForwardRecipient[]>([{ label: "", handle: "" }]);
   const [sent, setSent] = useState<ForwardResult["recipients"]>([]);
+  const [payoutAddress, setPayoutAddress] = useState("");
+  const [addressCopy, setAddressCopy] = useState("");
   const [copyStatus, setCopyStatus] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [posterToken, setPosterToken] = useState("");
@@ -109,7 +115,7 @@ export default function HolderPage() {
   async function forward(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!view || inFlight.current) return;
-    inFlight.current = true; setBusy(true); setError("");
+    inFlight.current = true; setBusy(true); setError(""); setAddressCopy("");
     try {
       const response = await fetch("/api/forward", {
         method: "POST", headers: { "Content-Type": "application/json" }, referrerPolicy: "no-referrer",
@@ -122,6 +128,9 @@ export default function HolderPage() {
       }
       const result = data as ForwardResult;
       setSent((current) => [...current, ...result.recipients]);
+      const nextAddress = typeof result.payoutAddress === "string" ? result.payoutAddress : "";
+      if (editDestination && rail === "bank") setPayoutAddress("");
+      else if (payoutExplorer(nextAddress)) setPayoutAddress(nextAddress);
       const left = Math.max(0, view.forwardsLeft - result.recipients.length);
       setView({ ...view, rail: editDestination ? rail : view.rail, forwardsLeft: left, canForward: view.canForward && left > 0 });
       setEditDestination(false); setWallet("");
@@ -215,6 +224,13 @@ export default function HolderPage() {
         </fieldset>}
         <button disabled={busy} type="submit">{busy ? "Creating personal links…" : "Pass it on"}</button>
       </form> : view.bounty.status === "open" && <p>This link cannot forward further. It is at its last hop or out of forwards.</p>}
+      {payoutAddress && <section className={styles.card} aria-label="Payout address">
+        <p role="status">Your share is paid to this address.</p>
+        <p className={styles.address}>{payoutAddress}</p>
+        <button type="button" onClick={async () => { try { await navigator.clipboard.writeText(payoutAddress); setAddressCopy("Copied the payout address."); } catch { setAddressCopy("Select the address above and copy it manually."); } }}>Copy address</button>
+        {payoutExplorer(payoutAddress) && <a className={styles.addressLink} href={payoutExplorer(payoutAddress)} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">View on Solana Explorer</a>}
+        {addressCopy && <p role="status">{addressCopy}</p>}
+      </section>}
       {sent.length > 0 && <section className={styles.card} aria-label="Created recipient links"><h2>Your personal links</h2><p role="status">{sent.length} recipient links created.</p>{sent.map((r) => <div key={r.link}><h3>{r.label}</h3><p>{r.delivered === "imessage" ? "Delivered by iMessage" : "Link ready — share it with this recipient"}</p><input aria-label={`Personal link for ${r.label}`} readOnly value={r.link} onFocus={(e) => e.currentTarget.select()} /><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(r.link); setCopyStatus(`Copied the link for ${r.label}.`); } catch { setCopyStatus("Select the link above and copy it manually."); } }}>Copy link</button></div>)}<p role="status">{copyStatus}</p></section>}
       <nav className={styles.actions} aria-label="Other ways to participate"><a href={`/talk/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">Talk instead</a></nav>
     </>}
