@@ -4,7 +4,7 @@ import { POST } from "./route";
 
 const MIT: Record<number, number> = { 1: 50, 2: 75, 3: 87.5, 4: 93.75 };
 
-test("attack returns +0% for ours and the MIT gains at k=1..4", async () => {
+test("attack returns the accepted match gain and the MIT gains at k=1..4", async () => {
   for (const k of [1, 2, 3, 4]) {
     const response = await POST(new Request("http://localhost/api/attack", {
       method: "POST",
@@ -12,7 +12,9 @@ test("attack returns +0% for ours and the MIT gains at k=1..4", async () => {
     }));
     assert.equal(response.status, 200);
     const body = await response.json();
-    assert.equal(body.ours.gainPct, 0);
+    assert.equal(body.ours.honestFinder, 900);
+    assert.equal(body.ours.withFakes, 1300);
+    assert.equal(body.ours.gainPct, ((1300 - 900) / 900) * 100);
     assert.equal(body.mit.gainPct, MIT[k]);
     assert.equal(body.ours.posterPays, 1600);
   }

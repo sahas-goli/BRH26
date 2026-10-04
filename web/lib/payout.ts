@@ -1,4 +1,4 @@
-import { splitCents } from "./split";
+import { depthCents, splitCents } from "./split";
 import { explorerUrl, validSolanaAddress } from "./solana";
 
 export type Rail = "custodial" | "wallet" | "bank";
@@ -54,10 +54,11 @@ export function settleChain(
   if (!split) return null;
   if (existing.length > 0) return { payoutSig: existing[0].txSig, rows: existing };
   const txSig = `mock_${bountyId}`;
+  const hops = ordered.length;
   const rows: PayoutRow[] = ordered.map((holder) => ({
     holderId: holder.holderId,
-    role: holder.depth === ordered.length ? "finder" : "relay",
-    cents: holder.depth === ordered.length ? split.finder : split.relay,
+    role: holder.depth === hops ? "finder" : "relay",
+    cents: depthCents(split, holder.depth, hops),
     rail: holder.rail,
     txSig,
     solAddress: holder.solAddress,
