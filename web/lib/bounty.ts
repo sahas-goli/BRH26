@@ -87,9 +87,6 @@ function options(): BountyOptions {
   return {
     ...base,
     compileHint: base.compileHint ?? ((text) => import("./hintcard").then((m) => m.compileHintCard(text))),
-    generateWantedCard: base.generateWantedCard ?? (enabled("GROK_ENABLED")
-      ? (input) => import("./imagine").then((m) => m.storeWantedCard(base.database, input))
-      : undefined),
   };
 }
 
@@ -215,7 +212,6 @@ export async function createBounty(input: unknown): Promise<{
   if (body.posterRail !== undefined && body.posterRail !== "bank") throw new BountyError("invalid_rail", 400);
   const o = options();
   liveRequired(process.env.NESSIE_MODE === "live", o.createEscrow, "escrow_unavailable");
-  liveRequired(enabled("GROK_ENABLED"), o.generateWantedCard, "wanted_card_unavailable");
   let hint: HintCard;
   let hidden: HiddenHint[];
   const description = typeof body.text === "string" && body.text.trim() ? body.text : undefined;
@@ -262,7 +258,6 @@ export async function createBounty(input: unknown): Promise<{
     );
     await event(tx, at.toISOString(), bountyId, root, "created");
   });
-  if (enabled("GROK_ENABLED")) background(o, "wanted_card", () => o.generateWantedCard!({ bountyId, hint }));
   return { bountyId, posterToken, posterLink: `/h/${rootToken}`, publicUrl: `${o.publicBaseUrl}/?bounty=${bountyId}` };
 }
 

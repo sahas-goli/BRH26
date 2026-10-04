@@ -1,5 +1,4 @@
 import type { HintCard } from "./types";
-import type { BountyDatabase } from "./bounty";
 
 const ORG_LABELS: Record<string, string> = {
   company: "a company",
@@ -32,16 +31,32 @@ export function wantedPrompt(hint: HintCard): string {
   return lines.join("\n");
 }
 
-export function portraitPrompt(description: string): string {
+export function bountyPortraitPrompt(
+  description: string,
+  context?: { hours?: number; capCents?: number },
+): string {
   const cue = description.trim().slice(0, 500);
-  return [
-    "Illustrated flat-color portrait, not a photograph.",
-    "No name, no real likeness of any specific person.",
-    `Kind of person described: ${cue || "someone interesting"}`,
-  ].join("\n");
+  const lines = [
+    "Simple flat vector illustration of the kind of person described.",
+    "Neutral, inoffensive, modest ordinary appearance.",
+    "No caricature, no stereotype, no photorealism.",
+    "No name, no real person's likeness, no photograph of a real person.",
+    "Plain background.",
+    `Person cue: ${cue || "someone with an ordinary professional background"}`,
+  ];
+  if (typeof context?.hours === "number" && Number.isFinite(context.hours)) {
+    lines.push(`Light context only: search window about ${Math.round(context.hours)} hours.`);
+  }
+  if (typeof context?.capCents === "number" && Number.isSafeInteger(context.capCents)) {
+    lines.push(`Light context only: reward cap about $${Math.round(context.capCents / 100)} USD.`);
+  }
+  return lines.join("\n");
 }
 
-export async function fetchPortraitPng(description: string): Promise<Buffer> {
+export async function fetchBountyPortraitPng(
+  description: string,
+  context?: { hours?: number; capCents?: number },
+): Promise<Buffer> {
   const key = process.env.XAI_API_KEY?.trim();
   if (!key) throw new Error("missing_xai_key");
   const response = await fetch("https://api.x.ai/v1/images/generations", {
@@ -52,7 +67,7 @@ export async function fetchPortraitPng(description: string): Promise<Buffer> {
     },
     body: JSON.stringify({
       model: "grok-imagine-image",
-      prompt: portraitPrompt(description),
+      prompt: bountyPortraitPrompt(description, context),
       response_format: "b64_json",
       n: 1,
     }),
@@ -70,45 +85,7 @@ export async function fetchPortraitPng(description: string): Promise<Buffer> {
   return Buffer.from(await image.arrayBuffer());
 }
 
-export async function fetchWantedCardPng(hint: HintCard): Promise<Buffer> {
-  const key = process.env.XAI_API_KEY?.trim();
-  if (!key) throw new Error("missing_xai_key");
-  const response = await fetch("https://api.x.ai/v1/images/generations", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "grok-imagine-image",
-      prompt: wantedPrompt(hint),
-      response_format: "b64_json",
-      n: 1,
-    }),
-  });
-  if (!response.ok) throw new Error("imagine_http");
-  const body = await response.json() as {
-    data?: { b64_json?: string; url?: string }[];
-  };
-  const b64 = body.data?.[0]?.b64_json;
-  if (b64) return Buffer.from(b64, "base64");
-  const url = body.data?.[0]?.url;
-  if (!url) throw new Error("imagine_empty");
-  const image = await fetch(url);
-  if (!image.ok) throw new Error("imagine_download");
-  return Buffer.from(await image.arrayBuffer());
-}
-
-/** Generate via Grok Imagine and persist to bounties.og_png. */
-export async function storeWantedCard(
-  database: BountyDatabase,
-  input: { bountyId: string; hint: HintCard },
-): Promise<void> {
-  const png = await fetchWantedCardPng(input.hint);
-  await database.query("UPDATE bounties SET og_png=$1 WHERE id=$2", [png, input.bountyId]);
-}
-
-/** next/og fallback when GROK is off or no stored PNG exists. */
+/** next/og fallback when no stored PNG exists. */
 export async function fallbackWantedCardResponse(hint: HintCard): Promise<Response> {
   const [{ ImageResponse }, { createElement }] = await Promise.all([
     import("next/og"),
