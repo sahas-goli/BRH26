@@ -33,7 +33,7 @@ export default function HomePage() {
     return () => controller.abort();
   }, []);
   return <main className={styles.shell}><div className={styles.content}>
-    <nav className={styles.nav} aria-label="Main navigation"><a href="/">SIX HOPS</a><span className={styles.navLinks}><a href="/about">How it works</a><a href="/live">Watch the search ↗</a></span></nav>
+    <nav className={styles.nav} aria-label="Main navigation"><a href="/">SIX HOPS</a><span className={styles.navLinks}><a href="/about">How it works</a><a href="/grok">Grok</a><a href="/live">Watch the search ↗</a></span></nav>
     <p className={styles.eyebrow}>Someone you know knows someone</p>
     <h1 className={styles.title}>Find your person.<br />One friend at a time.</h1>
     <p className={styles.intro}>Looking for a particular kind of experience? Put out a hint card. Friends pass it closer, and the successful chain shares the reward.</p>
