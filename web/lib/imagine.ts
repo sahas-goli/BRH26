@@ -15,6 +15,7 @@ const ORG_LABELS: Record<string, string> = {
 export function wantedPrompt(hint: HintCard): string {
   const lines = [
     "Design a stylized WANTED poster illustration for a social search game.",
+    "Illustrated portrait of the kind of person described, flat color, not a photograph, no photorealism, no name, no real likeness.",
     "No photographs of real people. No faces that look like a specific person.",
     "No readable names, street addresses, phone numbers, or QR codes.",
     "Mood: warm paper, ink stamp, bold typography saying WANTED, mysterious silhouette.",
