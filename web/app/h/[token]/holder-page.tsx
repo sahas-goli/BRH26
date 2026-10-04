@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { H } from "../../../lib/types";
 import type { ForwardRecipient, ForwardResult, HolderView, Rail } from "../../../lib/types";
+import { PosterNetwork } from "./poster-network";
 import styles from "./hop.module.css";
 
 const labels: Record<string, string> = { city: "City", organizationType: "Organization", field: "Field", skill: "Skill", language: "Language", experience: "Experience" };
@@ -154,6 +155,7 @@ export default function HolderPage() {
         {view.parentLabel && <p>Your sender labeled your link “{view.parentLabel}”.</p>}
         <p className={styles.muted}>Deadline: <time dateTime={view.bounty.expiresAt}>{new Date(view.bounty.expiresAt).toLocaleString()}</time>. Demo rewards use test funds.</p>
       </section>
+      {view.depth === 0 && <PosterNetwork token={token} />}
       {view.depth > 0 && view.bounty.status === "open" && (
         <div className={styles.claim}>
           <a className={styles.claimButton} href={`/claim/${encodeURIComponent(token)}`} referrerPolicy="no-referrer">This is me</a>

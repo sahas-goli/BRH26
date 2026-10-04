@@ -319,6 +319,27 @@ export async function loadGraph(db: DbQuery, bountyId: string): Promise<GraphPay
   });
 }
 
+/** Poster map: shape and depth only. No names, salts, memos, or holder ids. */
+export function anonymizeGraph(graph: GraphPayload): GraphPayload {
+  const order = [...graph.nodes].sort((a, b) => a.depth - b.depth || a.id.localeCompare(b.id));
+  const ids = new Map(order.map((node, index) => [node.id, `n${index}`]));
+  return {
+    nodes: order.map((node) => ({
+      id: ids.get(node.id)!,
+      depth: node.depth,
+      label: node.depth === 0 ? "You" : "Someone",
+      isTarget: node.isTarget,
+      ...(node.paidCents != null ? { paidCents: node.paidCents } : {}),
+    })),
+    edges: graph.edges.flatMap((edge) => {
+      const from = ids.get(edge.from);
+      const to = ids.get(edge.to);
+      return from && to ? [{ from, to, at: edge.at }] : [];
+    }),
+    ...(graph.explorerUrl ? { explorerUrl: graph.explorerUrl, payoutSig: graph.payoutSig } : {}),
+  };
+}
+
 export function resolveStatsBountyId(queryBounty: string | null, featured = process.env.FEATURED_BOUNTY): string | null {
   const id = (queryBounty || featured || "").trim();
   return id || null;
