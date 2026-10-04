@@ -126,3 +126,18 @@ Open the two Explorer links from the top again. Both balances went up by about t
 | Judge A's page has no Accept button | Refresh. Make sure Judge C finished step 5 and saw **Your introduction is sent.** |
 | The accept code box is empty | Open your private page again from Photon's message, not from history. |
 | "That Solana address is not valid" | Copy the address again from this guide. It has no spaces. |
+| Photon is stuck mid-conversation | Text `reset` to Photon. Your own conversation starts over, and you can text `new search` or send a Six Hops link again. |
+| A page says **This search was stopped by the organizers.** | The team reset the demo. Judge A starts a fresh search from step 1. |
+
+---
+
+## For the team: kill switch
+
+From the repo root:
+
+```powershell
+npm --prefix web run kill-switch -- --dry-run   # shows what would stop
+npm --prefix web run kill-switch                # stops it
+```
+
+It stops every live search on sash.select, so every personal link for those searches goes dead, and it clears all Photon conversations on the laptop agent. Paid results and the `/live` replay stay as they are. Devnet SOL already deposited stays in each search's deposit wallet. A new search can start right after.

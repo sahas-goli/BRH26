@@ -1,5 +1,5 @@
 import { formatHintCard, parseIntent, sanitizeOutbound } from "./privacy.js";
-import { awaitName, clearStage, getSession, setStage, setToken, type Session } from "./session.js";
+import { awaitName, clearStage, getSession, resetSessions, setStage, setToken, type Session } from "./session.js";
 import { createDeposit, fetchHolder, forwardTo, fundDeposit } from "./web.js";
 
 const PUBLIC = () => (process.env.PUBLIC_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -11,6 +11,10 @@ export async function handleInboundText(handle: string, text: string): Promise<s
   const session = getSession(handle);
   const lower = text.trim().toLowerCase();
 
+  if (lower === "reset") {
+    resetSessions(handle);
+    return sanitizeOutbound("Reset. Text new search to start over, or send a Six Hops link to pass one on.");
+  }
   if (lower === "cancel" && session.stage.startsWith("awaiting_")) {
     session.draft = undefined;
     clearStage(handle);

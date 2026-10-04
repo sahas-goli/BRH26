@@ -36,6 +36,13 @@ export function getSession(handle: string): Session {
   return created;
 }
 
+export function resetSessions(handle?: string): number {
+  if (handle) return sessions.delete(handle) ? 1 : 0;
+  const cleared = sessions.size;
+  sessions.clear();
+  return cleared;
+}
+
 export function setToken(handle: string, token: string): Session {
   const session = getSession(handle);
   session.token = token;

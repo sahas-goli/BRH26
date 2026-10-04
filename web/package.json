@@ -9,7 +9,8 @@
     "smoke:mock": "tsx scripts/smoke-mvp.ts",
     "smoke:http": "tsx scripts/smoke-http.ts",
     "smoke:unit": "tsx --test \"./app/api/bounties/lifecycle.test.ts\" \"./app/api/bounties/bounty.test.ts\"",
-    "seed:demo": "tsx scripts/seed-demo.ts"
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "kill-switch": "tsx scripts/kill-switch.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

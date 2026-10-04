@@ -14,7 +14,7 @@ export interface HintCard {
   experience?: string;        // e.g. "has interned at a launch company"
 }
 
-export type BountyStatus = 'open' | 'found' | 'paid' | 'expired' | 'refunded';
+export type BountyStatus = 'open' | 'found' | 'paid' | 'expired' | 'refunded' | 'cancelled';
 export type Rail = 'custodial' | 'wallet' | 'bank';
 export type EventKind =
   | 'created' | 'received' | 'opened' | 'forwarded' | 'claimed' | 'confirmed'
