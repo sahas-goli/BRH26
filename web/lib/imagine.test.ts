@@ -12,4 +12,5 @@ test("wantedPrompt includes attribute cues without inventing identity", () => {
   assert.match(prompt, /Amharic/);
   assert.match(prompt, /interned at a launch company/);
   assert.match(prompt, /No photographs of real people/);
+  assert.match(prompt, /flat color, not a photograph, no photorealism, no name, no real likeness/);
 });

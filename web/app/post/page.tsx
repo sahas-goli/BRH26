@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { HintCard } from "../../lib/types";
 import styles from "./pages.module.css";
 
@@ -13,6 +13,58 @@ export default function PostPage() {
   const [error, setError] = useState("");
   const [created, setCreated] = useState<Created | null>(null);
   const [copied, setCopied] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewing, setPreviewing] = useState(false);
+  const [previewNote, setPreviewNote] = useState("");
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewSeq = useRef(0);
+  const previewUrlRef = useRef("");
+  const lastPreview = useRef("");
+
+  useEffect(() => () => {
+    if (previewTimer.current) clearTimeout(previewTimer.current);
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+  }, []);
+
+  function schedulePreview(value: string) {
+    if (previewTimer.current) clearTimeout(previewTimer.current);
+    const text = value.trim();
+    if (text.length < 8) return;
+    previewTimer.current = setTimeout(() => { void drawPreview(text); }, 700);
+  }
+
+  async function drawPreview(text: string) {
+    if (text === lastPreview.current) return;
+    lastPreview.current = text;
+    const seq = ++previewSeq.current;
+    setPreviewing(true);
+    setPreviewNote("");
+    try {
+      const response = await fetch("/api/wanted-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (seq !== previewSeq.current) return;
+      if (!response.ok) {
+        setPreviewNote("Could not draw a preview. You can still post the search.");
+        return;
+      }
+      const url = URL.createObjectURL(await response.blob());
+      if (seq !== previewSeq.current) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = url;
+      setPreviewUrl(url);
+    } catch {
+      if (seq === previewSeq.current) setPreviewNote("Could not draw a preview. You can still post the search.");
+    } finally {
+      if (seq === previewSeq.current) setPreviewing(false);
+    }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current) return;
@@ -149,8 +201,13 @@ export default function PostPage() {
                   maxLength={4000}
                   placeholder="Someone who has worked on a launch team near Starbase, maybe bilingual in Amharic…"
                   disabled={pending}
+                  onChange={(event) => schedulePreview(event.target.value)}
                 />
               </label>
+              <p className={styles.muted}>An illustrated preview of that person shows up here.</p>
+              {previewing && <p className={styles.muted}>Drawing an illustrated preview…</p>}
+              {previewUrl && <img className={styles.preview} src={previewUrl} alt="Illustrated preview of the kind of person described" />}
+              {previewNote && <p className={styles.error} role="status">{previewNote}</p>}
               <h2>Or edit the hint card directly</h2>
               <p className={styles.muted}>Fill in at least one field if you are not using free text. All hints below are visible to recipients.</p>
               {fields.map(([key, label, placeholder]) => (
