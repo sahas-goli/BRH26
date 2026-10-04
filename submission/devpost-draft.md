@@ -1,6 +1,6 @@
 # Devpost draft (Six Hops)
 
-Paste into Devpost after team review. Grounded in what is on `main` as of this draft; do not claim live Tiger, Photon, GoDaddy, or Nessie transfers until those go/no-gos pass. PLAN demo script: §12; checklist: §13.
+Paste into Devpost after team review. Grounded in what is on `main` as of this draft; do not claim live Tiger, Photon, or GoDaddy transfers until those go/no-gos pass. PLAN demo script: §12; checklist: §13.
 
 ## Inspiration
 
@@ -16,7 +16,7 @@ Jon Kleinberg’s navigability results say strangers can find each other with **
 4. The winning chain is paid under a **Babaioff-style split** (published sixteenths); the finder cannot profit from inventing fake hops.
 5. A stall **controller** widens hints when branching factor `b` collapses; `/live` shows cascades, `b`, and an attack comparison (MIT-style fake-hop gains vs ours at +0%).
 
-Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow (mock until VERIFY D), optional Photon iMessage agent for registered numbers.
+Rails: Solana atomic multi-payee payout (devnet or mock). Tick Capital One: Nessie because on post the cap moves from checking to escrow; on poster confirm, holder shares and the Solana-rail treasury leg leave escrow and the remainder returns to checking; on expiry the escrow refunds to checking. The `/live` money panel shows it. The depth-0 poster is not paid. Optional Photon iMessage agent for registered numbers.
 
 ## How we built it
 
@@ -25,7 +25,7 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 | Web app | Next.js typed APIs + mobile pages | `web/app/`, `web/lib/bounty.ts`, `web/lib/types.ts` |
 | Incentives | Split + attack endpoint | `web/lib/split.ts`, `web/app/api/attack/` |
 | Payout | Mock or Solana System transfers + memos | `web/lib/payout.ts`, `web/lib/solana.ts` |
-| Bank rail | Nessie client (mock default) | `web/lib/nessie.ts` |
+| Bank rail | Nessie escrow: post, confirm, expiry | `web/lib/nessie.ts` |
 | Live board | d3 cascade, branching factor, controller UI | `web/app/live/` |
 | Agent | Spectrum / Photon flows + privacy rules | `agent/src/` |
 | Hints | Gemini structured HintCard (optional) | `web/lib/hintcard.ts` |
@@ -34,7 +34,6 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 
 ## Challenges we ran into
 
-- **Sponsor sandboxes disagree with docs.** Nessie VERIFY D: transfers return success-shaped responses but balances do not move — we stayed on `NESSIE_MODE=mock` rather than fake a live bank demo.
 - **Secrets vs parallel agents.** Tiger `DATABASE_URL`, Spectrum, and domain DNS are shared human steps; we kept the product green with PGlite + mock flags so software never blocked on keys.
 - **Privacy in iMessage.** Agent replies must never leak chain members or other handles — enforced in `agent/src/privacy.ts`, not left to an LLM.
 - **Cornell network.** Plain HTTP to Nessie resets; Photon agent needs outbound-only + tunnel for `/send`.
@@ -58,9 +57,8 @@ Rails: Solana atomic multi-payee payout (devnet or mock), optional Nessie escrow
 1. Wire Tiger (`DATABASE_URL`) → schema/caggs → Vercel preview MVP; load replay benches.
 2. Claim **milgram.study** (GoDaddy Registry), set `PUBLIC_BASE_URL`.
 3. Live Photon go/no-go (registered forward + nudge + paid).
-4. Re-run Nessie when a transfer shape that moves balances is confirmed.
-5. People’s Choice push after the Devpost hard deadline.
+4. People’s Choice push after the Devpost hard deadline.
 
 ## Track write-ups (repo)
 
-See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, using the full capabilities of Cursor agent mode and Cursor cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina were running sandbox agents. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track.
+See `submission/{software,solana,nessie,tiger,spacex,design,godaddy,photon,gemini,bigred}.md` for per-prize blurbs aligned with PLAN §13. Hardware is not entered. Tick SpaceX: Make it Legendary because the project was built entirely in Cursor, using the full capabilities of Cursor agent mode and Cursor cloud agents. Sahas, Hayden, Audrey, and Selina used an agent-mode chat, and Hayden, Audrey, and Selina were running sandbox agents. There is no separate Cursor sponsor; Built with Cursor is requirement 1 of this track. Tick Capital One: Nessie because on post the cap moves from checking to escrow; on poster confirm, holder shares and the Solana-rail treasury leg leave escrow and the remainder returns to checking; on expiry the escrow refunds to checking. The `/live` money panel shows it. The depth-0 poster is not paid.
